@@ -1,0 +1,31 @@
+# PyTorch (CUDA 버전은 https://pytorch.org/get-started/locally/ 에서 환경에 맞게 설치)
+# CPU: pip install torch torchvision
+# CUDA 11.8: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+# CUDA 12.1: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+torch>=2.0
+torchvision>=0.15
+
+# 모델 + 학습
+segmentation-models-pytorch>=0.3.3
+pytorch-lightning>=2.0
+torchmetrics>=1.0
+
+# 데이터
+daltonize>=0.1
+Pillow>=10.0
+numpy>=1.24
+
+# ONNX
+onnx>=1.14
+onnxruntime>=1.16
+onnxconverter-common>=1.13
+
+# 평가
+scikit-image>=0.21
+colormath>=3.0
+matplotlib>=3.7
+
+# 유틸
+tqdm>=4.65
+tensorboard>=2.14
+requests>=2.31

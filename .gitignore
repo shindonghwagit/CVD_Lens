@@ -1,0 +1,58 @@
+# ───────────────────────────────────────────
+# OS / Editor
+# ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.suo
+*.user
+
+# ───────────────────────────────────────────
+# Next.js
+# ───────────────────────────────────────────
+cvd-lens/.next/
+cvd-lens/out/
+cvd-lens/node_modules/
+cvd-lens/.env
+cvd-lens/.env.local
+cvd-lens/.env*.local
+
+# ───────────────────────────────────────────
+# Python / ML
+# ───────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# ───────────────────────────────────────────
+# 대용량 모델 / 데이터
+# ───────────────────────────────────────────
+*.onnx
+*.ckpt
+*.pt
+*.pth
+*.npz
+*.h5
+*.safetensors
+
+model-training/data/raw/
+model-training/data/processed/
+model-training/outputs/
+
+# ───────────────────────────────────────────
+# Docker
+# ───────────────────────────────────────────
+cvd-lens/inference/model/
+
+# ───────────────────────────────────────────
+# 기타
+# ───────────────────────────────────────────
+*.pptx
+색각이상보조시스템 발표 영상.pptx

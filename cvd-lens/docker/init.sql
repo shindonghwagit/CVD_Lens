@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ishihara_results (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  correct INT NOT NULL,
+  total INT NOT NULL,
+  diagnosis TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
