@@ -54,3 +54,10 @@ model-training/outputs/logs/
 # Docker
 # ───────────────────────────────────────────
 cvd-lens/inference/model/
+
+# ───────────────────────────────────────────
+# 불필요한 압축/빌드 산출물
+# ───────────────────────────────────────────
+*.zip
+model-training/outputs/
+model-training/**/*.ipynb
