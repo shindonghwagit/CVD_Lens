@@ -8,8 +8,9 @@ import Logo from "./Logo";
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/ishihara", label: "진단" },
+  { href: "/history", label: "기록" },
   { href: "/correction?tab=image", label: "이미지", match: "/correction" },
-  { href: "/correction", label: "실시간", match: "/correction" },
+  { href: "/correction", label: "카메라", match: "/correction" },
 ];
 
 export default function NavBar() {
@@ -57,19 +58,11 @@ export default function NavBar() {
 
       {/* Session */}
       <div className="flex items-center gap-3">
-        <span
-          className="font-mono text-[11px] tracking-[0.04em] hidden md:flex items-center"
-          style={{ color: "var(--fg-subtle)" }}
-        >
-          <span
-            className="inline-block w-[7px] h-[7px] rounded-full mr-1.5"
-            style={{
-              background: "#2f9e6b",
-              boxShadow: "0 0 0 3px color-mix(in oklab, #2f9e6b 20%, transparent)",
-            }}
-          />
-          Model ready
-        </span>
+        {status === "authenticated" && session?.user?.name && (
+          <span className="font-mono text-[12px] hidden md:block" style={{ color: "var(--fg-muted)" }}>
+            {session.user.name}
+          </span>
+        )}
         {status === "authenticated" ? (
           <button
             onClick={() => signOut()}
@@ -79,12 +72,21 @@ export default function NavBar() {
             로그아웃
           </button>
         ) : (
-          <Link
-            href="/login"
-            className="px-4 py-1.5 rounded-full text-[13px] text-white bg-brand hover:bg-brand-ink transition-colors"
-          >
-            로그인
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/register"
+              className="px-4 py-1.5 rounded-full text-[13px] border transition-colors hover:bg-[var(--bg-muted)]"
+              style={{ borderColor: "var(--border-strong)", color: "var(--fg)" }}
+            >
+              회원가입
+            </Link>
+            <Link
+              href="/login"
+              className="px-4 py-1.5 rounded-full text-[13px] text-white bg-brand hover:bg-brand-ink transition-colors"
+            >
+              로그인
+            </Link>
+          </div>
         )}
       </div>
     </header>

@@ -9,6 +9,18 @@ const CVD_LABELS: Record<CVDType, string> = {
   t: "Tritanopia (제3색맹)",
 };
 
+async function saveResult(cvdType: CVDType) {
+  try {
+    await fetch("/api/corrections", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cvdType, source: "camera" }),
+    });
+  } catch {
+    // 저장 실패는 무시
+  }
+}
+
 export default function CameraView() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -69,13 +81,13 @@ export default function CameraView() {
       const result = await infer(imageData, cvdType);
       ctx.putImageData(result, 0, 0);
       setCorrected(canvas.toDataURL("image/jpeg", 0.9));
+      saveResult(cvdType);
     } catch (e) {
       console.error("보정 오류:", e);
     }
     setProcessing(false);
   }, [ready, cvdType, infer]);
 
-  // 슬라이더 드래그
   const onSliderMove = useCallback((clientX: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -108,11 +120,13 @@ export default function CameraView() {
           <button
             key={type}
             onClick={() => setCvdType(type)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              cvdType === type
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-            }`}
+            className="px-4 py-2 rounded-full text-sm font-medium transition-colors"
+            style={{
+              background: cvdType === type ? "var(--color-brand)" : "var(--bg-muted)",
+              color: cvdType === type ? "#ffffff" : "var(--fg-muted)",
+              border: "1px solid",
+              borderColor: cvdType === type ? "var(--color-brand)" : "var(--border)",
+            }}
           >
             {CVD_LABELS[type]}
           </button>
@@ -122,11 +136,11 @@ export default function CameraView() {
       {!original ? (
         /* 카메라 프리뷰 */
         <div className="flex flex-col items-center gap-4 w-full">
-          <div className="relative w-full max-w-sm aspect-square rounded-xl overflow-hidden border border-gray-700 bg-black">
+          <div className="relative w-full max-w-sm aspect-square rounded-xl overflow-hidden border" style={{ background: "#000", borderColor: "var(--border)" }}>
             <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
             {!streaming && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-gray-500 text-sm">카메라가 꺼져 있습니다</p>
+                <p className="text-sm" style={{ color: "var(--fg-subtle)" }}>카메라가 꺼져 있습니다</p>
               </div>
             )}
           </div>
@@ -135,7 +149,8 @@ export default function CameraView() {
               <button
                 onClick={startCamera}
                 disabled={!ready}
-                className="px-6 py-2.5 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 disabled:opacity-40 transition-colors"
+                className="px-6 py-2.5 rounded-full text-white text-sm font-medium transition-colors disabled:opacity-40"
+                style={{ background: "var(--color-brand)" }}
               >
                 카메라 시작
               </button>
@@ -143,13 +158,15 @@ export default function CameraView() {
               <>
                 <button
                   onClick={capture}
-                  className="px-6 py-2.5 rounded-full bg-white text-gray-900 text-sm font-semibold hover:bg-gray-100 transition-colors"
+                  className="px-6 py-2.5 rounded-full text-sm font-semibold transition-colors"
+                  style={{ background: "var(--fg)", color: "var(--bg)" }}
                 >
                   촬영
                 </button>
                 <button
                   onClick={stopCamera}
-                  className="px-6 py-2.5 rounded-full bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+                  className="px-6 py-2.5 rounded-full text-sm font-medium transition-colors"
+                  style={{ background: "var(--bg-muted)", color: "var(--fg-muted)", border: "1px solid var(--border)" }}
                 >
                   취소
                 </button>
@@ -162,7 +179,8 @@ export default function CameraView() {
         <div className="flex flex-col items-center gap-4 w-full max-w-sm">
           <div
             ref={containerRef}
-            className="relative w-full aspect-square rounded-xl overflow-hidden cursor-ew-resize select-none border border-gray-700"
+            className="relative w-full aspect-square rounded-xl overflow-hidden cursor-ew-resize select-none border"
+            style={{ borderColor: "var(--border)" }}
             onMouseDown={() => setDragging(true)}
             onTouchStart={() => setDragging(true)}
           >
@@ -170,17 +188,17 @@ export default function CameraView() {
               <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
             )}
             <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderX}%` }}>
-              <img src={original} alt="original" className="absolute inset-0 w-full h-full max-w-none object-cover" draggable={false} />
+              <img src={original!} alt="original" className="absolute inset-0 w-full h-full max-w-none object-cover" draggable={false} />
             </div>
-            <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg" style={{ left: `${sliderX}%` }}>
-              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="absolute top-0 bottom-0 w-0.5 shadow-lg" style={{ left: `${sliderX}%`, background: "var(--bg-elevated)" }}>
+              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full shadow-lg flex items-center justify-center" style={{ background: "var(--bg-elevated)" }}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "var(--fg)" }}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l-4 3 4 3M16 9l4 3-4 3" />
                 </svg>
               </div>
             </div>
             <span className="absolute top-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">원본</span>
-            <span className="absolute top-2 right-2 text-xs bg-blue-600/80 text-white px-2 py-0.5 rounded-full">보정</span>
+            <span className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full text-white" style={{ background: "var(--color-brand)" }}>보정</span>
             {processing && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                 <p className="text-white text-sm">처리 중...</p>
@@ -189,15 +207,18 @@ export default function CameraView() {
           </div>
           <button
             onClick={() => { setOriginal(null); setCorrected(null); }}
-            className="text-sm text-gray-400 hover:text-white transition-colors"
+            className="text-sm transition-colors"
+            style={{ color: "var(--fg-subtle)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-subtle)")}
           >
             다시 촬영
           </button>
         </div>
       )}
 
-      {!ready && <p className="text-yellow-400 text-sm">서버 연결 중...</p>}
-      {error && <p className="text-red-400 text-sm">오류: {error}</p>}
+      {!ready && <p className="text-sm" style={{ color: "#d89a2b" }}>서버 연결 중...</p>}
+      {error && <p className="text-sm" style={{ color: "#d5383a" }}>오류: {error}</p>}
     </div>
   );
 }

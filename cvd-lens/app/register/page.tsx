@@ -7,14 +7,18 @@ import Logo from "../components/Logo";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password.length < 12) {
+      setError("비밀번호는 12자 이상이어야 합니다.");
+      return;
+    }
     setLoading(true);
     setError(null);
     const res = await fetch("/api/register", {
@@ -25,7 +29,7 @@ export default function RegisterPage() {
     setLoading(false);
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
-      setError(j.error || "회원가입에 실패했습니다.");
+      setError(j.error || "회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
     router.push("/login");
@@ -57,31 +61,59 @@ export default function RegisterPage() {
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-muted)" }}>NAME</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} required
+            <span className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-muted)" }}>아이디</span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="영문, 숫자 조합"
               className="px-3.5 py-3 rounded-lg border text-[14px] focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
-              style={{ background: "var(--bg-elevated)", borderColor: "var(--border-strong)", color: "var(--fg)" }} />
+              style={{ background: "var(--bg-elevated)", borderColor: "var(--border-strong)", color: "var(--fg)" }}
+            />
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-muted)" }}>EMAIL</span>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+            <span className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-muted)" }}>이메일</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="example@email.com"
               className="px-3.5 py-3 rounded-lg border text-[14px] focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
-              style={{ background: "var(--bg-elevated)", borderColor: "var(--border-strong)", color: "var(--fg)" }} />
+              style={{ background: "var(--bg-elevated)", borderColor: "var(--border-strong)", color: "var(--fg)" }}
+            />
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-muted)" }}>PASSWORD</span>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
+            <span className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-muted)" }}>비밀번호</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={12}
               className="px-3.5 py-3 rounded-lg border text-[14px] focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
-              style={{ background: "var(--bg-elevated)", borderColor: "var(--border-strong)", color: "var(--fg)" }} />
+              style={{ background: "var(--bg-elevated)", borderColor: "var(--border-strong)", color: "var(--fg)" }}
+            />
+            <span className="text-[11px]" style={{ color: password.length === 0 ? "var(--fg-subtle)" : password.length < 12 ? "#d89a2b" : "#2f9e6b" }}>
+              {password.length === 0 ? "최소 12자 이상" : password.length < 12 ? `${12 - password.length}자 더 필요` : "✓ 조건 충족"}
+            </span>
           </label>
 
-          {error && <div className="text-[13px] px-3 py-2 rounded-lg" style={{ background: "#fdecea", color: "#b23a2a" }}>{error}</div>}
+          {error && (
+            <div className="text-[13px] px-3 py-2.5 rounded-lg flex items-start gap-2" style={{ background: "#fdecea", color: "#b23a2a" }}>
+              <span>⚠</span>
+              <span>{error}</span>
+            </div>
+          )}
 
-          <button type="submit" disabled={loading}
-            className="w-full py-3 rounded-full bg-brand hover:bg-brand-ink text-white text-sm font-medium transition-colors disabled:opacity-60">
-            {loading ? "생성 중…" : "계정 만들기"}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-full bg-brand hover:bg-brand-ink text-white text-sm font-medium transition-colors disabled:opacity-60"
+          >
+            {loading ? "가입 중…" : "계정 만들기"}
           </button>
 
           <p className="text-center text-[13px]" style={{ color: "var(--fg-muted)" }}>

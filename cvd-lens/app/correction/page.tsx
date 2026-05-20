@@ -86,26 +86,6 @@ function CorrectionContent() {
         {isImage ? <ImageCorrection /> : <CameraView />}
       </div>
 
-      {/* Info cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-        {[
-          { k: "MODEL", v: "MobileNetV2 U-Net" },
-          { k: "RUNTIME", v: "ONNX Runtime" },
-          { k: "BACKEND", v: "FastAPI + Python" },
-          { k: "PRIVACY", v: "자체 서버 처리" },
-        ].map((c) => (
-          <div
-            key={c.k}
-            className="p-5 rounded-xl border"
-            style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}
-          >
-            <div className="font-mono text-[11px] tracking-[0.12em] uppercase mb-1.5" style={{ color: "var(--fg-subtle)" }}>
-              {c.k}
-            </div>
-            <div className="text-[15px] font-medium tracking-[-0.01em]">{c.v}</div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

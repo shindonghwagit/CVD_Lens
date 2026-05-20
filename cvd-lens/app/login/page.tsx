@@ -8,7 +8,7 @@ import Logo from "../components/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +17,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await signIn("credentials", { email, password, redirect: false });
+    const res = await signIn("credentials", { username, password, redirect: false });
     setLoading(false);
     if (res?.error) setError("이메일 또는 비밀번호가 올바르지 않습니다.");
     else router.push("/");
@@ -58,12 +58,13 @@ export default function LoginPage() {
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-muted)" }}>EMAIL</span>
+            <span className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-muted)" }}>아이디</span>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
+              placeholder="가입 시 등록한 아이디"
               className="px-3.5 py-3 rounded-lg border text-[14px] focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
               style={{ background: "var(--bg-elevated)", borderColor: "var(--border-strong)", color: "var(--fg)" }}
             />

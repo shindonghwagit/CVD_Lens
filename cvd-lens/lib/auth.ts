@@ -13,23 +13,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "이메일", type: "email" },
+        username: { label: "아이디", type: "text" },
         password: { label: "비밀번호", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.username || !credentials?.password) return null;
 
         const { rows } = await pool.query(
-          "SELECT id, email, name, password FROM users WHERE email = $1",
-          [credentials.email]
+          "SELECT id, email, name, password, preferred_cvd_type FROM users WHERE name = $1",
+          [credentials.username]
         );
         const user = rows[0];
         if (!user) return null;
 
-        const valid = await bcrypt.compare(credentials.password as string, user.password);
+        const valid = await bcrypt.compare(credentials.password as string, user.password as string);
         if (!valid) return null;
 
-        return { id: user.id, email: user.email, name: user.name };
+        await pool.query("UPDATE users SET last_login_at = NOW() WHERE id = $1", [user.id]);
+
+        return { id: user.id, email: user.email, name: user.name, preferred_cvd_type: user.preferred_cvd_type };
       },
     }),
   ],

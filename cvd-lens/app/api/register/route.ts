@@ -10,9 +10,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "모든 필드를 입력해주세요." }, { status: 400 });
   }
 
-  const { rows } = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
-  if (rows.length > 0) {
+  if (password.length < 12) {
+    return NextResponse.json({ error: "비밀번호는 12자 이상이어야 합니다." }, { status: 400 });
+  }
+
+  const { rows: emailRows } = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+  if (emailRows.length > 0) {
     return NextResponse.json({ error: "이미 사용 중인 이메일입니다." }, { status: 409 });
+  }
+
+  const { rows: nameRows } = await pool.query("SELECT id FROM users WHERE name = $1", [name]);
+  if (nameRows.length > 0) {
+    return NextResponse.json({ error: "이미 사용 중인 아이디입니다." }, { status: 409 });
   }
 
   const hashed = await bcrypt.hash(password, 10);
