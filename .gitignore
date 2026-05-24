@@ -53,7 +53,11 @@ model-training/outputs/logs/
 # ───────────────────────────────────────────
 # Docker
 # ───────────────────────────────────────────
-cvd-lens/inference/model/
+# cvd-lens/inference/model/ 은 배포용 모델 포함으로 추적
+
+# inference model 예외
+!cvd-lens/inference/model/
+!cvd-lens/inference/model/*.onnx
 
 # ───────────────────────────────────────────
 # 불필요한 압축/빌드 산출물

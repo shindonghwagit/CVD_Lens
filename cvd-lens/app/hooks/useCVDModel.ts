@@ -66,7 +66,7 @@ export function useCVDModel() {
     const outCanvas = document.createElement("canvas");
     outCanvas.width = imageData.width;
     outCanvas.height = imageData.height;
-    outCanvas.getContext("2d")!.drawImage(bitmap, 0, 0);
+    outCanvas.getContext("2d")!.drawImage(bitmap, 0, 0, imageData.width, imageData.height);
     return outCanvas.getContext("2d")!.getImageData(0, 0, imageData.width, imageData.height);
   }, []);
 
