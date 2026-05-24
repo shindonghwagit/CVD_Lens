@@ -11,17 +11,19 @@ const CVD_LABELS: Record<CVDType, string> = {
 };
 
 const MODEL_SIZE = 512;
+const THUMB_SIZE = 256;
 
-async function saveResult(cvdType: CVDType) {
-  try {
-    await fetch("/api/corrections", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cvdType, source: "image" }),
-    });
-  } catch {
-    // 저장 실패는 무시
-  }
+function resizeDataURL(src: string, size: number): Promise<string> {
+  return new Promise((resolve) => {
+    const img = document.createElement("img");
+    img.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = size; c.height = size;
+      c.getContext("2d")!.drawImage(img, 0, 0, size, size);
+      resolve(c.toDataURL("image/jpeg", 0.75));
+    };
+    img.src = src;
+  });
 }
 
 export default function ImageCorrection() {
@@ -30,6 +32,7 @@ export default function ImageCorrection() {
   const [original, setOriginal] = useState<string | null>(null);
   const [corrected, setCorrected] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [sliderX, setSliderX] = useState(50);
   const [dragging, setDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -59,8 +62,27 @@ export default function ImageCorrection() {
     ctx.putImageData(result, 0, 0);
     setCorrected(canvas.toDataURL());
     setProcessing(false);
-    saveResult(type);
+    setSaveState("idle");
   }, [ready, infer]);
+
+  const saveCorrection = useCallback(async () => {
+    if (!original || !corrected || saveState === "saving") return;
+    setSaveState("saving");
+    const [origThumb, corrThumb] = await Promise.all([
+      resizeDataURL(original, THUMB_SIZE),
+      resizeDataURL(corrected, THUMB_SIZE),
+    ]);
+    try {
+      const res = await fetch("/api/corrections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cvdType, originalImage: origThumb, correctedImage: corrThumb }),
+      });
+      setSaveState(res.ok ? "saved" : "idle");
+    } catch {
+      setSaveState("idle");
+    }
+  }, [original, corrected, cvdType, saveState]);
 
   const onFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
@@ -190,15 +212,30 @@ export default function ImageCorrection() {
             )}
           </div>
 
-          <button
-            onClick={() => { setOriginal(null); setCorrected(null); pendingFileRef.current = null; fileInputRef.current && (fileInputRef.current.value = ""); }}
-            className="text-sm transition-colors"
-            style={{ color: "var(--fg-subtle)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-subtle)")}
-          >
-            다른 이미지 선택
-          </button>
+          <div className="flex items-center gap-3">
+            {corrected && !processing && (
+              <button
+                onClick={saveCorrection}
+                disabled={saveState === "saving" || saveState === "saved"}
+                className="px-4 py-2 rounded-full text-sm font-medium transition-colors disabled:opacity-60"
+                style={saveState === "saved"
+                  ? { background: "#22c55e18", color: "#22c55e", border: "1px solid #22c55e44" }
+                  : { background: "var(--bg-muted)", color: "var(--fg)", border: "1px solid var(--border-strong)" }
+                }
+              >
+                {saveState === "saving" ? "저장 중..." : saveState === "saved" ? "저장됨 ✓" : "목록에 저장"}
+              </button>
+            )}
+            <button
+              onClick={() => { setOriginal(null); setCorrected(null); setSaveState("idle"); pendingFileRef.current = null; fileInputRef.current && (fileInputRef.current.value = ""); }}
+              className="text-sm transition-colors"
+              style={{ color: "var(--fg-subtle)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-subtle)")}
+            >
+              다른 이미지 선택
+            </button>
+          </div>
         </div>
       )}
 

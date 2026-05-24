@@ -9,11 +9,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
   }
 
-  const { cvdType, source } = await req.json();
+  const { cvdType, source, originalImage, correctedImage } = await req.json();
 
   const { rows } = await pool.query(
-    "INSERT INTO correction_results (id, user_id, cvd_type, source) VALUES ($1, $2, $3, $4) RETURNING *",
-    [randomUUID(), session.user.id, cvdType, source ?? "image"]
+    `INSERT INTO correction_results (id, user_id, cvd_type, source, original_image, corrected_image)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [randomUUID(), session.user.id, cvdType, source ?? "image", originalImage ?? null, correctedImage ?? null]
   );
 
   return NextResponse.json(rows[0]);
@@ -26,7 +27,7 @@ export async function GET() {
   }
 
   const { rows } = await pool.query(
-    "SELECT * FROM correction_results WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20",
+    "SELECT id, cvd_type, source, original_image, corrected_image, created_at FROM correction_results WHERE user_id = $1 ORDER BY created_at DESC LIMIT 30",
     [session.user.id]
   );
 

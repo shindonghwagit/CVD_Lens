@@ -29,6 +29,7 @@ export default function IshiharaTest() {
   const [correcting, setCorrecting] = useState(false);
   const [done, setDone] = useState(false);
 
+  const submittingRef = useRef(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const plate = PLATES[current];
 
@@ -67,6 +68,8 @@ export default function IshiharaTest() {
   }, [correctionOn, correctedSrc, applyCorrection]);
 
   const submit = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     const newAnswers = [...answers];
     newAnswers[current] = input.trim() || "모름";
     setAnswers(newAnswers);
@@ -86,6 +89,7 @@ export default function IshiharaTest() {
     } else {
       setCurrent(current + 1);
     }
+    submittingRef.current = false;
   };
 
   function getDiagnosis(ans: (string | null)[]) {
