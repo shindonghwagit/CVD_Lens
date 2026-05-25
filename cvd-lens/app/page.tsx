@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import HeroVisual from "./components/HeroVisual";
-import IshiharaPlateCanvas from "./components/IshiharaPlate";
 import { useEffect, useRef } from "react";
 
 function useFadeIn() {
@@ -27,9 +26,9 @@ function useFadeIn() {
 }
 
 const CVD_TYPES = [
-  { type: "PROTAN", kor: "제1색맹 (적색약)" },
-  { type: "DEUTAN", kor: "제2색맹 (녹색약)" },
-  { type: "TRITAN", kor: "제3색맹 (청황색약)" },
+  { type: "PROTAN", kor: "적색맹" },
+  { type: "DEUTAN", kor: "녹색맹" },
+  { type: "TRITAN", kor: "청색맹" },
 ];
 
 const FEATURES = [
@@ -173,17 +172,17 @@ export default function Home() {
               {/* Plate preview for first card, others get placeholder */}
               {i === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center gap-4">
-                  {[
-                    { t: "8", v: "pd" as const, s: 3 },
-                    { t: "29", v: "pd" as const, s: 92 },
-                    { t: "5", v: "t" as const, s: 51 },
-                  ].map((p, j) => (
+                  {["06", "01", "08"].map((id, j) => (
                     <div
-                      key={j}
+                      key={id}
                       className="w-[130px] h-[130px] rounded-full overflow-hidden shadow-lift"
                       style={{ transform: `translateY(${j === 1 ? "-10px" : "0"}) rotate(${(j - 1) * 4}deg)` }}
                     >
-                      <IshiharaPlateCanvas text={p.t} variant={p.v} seed={p.s} size={220} className="w-full h-full block" />
+                      <img
+                        src={`/ishihara/Ishihara_${id}.jpg`}
+                        alt={`이시하라 플레이트 ${id}`}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   ))}
                 </div>
