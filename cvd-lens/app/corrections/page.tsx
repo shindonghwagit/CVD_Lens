@@ -15,9 +15,9 @@ interface CorrectionRecord {
 }
 
 const CVD_LABEL: Record<string, { label: string; color: string }> = {
-  p: { label: "제1색맹", color: "#ef4444" },
-  d: { label: "제2색맹", color: "#f97316" },
-  t: { label: "제3색맹", color: "#3b82f6" },
+  p: { label: "적색맹", color: "#ef4444" },
+  d: { label: "녹색맹", color: "#f97316" },
+  t: { label: "청색맹", color: "#3b82f6" },
 };
 
 function cvdInfo(type: string) {

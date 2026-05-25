@@ -4,9 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { CVDType, useCVDModel } from "../hooks/useCVDModel";
 
 const CVD_LABELS: Record<CVDType, string> = {
-  p: "Protanopia (제1색맹)",
-  d: "Deuteranopia (제2색맹)",
-  t: "Tritanopia (제3색맹)",
+  p: "적색맹 (Protanopia)",
+  d: "녹색맹 (Deuteranopia)",
+  t: "청색맹 (Tritanopia)",
 };
 
 async function saveResult(cvdType: CVDType) {

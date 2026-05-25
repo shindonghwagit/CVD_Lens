@@ -14,13 +14,13 @@ interface Result {
 }
 
 const DIAGNOSIS_LABEL: Record<string, { label: string; color: string }> = {
-  normal:       { label: "정상",         color: "#22c55e" },
-  p:            { label: "제1색각이상",   color: "#ef4444" },
-  d:            { label: "제2색각이상",   color: "#f97316" },
-  t:            { label: "제3색각이상",   color: "#3b82f6" },
-  protanopia:   { label: "제1색각이상",   color: "#ef4444" },
-  deuteranopia: { label: "제2색각이상",   color: "#f97316" },
-  tritanopia:   { label: "제3색각이상",   color: "#3b82f6" },
+  normal:       { label: "정상",       color: "#22c55e" },
+  p:            { label: "적색맹",     color: "#ef4444" },
+  d:            { label: "녹색맹",     color: "#f97316" },
+  t:            { label: "청색맹",     color: "#3b82f6" },
+  protanopia:   { label: "적색맹",     color: "#ef4444" },
+  deuteranopia: { label: "녹색맹",     color: "#f97316" },
+  tritanopia:   { label: "청색맹",     color: "#3b82f6" },
 };
 
 function diagnosisInfo(diagnosis: string) {

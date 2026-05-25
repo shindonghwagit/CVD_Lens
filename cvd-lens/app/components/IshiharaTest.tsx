@@ -4,18 +4,31 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useModel } from "../context/ModelContext";
 import { CVDType } from "../hooks/useCVDModel";
-import Image from "next/image";
 
-// 정답: 정상 색각자가 보는 숫자
-// type: pd = 적록색각이상 감별, t = 청황색각이상 감별, demo = 전원 정답
+// answer: 정상 색각자가 읽는 숫자
+// type: demo=전원정답, pd=적록색각이상 감별, t=청색맹 감별
+// ext: 파일 확장자 (기본 jpg)
 const PLATES = [
-  { id: "01", answer: "12",  type: "demo" as const, label: "모든 분이 읽을 수 있는 플레이트" },
-  { id: "06", answer: "5",   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "08", answer: "15",  type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "09", answer: "74",  type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "03", answer: "6",   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "11", answer: "6",   type: "t"    as const, label: "청황색각이상 감별" },
+  { id: "01", answer: "74",  type: "demo" as const, label: "모든 분이 읽을 수 있는 플레이트" },
+  { id: "03", answer: "16",  type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "04", answer: "2",   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "05", answer: "29",  type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "06", answer: "7",   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "07", answer: "45",  type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "08", answer: "5",   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "09", answer: "97",  type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "10", answer: "8",   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "11", answer: "42",  type: "t"    as const, label: "청색맹 감별" },
+  { id: "12", answer: "3",   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "13", answer: "42",  type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
+  { id: "14", answer: "27",  type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
+  { id: "15", answer: "12",  type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
 ];
+
+const TYPE_LABEL: Record<string, { short: string; color: string }> = {
+  pd: { short: "적록색각이상 의심", color: "#f97316" },
+  t:  { short: "청색맹 의심",      color: "#3b82f6" },
+};
 
 export default function IshiharaTest() {
   const { ready, infer } = useModel();
@@ -101,40 +114,93 @@ export default function IshiharaTest() {
         else tWrong++;
       }
     });
-    if (pdWrong >= 2) return "d";
+    if (pdWrong >= 4) return "d";
     if (tWrong >= 1)  return "t";
     return "normal";
-  }
-
-  function getDiagnosisLabel(d: string) {
-    if (d === "d") return "적록색각이상(제1·2색맹) 가능성이 있습니다.";
-    if (d === "t") return "청황색각이상(제3색맹) 가능성이 있습니다.";
-    return "정상 색각으로 판단됩니다.";
   }
 
   if (done) {
     const diagnosis = getDiagnosis(answers);
     const correct = answers.filter((a, i) => a === PLATES[i].answer).length;
+    const diagnosisColor = diagnosis === "d" ? "#f97316" : diagnosis === "t" ? "#3b82f6" : "#22c55e";
+    const diagnosisLabel =
+      diagnosis === "d" ? "적록색각이상 (적색맹/녹색맹) 가능성이 있습니다." :
+      diagnosis === "t" ? "청색맹 가능성이 있습니다." :
+      "정상 색각으로 판단됩니다.";
+
     return (
-      <div className="flex flex-col items-center gap-6 py-8">
+      <div className="flex flex-col items-center gap-6 py-6 w-full">
+        {/* 진단 결과 헤더 */}
         <div className="text-center">
-          <p className="font-serif text-[28px] tracking-[-0.02em] mb-2">진단 완료</p>
-          <p className="text-[15px]" style={{ color: "var(--fg-muted)" }}>{getDiagnosisLabel(diagnosis)}</p>
-          <p className="text-xs mt-2 font-mono" style={{ color: "var(--fg-subtle)" }}>※ 이 결과는 참고용이며 정확한 진단은 안과 전문의에게 받으세요.</p>
+          <p className="font-serif text-[26px] tracking-[-0.02em] mb-2">진단 완료</p>
+          <p
+            className="text-[15px] font-medium px-4 py-1.5 rounded-full inline-block"
+            style={{ background: diagnosisColor + "18", color: diagnosisColor }}
+          >
+            {diagnosisLabel}
+          </p>
+          <p className="text-xs mt-3 font-mono" style={{ color: "var(--fg-subtle)" }}>
+            ※ 참고용이며 정확한 진단은 안과 전문의에게 받으세요.
+          </p>
         </div>
 
-        <div className="w-full rounded-xl p-4 flex flex-col gap-2" style={{ background: "var(--bg-muted)" }}>
-          <p className="text-sm font-mono mb-1" style={{ color: "var(--fg-subtle)" }}>
+        {/* 플레이트별 상세 결과 */}
+        <div className="w-full rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+          {/* 헤더 */}
+          <div
+            className="grid grid-cols-[2rem_3rem_3rem_1fr] gap-3 px-4 py-2.5 font-mono text-[11px] tracking-wide border-b"
+            style={{ background: "var(--bg-muted)", color: "var(--fg-subtle)", borderColor: "var(--border)" }}
+          >
+            <span>#</span>
+            <span>정답</span>
+            <span>내 답</span>
+            <span>결과</span>
+          </div>
+
+          {PLATES.map((p, i) => {
+            const isCorrect = answers[i] === p.answer;
+            const typeInfo = p.type !== "demo" ? TYPE_LABEL[p.type] : null;
+            return (
+              <div
+                key={i}
+                className="grid grid-cols-[2rem_3rem_3rem_1fr] gap-3 px-4 py-3 border-b last:border-0 text-sm items-center"
+                style={{ borderColor: "var(--border)" }}
+              >
+                <span className="font-mono text-[12px]" style={{ color: "var(--fg-subtle)" }}>{i + 1}</span>
+                <span className="font-mono font-medium">{p.answer}</span>
+                <span className="font-mono font-medium" style={{ color: isCorrect ? "#22c55e" : "#ef4444" }}>
+                  {answers[i] ?? "-"}
+                </span>
+                <div>
+                  {isCorrect ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#22c55e18", color: "#22c55e" }}>
+                      ✓ 정상
+                    </span>
+                  ) : p.type === "demo" ? (
+                    <span className="text-xs font-mono" style={{ color: "var(--fg-subtle)" }}>-</span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: typeInfo!.color + "18", color: typeInfo!.color }}>
+                      ✗ {typeInfo!.short}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 요약 */}
+        <div className="w-full rounded-xl p-4" style={{ background: "var(--bg-muted)" }}>
+          <p className="text-sm font-mono mb-2" style={{ color: "var(--fg-subtle)" }}>
             정답 {correct} / {PLATES.length}
           </p>
-          {PLATES.map((p, i) => (
-            <div key={i} className="flex justify-between text-sm">
-              <span style={{ color: "var(--fg-muted)" }}>플레이트 {i + 1}</span>
-              <span style={{ color: answers[i] === p.answer ? "#22c55e" : "#ef4444" }}>
-                내 답: {answers[i] ?? "-"}  {answers[i] === p.answer ? "✓" : `✗ (정답: ${p.answer})`}
-              </span>
-            </div>
-          ))}
+          {diagnosis !== "normal" && (
+            <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
+              {diagnosis === "d"
+                ? "적록색각이상 플레이트에서 4개 이상 오답입니다. 안과 정밀 검사를 권장합니다."
+                : "청색맹 플레이트에서 오답입니다. 안과 정밀 검사를 권장합니다."}
+            </p>
+          )}
         </div>
 
         <button
@@ -168,7 +234,7 @@ export default function IshiharaTest() {
         {!correctionOn || !correctedSrc ? (
           <img
             ref={imgRef}
-            src={`/ishihara/Ishihara_${plate.id}.jpg`}
+            src={`/ishihara/Ishihara_${plate.id}.${plate.ext ?? "jpg"}`}
             alt={`이시하라 플레이트 ${plate.id}`}
             width={280}
             height={280}
