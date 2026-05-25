@@ -1,19 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { drawPlate } from "./IshiharaPlate";
 
 export default function HeroVisual() {
-  const origRef = useRef<HTMLCanvasElement>(null);
-  const corRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [pct, setPct] = useState(48);
   const [dragging, setDragging] = useState(false);
-
-  useEffect(() => {
-    if (origRef.current) drawPlate(origRef.current, { text: "74", variant: "pd", corrected: false, seed: 921, size: 560 });
-    if (corRef.current) drawPlate(corRef.current, { text: "74", variant: "pd", corrected: true, seed: 921, size: 560 });
-  }, []);
 
   const onMove = useCallback((clientX: number) => {
     if (!wrapRef.current) return;
@@ -43,7 +35,7 @@ export default function HeroVisual() {
   return (
     <div
       ref={wrapRef}
-      className="relative w-full aspect-[5/4] rounded-[28px] overflow-hidden border bg-elevated shadow-lift select-none"
+      className="relative w-full aspect-[5/4] rounded-[28px] overflow-hidden border shadow-lift select-none cursor-ew-resize"
       style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
       onMouseDown={(e) => { setDragging(true); onMove(e.clientX); }}
       onTouchStart={(e) => { setDragging(true); onMove(e.touches[0].clientX); }}
@@ -61,25 +53,31 @@ export default function HeroVisual() {
         보정 · corrected
       </span>
 
-      <div className="absolute inset-0 flex items-center justify-center" style={{ background: "#eaeadf" }}>
-        <canvas ref={corRef} className="w-full h-full block" />
-      </div>
-      <div
-        className="absolute inset-0 flex items-center justify-center"
-        style={{
-          clipPath: `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)`,
-          background: "#e6e4d9",
-        }}
-      >
-        <canvas ref={origRef} className="w-full h-full block" />
-      </div>
+      {/* Corrected (right side, full width with filter) */}
+      <img
+        src="/ishihara/Ishihara_01.jpg"
+        alt="corrected"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ filter: "saturate(2.2) contrast(1.15) brightness(1.05)" }}
+        draggable={false}
+      />
 
+      {/* Original (left side, same size, clipped via clipPath) */}
+      <img
+        src="/ishihara/Ishihara_01.jpg"
+        alt="original"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ clipPath: `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)` }}
+        draggable={false}
+      />
+
+      {/* Divider */}
       <div
         className="absolute top-0 bottom-0 w-[2px] bg-white z-20"
         style={{ left: `${pct}%`, boxShadow: "0 0 0 1px rgba(13,27,42,.2)" }}
       >
         <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white flex items-center justify-center cursor-ew-resize shadow-lift"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-lift"
           style={{ color: "var(--color-brand)" }}
         >
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
