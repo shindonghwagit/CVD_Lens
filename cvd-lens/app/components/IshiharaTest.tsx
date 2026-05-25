@@ -6,23 +6,24 @@ import { useModel } from "../context/ModelContext";
 import { CVDType } from "../hooks/useCVDModel";
 
 // answer: 정상 색각자가 읽는 숫자
+// altAnswer: 색각이상자가 읽는 숫자 (null=읽지 못함)
 // type: demo=전원정답, pd=적록색각이상 감별, t=청색맹 감별
 // ext: 파일 확장자 (기본 jpg)
-const PLATES = [
-  { id: "01", answer: "74",  type: "demo" as const, label: "모든 분이 읽을 수 있는 플레이트" },
-  { id: "03", answer: "16",  type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "04", answer: "2",   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "05", answer: "29",  type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "06", answer: "7",   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "07", answer: "45",  type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "08", answer: "5",   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "09", answer: "97",  type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "10", answer: "8",   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "11", answer: "42",  type: "t"    as const, label: "청색맹 감별" },
-  { id: "12", answer: "3",   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "13", answer: "42",  type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
-  { id: "14", answer: "27",  type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
-  { id: "15", answer: "12",  type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
+const ALL_PLATES = [
+  { id: "01", answer: "74",  altAnswer: "21",  type: "demo" as const, label: "모든 분이 읽을 수 있는 플레이트" },
+  { id: "03", answer: "16",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "04", answer: "2",   altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "05", answer: "29",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "06", answer: "7",   altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "07", answer: "45",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "08", answer: "5",   altAnswer: "2",    type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "09", answer: "97",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "10", answer: "8",   altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "11", answer: "42",  altAnswer: null,   type: "t"    as const, label: "청색맹 감별" },
+  { id: "12", answer: "3",   altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "13", answer: "42",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
+  { id: "14", answer: "27",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
+  { id: "15", answer: "12",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
 ];
 
 const TYPE_LABEL: Record<string, { short: string; color: string }> = {
@@ -30,12 +31,20 @@ const TYPE_LABEL: Record<string, { short: string; color: string }> = {
   t:  { short: "청색맹 의심",      color: "#3b82f6" },
 };
 
+function pickPlates() {
+  const demo = ALL_PLATES.filter(p => p.type === "demo");
+  const diagnostic = ALL_PLATES.filter(p => p.type !== "demo");
+  const shuffled = [...diagnostic].sort(() => Math.random() - 0.5);
+  return [...demo, ...shuffled.slice(0, 4)]; // 1 demo + 4 랜덤
+}
+
 export default function IshiharaTest() {
   const { ready, infer } = useModel();
   const { data: session } = useSession();
 
+  const [plates, setPlates] = useState(pickPlates);
   const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<(string | null)[]>(Array(PLATES.length).fill(null));
+  const [answers, setAnswers] = useState<(string | null)[]>(() => Array(5).fill(null));
   const [input, setInput] = useState("");
   const [correctionOn, setCorrectionOn] = useState(false);
   const [correctedSrc, setCorrectedSrc] = useState<string | null>(null);
@@ -44,7 +53,7 @@ export default function IshiharaTest() {
 
   const submittingRef = useRef(false);
   const imgRef = useRef<HTMLImageElement>(null);
-  const plate = PLATES[current];
+  const plate = plates[current];
 
   useEffect(() => {
     setCorrectionOn(false);
@@ -80,6 +89,22 @@ export default function IshiharaTest() {
     if (correctionOn && !correctedSrc) applyCorrection();
   }, [correctionOn, correctedSrc, applyCorrection]);
 
+  function getDiagnosis(ans: (string | null)[]) {
+    let pdWrong = 0, tWrong = 0;
+    ans.forEach((a, i) => {
+      if (plates[i].type === "demo") return;
+      if (a !== plates[i].answer) {
+        if (plates[i].type === "pd") pdWrong++;
+        else tWrong++;
+      }
+    });
+    const pdCount = plates.filter(p => p.type === "pd").length;
+    const threshold = Math.max(1, Math.round(pdCount / 2));
+    if (pdWrong >= threshold) return "d";
+    if (tWrong >= 1) return "t";
+    return "normal";
+  }
+
   const submit = async () => {
     if (submittingRef.current) return;
     submittingRef.current = true;
@@ -87,15 +112,15 @@ export default function IshiharaTest() {
     newAnswers[current] = input.trim() || "모름";
     setAnswers(newAnswers);
 
-    if (current + 1 >= PLATES.length) {
-      const correct = newAnswers.filter((ans, i) => ans === PLATES[i].answer).length;
+    if (current + 1 >= plates.length) {
+      const correct = newAnswers.filter((ans, i) => ans === plates[i].answer).length;
       const diagnosis = getDiagnosis(newAnswers);
 
       if (session?.user) {
         await fetch("/api/results", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ correct, total: PLATES.length, diagnosis }),
+          body: JSON.stringify({ correct, total: plates.length, diagnosis }),
         }).catch(() => {});
       }
       setDone(true);
@@ -105,23 +130,17 @@ export default function IshiharaTest() {
     submittingRef.current = false;
   };
 
-  function getDiagnosis(ans: (string | null)[]) {
-    let pdWrong = 0, tWrong = 0;
-    ans.forEach((a, i) => {
-      if (PLATES[i].type === "demo") return;
-      if (a !== PLATES[i].answer) {
-        if (PLATES[i].type === "pd") pdWrong++;
-        else tWrong++;
-      }
-    });
-    if (pdWrong >= 4) return "d";
-    if (tWrong >= 1)  return "t";
-    return "normal";
-  }
+  const restart = () => {
+    const next = pickPlates();
+    setPlates(next);
+    setAnswers(Array(next.length).fill(null));
+    setCurrent(0);
+    setDone(false);
+  };
 
   if (done) {
     const diagnosis = getDiagnosis(answers);
-    const correct = answers.filter((a, i) => a === PLATES[i].answer).length;
+    const correct = answers.filter((a, i) => a === plates[i].answer).length;
     const diagnosisColor = diagnosis === "d" ? "#f97316" : diagnosis === "t" ? "#3b82f6" : "#22c55e";
     const diagnosisLabel =
       diagnosis === "d" ? "적록색각이상 (적색맹/녹색맹) 가능성이 있습니다." :
@@ -130,7 +149,6 @@ export default function IshiharaTest() {
 
     return (
       <div className="flex flex-col items-center gap-6 py-6 w-full">
-        {/* 진단 결과 헤더 */}
         <div className="text-center">
           <p className="font-serif text-[26px] tracking-[-0.02em] mb-2">진단 완료</p>
           <p
@@ -144,9 +162,7 @@ export default function IshiharaTest() {
           </p>
         </div>
 
-        {/* 플레이트별 상세 결과 */}
         <div className="w-full rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
-          {/* 헤더 */}
           <div
             className="grid grid-cols-[2rem_3rem_3rem_1fr] gap-3 px-4 py-2.5 font-mono text-[11px] tracking-wide border-b"
             style={{ background: "var(--bg-muted)", color: "var(--fg-subtle)", borderColor: "var(--border)" }}
@@ -156,18 +172,24 @@ export default function IshiharaTest() {
             <span>내 답</span>
             <span>결과</span>
           </div>
-
-          {PLATES.map((p, i) => {
+          {plates.map((p, i) => {
             const isCorrect = answers[i] === p.answer;
             const typeInfo = p.type !== "demo" ? TYPE_LABEL[p.type] : null;
             return (
               <div
-                key={i}
+                key={p.id}
                 className="grid grid-cols-[2rem_3rem_3rem_1fr] gap-3 px-4 py-3 border-b last:border-0 text-sm items-center"
                 style={{ borderColor: "var(--border)" }}
               >
                 <span className="font-mono text-[12px]" style={{ color: "var(--fg-subtle)" }}>{i + 1}</span>
-                <span className="font-mono font-medium">{p.answer}</span>
+                <div className="flex flex-col">
+                  <span className="font-mono font-medium">{p.answer}</span>
+                  {p.type !== "demo" && p.altAnswer && (
+                    <span className="font-mono text-[10px]" style={{ color: "var(--fg-subtle)" }}>
+                      색각이상: {p.altAnswer}
+                    </span>
+                  )}
+                </div>
                 <span className="font-mono font-medium" style={{ color: isCorrect ? "#22c55e" : "#ef4444" }}>
                   {answers[i] ?? "-"}
                 </span>
@@ -189,26 +211,25 @@ export default function IshiharaTest() {
           })}
         </div>
 
-        {/* 요약 */}
         <div className="w-full rounded-xl p-4" style={{ background: "var(--bg-muted)" }}>
-          <p className="text-sm font-mono mb-2" style={{ color: "var(--fg-subtle)" }}>
-            정답 {correct} / {PLATES.length}
+          <p className="text-sm font-mono mb-1" style={{ color: "var(--fg-subtle)" }}>
+            정답 {correct} / {plates.length}
           </p>
           {diagnosis !== "normal" && (
             <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
               {diagnosis === "d"
-                ? "적록색각이상 플레이트에서 4개 이상 오답입니다. 안과 정밀 검사를 권장합니다."
+                ? "적록색각이상 플레이트에서 절반 이상 오답입니다. 안과 정밀 검사를 권장합니다."
                 : "청색맹 플레이트에서 오답입니다. 안과 정밀 검사를 권장합니다."}
             </p>
           )}
         </div>
 
         <button
-          onClick={() => { setCurrent(0); setAnswers(Array(PLATES.length).fill(null)); setDone(false); }}
+          onClick={restart}
           className="px-6 py-2.5 rounded-full text-sm font-medium text-white"
           style={{ background: "var(--color-brand)" }}
         >
-          다시 테스트
+          다시 테스트 (새 문제)
         </button>
       </div>
     );
@@ -221,10 +242,10 @@ export default function IshiharaTest() {
         <div className="flex-1 rounded-full h-1.5" style={{ background: "var(--border)" }}>
           <div
             className="h-1.5 rounded-full transition-all"
-            style={{ width: `${(current / PLATES.length) * 100}%`, background: "var(--color-brand)" }}
+            style={{ width: `${(current / plates.length) * 100}%`, background: "var(--color-brand)" }}
           />
         </div>
-        <span className="text-sm font-mono" style={{ color: "var(--fg-subtle)" }}>{current + 1} / {PLATES.length}</span>
+        <span className="text-sm font-mono" style={{ color: "var(--fg-subtle)" }}>{current + 1} / {plates.length}</span>
       </div>
 
       <p className="text-sm" style={{ color: "var(--fg-muted)" }}>{plate.label}</p>
@@ -234,7 +255,7 @@ export default function IshiharaTest() {
         {!correctionOn || !correctedSrc ? (
           <img
             ref={imgRef}
-            src={`/ishihara/Ishihara_${plate.id}.${plate.ext ?? "jpg"}`}
+            src={`/ishihara/Ishihara_${plate.id}.${"ext" in plate && plate.ext ? plate.ext : "jpg"}`}
             alt={`이시하라 플레이트 ${plate.id}`}
             width={280}
             height={280}
@@ -291,11 +312,11 @@ export default function IshiharaTest() {
             className="px-4 py-2.5 rounded-lg text-sm font-medium text-white"
             style={{ background: "var(--color-brand)" }}
           >
-            {current + 1 < PLATES.length ? "다음" : "완료"}
+            {current + 1 < plates.length ? "다음" : "완료"}
           </button>
         </div>
         <button
-          onClick={() => { setInput("모름"); submit(); }}
+          onClick={() => { setInput("모름"); setTimeout(submit, 0); }}
           className="text-xs transition-colors"
           style={{ color: "var(--fg-subtle)" }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
