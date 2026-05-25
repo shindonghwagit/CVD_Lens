@@ -1,21 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import Logo from "./Logo";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Home" },
-  { href: "/ishihara", label: "진단" },
-  { href: "/history", label: "진단 기록" },
-  { href: "/corrections", label: "보정 기록" },
-  { href: "/correction?tab=image", label: "이미지", match: "/correction" },
-  { href: "/correction", label: "카메라", match: "/correction" },
+  { href: "/",                    label: "Home" },
+  { href: "/ishihara",            label: "진단" },
+  { href: "/history",             label: "진단 기록" },
+  { href: "/corrections",         label: "보정 기록" },
+  { href: "/correction?tab=image",label: "이미지",  matchPath: "/correction", matchTab: "image" },
+  { href: "/correction",          label: "카메라",  matchPath: "/correction", matchTab: "" },
 ];
 
 export default function NavBar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") ?? "";
   const { data: session, status } = useSession();
 
   return (
@@ -29,18 +31,20 @@ export default function NavBar() {
     >
       {/* Brand */}
       <Link href="/" className="flex items-center">
-      <Logo size={32} showWordmark />
+        <Logo size={32} showWordmark />
       </Link>
-
 
       {/* Nav */}
       <nav className="flex items-center gap-1">
         {NAV_ITEMS.map((item) => {
-          const matchPath = item.match ?? item.href.split("?")[0];
-          const isActive =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname === matchPath || pathname.startsWith(matchPath + "/");
+          let isActive: boolean;
+          if (item.href === "/") {
+            isActive = pathname === "/";
+          } else if ("matchTab" in item) {
+            isActive = pathname === item.matchPath && tab === item.matchTab;
+          } else {
+            isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          }
           return (
             <Link
               key={item.label}
