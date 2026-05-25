@@ -23,25 +23,23 @@ function resizeDataURL(src: string, size: number): Promise<string> {
 }
 
 export default function CameraView() {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef    = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [cvdType, setCvdType] = useState<CVDType>("d");
+  const [cvdType, setCvdType]     = useState<CVDType>("d");
   const [streaming, setStreaming] = useState(false);
-  const [original, setOriginal] = useState<string | null>(null);
+  const [original, setOriginal]   = useState<string | null>(null);
   const [corrected, setCorrected] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
-  const [sliderX, setSliderX] = useState(50);
-  const [dragging, setDragging] = useState(false);
+  const [sliderX, setSliderX]     = useState(50);
+  const [dragging, setDragging]   = useState(false);
 
   const { ready, error, infer } = useCVDModel();
 
   async function startCamera() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
       videoRef.current!.srcObject = stream;
       await videoRef.current!.play();
       setStreaming(true);
@@ -62,16 +60,13 @@ export default function CameraView() {
   const capture = useCallback(async () => {
     const video = videoRef.current;
     if (!video || !ready) return;
-
     setProcessing(true);
     setCorrected(null);
 
     const canvas = document.createElement("canvas");
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = 512; canvas.height = 512;
     const ctx = canvas.getContext("2d")!;
-    const vw = video.videoWidth;
-    const vh = video.videoHeight;
+    const vw = video.videoWidth, vh = video.videoHeight;
     const side = Math.min(vw, vh);
     ctx.drawImage(video, (vw - side) / 2, (vh - side) / 2, side, side, 0, 0, 512, 512);
 
@@ -117,9 +112,8 @@ export default function CameraView() {
 
   useEffect(() => {
     if (!dragging) return;
-    const onMove = (e: MouseEvent | TouchEvent) => {
+    const onMove = (e: MouseEvent | TouchEvent) =>
       onSliderMove("touches" in e ? e.touches[0].clientX : e.clientX);
-    };
     const onUp = () => setDragging(false);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
@@ -135,7 +129,6 @@ export default function CameraView() {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      {/* CVD 타입 선택 */}
       <div className="flex gap-2 flex-wrap justify-center">
         {(Object.keys(CVD_LABELS) as CVDType[]).map((type) => (
           <button
@@ -155,7 +148,6 @@ export default function CameraView() {
       </div>
 
       {!original ? (
-        /* 카메라 프리뷰 */
         <div className="flex flex-col items-center gap-4 w-full">
           <div className="relative w-full max-w-sm aspect-square rounded-xl overflow-hidden border" style={{ background: "#000", borderColor: "var(--border)" }}>
             <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
@@ -196,7 +188,6 @@ export default function CameraView() {
           </div>
         </div>
       ) : (
-        /* 보정 결과 슬라이더 */
         <div className="flex flex-col items-center gap-4 w-full max-w-sm">
           <div
             ref={containerRef}
@@ -205,9 +196,7 @@ export default function CameraView() {
             onMouseDown={() => setDragging(true)}
             onTouchStart={() => setDragging(true)}
           >
-            {corrected && (
-              <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
-            )}
+            {corrected && <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />}
             <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderX}%` }}>
               <img src={original!} alt="original" className="absolute inset-0 w-full h-full max-w-none object-cover" draggable={false} />
             </div>
