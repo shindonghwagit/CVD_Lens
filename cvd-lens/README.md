@@ -6,17 +6,13 @@
 
 개발 및 시연용 웹앱:
 
-```text
-https://d3kvjz20-3000.jpe1.devtunnels.ms/
-```
+- [CVDLens Web App](https://d3kvjz20-3000.jpe1.devtunnels.ms/)
 
 배포 환경:
 
-```text
-Frontend: https://cvd-lens.vercel.app
-Backend:  https://cvd-lens.onrender.com
-Health:   https://cvd-lens.onrender.com/health
-```
+- [Frontend](https://cvd-lens.vercel.app)
+- [Backend](https://cvd-lens.onrender.com)
+- [Health Check](https://cvd-lens.onrender.com/health)
 
 > dev tunnel 주소는 실행 환경에 따라 바뀔 수 있습니다.
 

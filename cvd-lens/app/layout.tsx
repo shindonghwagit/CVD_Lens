@@ -4,7 +4,6 @@ import "./globals.css";
 import NavBar from "./components/NavBar";
 import { ModelProvider } from "./context/ModelContext";
 import SessionWrapper from "./components/SessionWrapper";
-import { Suspense } from "react";
 
 const inter = Inter({ variable: "--font-sans", subsets: ["latin"] });
 const notoKR = Noto_Sans_KR({ variable: "--font-kr", subsets: ["latin"], weight: ["400", "500", "700"] });
@@ -22,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         <SessionWrapper>
           <ModelProvider>
-            <Suspense><NavBar /></Suspense>
+            <NavBar />
             <main className="flex-1">{children}</main>
           </ModelProvider>
         </SessionWrapper>
