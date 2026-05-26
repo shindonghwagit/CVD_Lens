@@ -1,6 +1,7 @@
 from pathlib import Path
 import io
 import os
+import shutil
 import tempfile
 import uuid
 
@@ -9,7 +10,7 @@ import numpy as np
 import onnxruntime as rt
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from PIL import Image
 
 app = FastAPI()
@@ -28,6 +29,7 @@ session = rt.InferenceSession(
 )
 
 CVD_VALUES = {"p": 0.0, "d": 0.5, "t": 1.0}
+
 
 
 @app.get("/health")
@@ -60,7 +62,6 @@ async def infer(image: UploadFile = File(...), cvd_type: str = Form(...)):
     return StreamingResponse(buf, media_type="image/jpeg")
 
 
-import shutil
 _FFMPEG = (
     shutil.which("ffmpeg")
     or r"C:\Users\SCH\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin\ffmpeg.exe"
@@ -82,7 +83,6 @@ def _correct_frame(frame_bgr: np.ndarray, cvd_val: float) -> np.ndarray:
     out = np.clip(out[0].transpose(1, 2, 0) * 255, 0, 255).astype(np.uint8)
     out_bgr = cv2.cvtColor(out, cv2.COLOR_RGB2BGR)
 
-    # scale back to original resolution
     if (orig_w, orig_h) != (256, 256):
         out_bgr = cv2.resize(out_bgr, (orig_w, orig_h), interpolation=cv2.INTER_LINEAR)
     return out_bgr
@@ -90,11 +90,6 @@ def _correct_frame(frame_bgr: np.ndarray, cvd_val: float) -> np.ndarray:
 
 @app.post("/infer/video")
 async def infer_video(video: UploadFile = File(...), cvd_type: str = Form(...)):
-    """
-    Upload video → correct each frame → return H.264 MP4 at original resolution.
-    Uses ffmpeg pipe: OpenCV reads frames, corrects via ONNX, writes raw BGR to
-    ffmpeg stdin → ffmpeg encodes H.264 directly (browser-compatible).
-    """
     import subprocess
 
     cvd_val = CVD_VALUES.get(cvd_type, 0.5)
@@ -114,11 +109,9 @@ async def infer_video(video: UploadFile = File(...), cvd_type: str = Form(...)):
         fps   = cap.get(cv2.CAP_PROP_FPS) or 30.0
         w     = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h     = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        # libx264/yuv420p requires even dimensions
         enc_w = w + (w % 2)
         enc_h = h + (h % 2)
 
-        # pipe raw BGR frames directly into ffmpeg → H.264 MP4
         proc = subprocess.Popen(
             [_FFMPEG, "-y",
              "-f", "rawvideo", "-vcodec", "rawvideo",
@@ -137,7 +130,6 @@ async def infer_video(video: UploadFile = File(...), cvd_type: str = Form(...)):
             if not ret:
                 break
             corrected = _correct_frame(frame, cvd_val)
-            # pad to even dimensions if needed
             if enc_w != w or enc_h != h:
                 corrected = cv2.copyMakeBorder(corrected, 0, enc_h - h, 0, enc_w - w, cv2.BORDER_REPLICATE)
             proc.stdin.write(corrected.tobytes())
