@@ -15,13 +15,13 @@ class MaskLoss(nn.Module):
         super().__init__()
         self.bce_w = bce_w
         self.dice_w = dice_w
-        self.bce = nn.BCELoss()
+        self.bce = nn.BCEWithLogitsLoss()
 
     def forward(self, pred: torch.Tensor, target: torch.Tensor) -> tuple[torch.Tensor, dict]:
         bce_loss = self.bce(pred, target)
 
         smooth = 1e-6
-        pred_flat = pred.reshape(-1)
+        pred_flat = torch.sigmoid(pred).reshape(-1)
         target_flat = target.reshape(-1)
         intersection = (pred_flat * target_flat).sum()
         dice_loss = 1.0 - (2.0 * intersection + smooth) / (

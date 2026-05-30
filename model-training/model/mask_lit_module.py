@@ -17,7 +17,7 @@ class MaskLitModule(pl.LightningModule):
         self.criterion = MaskLoss(bce_w=bce_w, dice_w=dice_w)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.model(x)
+        return torch.sigmoid(self.model(x))
 
     @staticmethod
     def _iou(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
@@ -29,8 +29,8 @@ class MaskLitModule(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         inp, mask_gt = batch
-        pred = self(inp)
-        loss, components = self.criterion(pred, mask_gt)
+        logits = self.model(inp)
+        loss, components = self.criterion(logits, mask_gt)
 
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
         self.log("train_loss_bce", components["loss_bce"], on_step=False, on_epoch=True)
@@ -39,9 +39,9 @@ class MaskLitModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         inp, mask_gt = batch
-        pred = self(inp)
-        loss, components = self.criterion(pred, mask_gt)
-        iou = self._iou(pred, mask_gt)
+        logits = self.model(inp)
+        loss, components = self.criterion(logits, mask_gt)
+        iou = self._iou(torch.sigmoid(logits), mask_gt)
 
         self.log("val_loss", loss, prog_bar=True, sync_dist=True)
         self.log("val_iou", iou, prog_bar=True, sync_dist=True)
@@ -50,9 +50,9 @@ class MaskLitModule(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         inp, mask_gt = batch
-        pred = self(inp)
-        loss, _ = self.criterion(pred, mask_gt)
-        iou = self._iou(pred, mask_gt)
+        logits = self.model(inp)
+        loss, _ = self.criterion(logits, mask_gt)
+        iou = self._iou(torch.sigmoid(logits), mask_gt)
         self.log("test_loss", loss, sync_dist=True)
         self.log("test_iou", iou, sync_dist=True)
 

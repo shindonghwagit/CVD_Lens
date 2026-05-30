@@ -26,7 +26,7 @@ def build_mask_model() -> nn.Module:
         encoder_weights="imagenet",
         in_channels=8,
         classes=1,
-        activation="sigmoid",
+        activation=None,
         decoder_attention_type="scse",
     )
 
