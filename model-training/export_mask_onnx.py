@@ -25,17 +25,21 @@ def export(ckpt_path: str, output_dir: str = "./outputs/onnx_mask") -> None:
     print(f"Loading checkpoint: {ckpt_path}")
     module = MaskLitModule.load_from_checkpoint(ckpt_path, map_location="cpu")
     module.eval()
+    export_model = torch.nn.Sequential(module.model, torch.nn.Sigmoid()).eval()
 
     dummy = torch.randn(1, 8, 256, 256)
     out_path = output_dir / "cvdlens_mask_fp32.onnx"
 
     torch.onnx.export(
-        module.model,
+        export_model,
         dummy,
         str(out_path),
         input_names=["input"],
         output_names=["mask"],
-        dynamic_axes={"input": {0: "batch"}, "mask": {0: "batch"}},
+        dynamic_axes={
+            "input": {0: "batch", 2: "height", 3: "width"},
+            "mask": {0: "batch", 2: "height", 3: "width"},
+        },
         opset_version=17,
         do_constant_folding=True,
     )

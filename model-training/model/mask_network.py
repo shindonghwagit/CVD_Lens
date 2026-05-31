@@ -12,7 +12,8 @@ Input:
     - CVD type channel: 1 channel
 
 Output:
-    (B, 1, 256, 256), soft correction mask M in [0, 1]
+    (B, 1, 256, 256), raw mask logits.
+    Apply sigmoid to convert logits into a soft correction mask M in [0, 1].
 """
 
 import segmentation_models_pytorch as smp
@@ -46,9 +47,11 @@ if __name__ == "__main__":
     dummy = torch.randn(2, 8, 256, 256)
     with torch.no_grad():
         out = model(dummy)
+        mask = torch.sigmoid(out)
     print(f"input shape:  {dummy.shape}")
     print(f"output shape: {out.shape}")
-    print(f"output range: [{out.min():.3f}, {out.max():.3f}]")
+    print(f"logit range:  [{out.min():.3f}, {out.max():.3f}]")
+    print(f"mask range:   [{mask.min():.3f}, {mask.max():.3f}]")
     assert out.shape == (2, 1, 256, 256)
-    assert 0.0 <= out.min() and out.max() <= 1.0
+    assert 0.0 <= mask.min() and mask.max() <= 1.0
     print("model check passed")
