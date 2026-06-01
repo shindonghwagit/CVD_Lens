@@ -45,8 +45,8 @@ class MaskLitModule(pl.LightningModule):
 
         self.log("val_loss", loss, prog_bar=True, sync_dist=True)
         self.log("val_iou", iou, prog_bar=True, sync_dist=True)
-        self.log("val_loss_bce", components["loss_bce"], sync_dist=True)
-        self.log("val_loss_dice", components["loss_dice"], sync_dist=True)
+        self.log("val_loss_bce", components["loss_bce"], prog_bar=True, sync_dist=True)
+        self.log("val_loss_dice", components["loss_dice"], prog_bar=True, sync_dist=True)
 
     def test_step(self, batch, batch_idx):
         inp, mask_gt = batch

@@ -49,14 +49,26 @@ def simulate_cvd(img: np.ndarray, cvd_key: str) -> np.ndarray:
     return (np.clip(sim.T.reshape(h, w, 3), 0, 1) * 255).astype(np.uint8)
 
 
-def make_pseudo_mask(original: np.ndarray, simulated: np.ndarray) -> np.ndarray:
-    """Generate a soft pseudo confusion mask in [0, 1]."""
-    diff = np.abs(simulated.astype(np.float32) - original.astype(np.float32))
-    mask = diff.mean(axis=2) / 255.0
+def make_pseudo_mask(
+    original: np.ndarray,
+    simulated: np.ndarray,
+    low: float = 2.0,
+    high: float = 15.0,
+) -> np.ndarray:
+    """Generate a soft pseudo confusion mask in [0, 1] using Lab delta-E.
 
-    vmax = float(mask.max())
-    if vmax > 1e-6:
-        mask = mask / vmax
+    Lab delta-E reflects perceptual color difference rather than raw RGB distance.
+    Global thresholds (low, high) ensure absolute color loss is preserved across
+    images — unlike per-image max normalization which treats every image equally
+    regardless of actual confusion magnitude.
+    """
+    from skimage.color import rgb2lab
+
+    lab_orig = rgb2lab(original.astype(np.uint8))
+    lab_sim = rgb2lab(simulated.astype(np.uint8))
+
+    delta_e = np.sqrt(np.sum((lab_orig - lab_sim) ** 2, axis=2)).astype(np.float32)
+    mask = np.clip((delta_e - low) / (high - low), 0.0, 1.0)
 
     mask_img = Image.fromarray((mask * 255).astype(np.uint8))
     mask_img = mask_img.filter(ImageFilter.GaussianBlur(radius=5))
