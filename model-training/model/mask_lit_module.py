@@ -10,11 +10,11 @@ from .mask_network import build_mask_model
 
 
 class MaskLitModule(pl.LightningModule):
-    def __init__(self, lr: float = 1e-3, bce_w: float = 1.0, dice_w: float = 1.0):
+    def __init__(self, lr: float = 1e-3, l1_w: float = 1.0, dice_w: float = 1.0):
         super().__init__()
         self.save_hyperparameters()
         self.model = build_mask_model()
-        self.criterion = MaskLoss(bce_w=bce_w, dice_w=dice_w)
+        self.criterion = MaskLoss(l1_w=l1_w, dice_w=dice_w)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return torch.sigmoid(self.model(x))
@@ -29,30 +29,30 @@ class MaskLitModule(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         inp, mask_gt = batch
-        logits = self.model(inp)
-        loss, components = self.criterion(logits, mask_gt)
+        pred = torch.sigmoid(self.model(inp))
+        loss, components = self.criterion(pred, mask_gt)
 
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
-        self.log("train_loss_bce", components["loss_bce"], on_step=False, on_epoch=True)
+        self.log("train_loss_l1", components["loss_l1"], on_step=False, on_epoch=True)
         self.log("train_loss_dice", components["loss_dice"], on_step=False, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         inp, mask_gt = batch
-        logits = self.model(inp)
-        loss, components = self.criterion(logits, mask_gt)
-        iou = self._iou(torch.sigmoid(logits), mask_gt)
+        pred = torch.sigmoid(self.model(inp))
+        loss, components = self.criterion(pred, mask_gt)
+        iou = self._iou(pred, mask_gt)
 
         self.log("val_loss", loss, prog_bar=True, sync_dist=True)
         self.log("val_iou", iou, prog_bar=True, sync_dist=True)
-        self.log("val_loss_bce", components["loss_bce"], prog_bar=True, sync_dist=True)
+        self.log("val_loss_l1", components["loss_l1"], prog_bar=True, sync_dist=True)
         self.log("val_loss_dice", components["loss_dice"], prog_bar=True, sync_dist=True)
 
     def test_step(self, batch, batch_idx):
         inp, mask_gt = batch
-        logits = self.model(inp)
-        loss, _ = self.criterion(logits, mask_gt)
-        iou = self._iou(torch.sigmoid(logits), mask_gt)
+        pred = torch.sigmoid(self.model(inp))
+        loss, _ = self.criterion(pred, mask_gt)
+        iou = self._iou(pred, mask_gt)
         self.log("test_loss", loss, sync_dist=True)
         self.log("test_iou", iou, sync_dist=True)
 

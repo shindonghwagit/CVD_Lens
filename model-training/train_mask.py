@@ -35,7 +35,7 @@ def main(args):
         print(f"Resuming from checkpoint: {args.resume}")
         module = MaskLitModule.load_from_checkpoint(args.resume)
     else:
-        module = MaskLitModule(lr=args.lr, bce_w=args.bce_w, dice_w=args.dice_w)
+        module = MaskLitModule(lr=args.lr, l1_w=args.l1_w, dice_w=args.dice_w)
 
     ckpt_dir = Path(args.output_dir) / "checkpoints_mask"
     callbacks = [
@@ -58,7 +58,7 @@ def main(args):
 
     accelerator = "gpu" if torch.cuda.is_available() else "cpu"
     print(f"Training device: {accelerator}")
-    print(f"Mask loss weights: BCE={args.bce_w}, Dice={args.dice_w}")
+    print(f"Mask loss weights: L1={args.l1_w}, Dice={args.dice_w}")
 
     trainer = pl.Trainer(
         max_epochs=args.max_epochs,
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     parser.add_argument("--resume", type=str, default=None)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--bce-w", type=float, default=1.0)
+    parser.add_argument("--l1-w", type=float, default=1.0)
     parser.add_argument("--dice-w", type=float, default=1.0)
     parser.add_argument("--max-epochs", type=int, default=100)
     parser.add_argument("--patience", type=int, default=15)
