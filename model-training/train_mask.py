@@ -89,7 +89,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--l1-w", type=float, default=1.0)
-    parser.add_argument("--dice-w", type=float, default=1.0)
+    parser.add_argument("--dice-w", type=float, default=0.2)
     parser.add_argument("--max-epochs", type=int, default=100)
     parser.add_argument("--patience", type=int, default=15)
     parser.add_argument("--num-workers", type=int, default=4)

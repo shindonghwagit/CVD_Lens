@@ -10,7 +10,7 @@ from .mask_network import build_mask_model
 
 
 class MaskLitModule(pl.LightningModule):
-    def __init__(self, lr: float = 1e-3, l1_w: float = 1.0, dice_w: float = 1.0):
+    def __init__(self, lr: float = 1e-3, l1_w: float = 1.0, dice_w: float = 0.2):
         super().__init__()
         self.save_hyperparameters()
         self.model = build_mask_model()

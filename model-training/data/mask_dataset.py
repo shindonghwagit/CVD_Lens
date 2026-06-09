@@ -52,8 +52,8 @@ def simulate_cvd(img: np.ndarray, cvd_key: str) -> np.ndarray:
 def make_pseudo_mask(
     original: np.ndarray,
     simulated: np.ndarray,
-    low: float = 2.0,
-    high: float = 15.0,
+    low: float = 5.0,
+    high: float = 25.0,
 ) -> np.ndarray:
     """Generate a soft pseudo confusion mask in [0, 1] using Lab delta-E.
 

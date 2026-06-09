@@ -64,4 +64,5 @@ model-training/outputs/logs/
 # ───────────────────────────────────────────
 *.zip
 model-training/outputs/
+outputs/
 model-training/**/*.ipynb
