@@ -13,7 +13,7 @@ from torchmetrics.functional.image import (
 )
 
 from .network import build_model
-from .losses import CVDCorrectionLoss, simulate_cvd_batch
+from .losses import CVDCorrectionLoss, compute_confusion_weight, simulate_cvd_batch
 
 
 class CVDLitModule(pl.LightningModule):
@@ -63,14 +63,21 @@ class CVDLitModule(pl.LightningModule):
         pred, orig_t, cvd_val, loss, components = self._step(batch)
 
         # 검증 지표: 자연스러움(SSIM vs orig) + 가시성(CVD_sim(pred) vs orig)
+        # global = 전체 픽셀 평균, weighted = 혼동 영역만 평균 (β 의도 직접 반영)
         ssim_natural = ssim_fn(pred, orig_t, data_range=1.0)
         with torch.no_grad():
+            sim_orig = simulate_cvd_batch(orig_t, cvd_val)
             sim_pred = simulate_cvd_batch(pred, cvd_val)
-            visibility_l1 = (sim_pred - orig_t).abs().mean()
+            w = compute_confusion_weight(orig_t, sim_orig)        # (B, 1, H, W)
 
-        self.log("val_loss",          loss,          prog_bar=True, sync_dist=True)
-        self.log("val_ssim_natural",  ssim_natural,  prog_bar=True, sync_dist=True)
-        self.log("val_visibility_l1", visibility_l1, prog_bar=True, sync_dist=True)
+            diff = (sim_pred - orig_t).abs()
+            visibility_l1_global = diff.mean()
+            visibility_l1_weighted = (w * diff).sum() / (w.sum() + 1e-6)
+
+        self.log("val_loss",                 loss,                   prog_bar=True, sync_dist=True)
+        self.log("val_ssim_natural",         ssim_natural,           prog_bar=True, sync_dist=True)
+        self.log("val_visibility_global",    visibility_l1_global,   prog_bar=True, sync_dist=True)
+        self.log("val_visibility_weighted",  visibility_l1_weighted, prog_bar=True, sync_dist=True)
         for k, v in components.items():
             self.log(f"val_{k}", v, sync_dist=True)
 
@@ -79,12 +86,18 @@ class CVDLitModule(pl.LightningModule):
 
         ssim_natural = ssim_fn(pred, orig_t, data_range=1.0)
         with torch.no_grad():
+            sim_orig = simulate_cvd_batch(orig_t, cvd_val)
             sim_pred = simulate_cvd_batch(pred, cvd_val)
-            visibility_l1 = (sim_pred - orig_t).abs().mean()
+            w = compute_confusion_weight(orig_t, sim_orig)
 
-        self.log("test_loss",          loss,          sync_dist=True)
-        self.log("test_ssim_natural",  ssim_natural,  sync_dist=True)
-        self.log("test_visibility_l1", visibility_l1, sync_dist=True)
+            diff = (sim_pred - orig_t).abs()
+            visibility_l1_global = diff.mean()
+            visibility_l1_weighted = (w * diff).sum() / (w.sum() + 1e-6)
+
+        self.log("test_loss",                loss,                   sync_dist=True)
+        self.log("test_ssim_natural",        ssim_natural,           sync_dist=True)
+        self.log("test_visibility_global",   visibility_l1_global,   sync_dist=True)
+        self.log("test_visibility_weighted", visibility_l1_weighted, sync_dist=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
