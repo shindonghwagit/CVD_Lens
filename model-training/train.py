@@ -124,10 +124,11 @@ if __name__ == "__main__":
     parser.add_argument("--num-val",     type=int, default=2000,        help="검증 이미지 수 (기본: 2000)")
     parser.add_argument("--num-test",    type=int, default=2000,        help="테스트 이미지 수 (기본: 2000)")
 
-    # β v1 spatial-weighted multi-objective loss weights
-    parser.add_argument("--preserve-w",   type=float, default=1.0, help="α — 비혼동 영역 원본 보존")
-    parser.add_argument("--visibility-w", type=float, default=0.7, help="β — 혼동 영역 CVD 가시성")
-    parser.add_argument("--structure-w",  type=float, default=0.5, help="η — 전체 구조 보존 (SSIM)")
+    # β v1.1 spatial-weighted multi-objective loss weights
+    # v1.0 (1.0/0.7/0.5/0.1)은 identity collapse — preserve↓ visibility↑로 rebalance
+    parser.add_argument("--preserve-w",   type=float, default=0.5, help="α — 비혼동 영역 원본 보존")
+    parser.add_argument("--visibility-w", type=float, default=1.5, help="β — 혼동 영역 CVD 가시성")
+    parser.add_argument("--structure-w",  type=float, default=0.3, help="η — 전체 구조 보존 (SSIM)")
     parser.add_argument("--color-w",      type=float, default=0.1, help="γ — 색 분포 보존 (mean/std)")
 
     args = parser.parse_args()

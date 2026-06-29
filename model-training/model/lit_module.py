@@ -20,9 +20,9 @@ class CVDLitModule(pl.LightningModule):
     def __init__(
         self,
         lr:           float = 1e-3,
-        preserve_w:   float = 1.0,
-        visibility_w: float = 0.7,
-        structure_w:  float = 0.5,
+        preserve_w:   float = 0.5,
+        visibility_w: float = 1.5,
+        structure_w:  float = 0.3,
         color_w:      float = 0.1,
     ):
         super().__init__()

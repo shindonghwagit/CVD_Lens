@@ -156,18 +156,18 @@ class CVDCorrectionLoss(nn.Module):
     """
     Spatial-weighted multi-objective loss.
 
-    Args:
-        preserve_w:   α — 비혼동 영역 원본 보존        (default 1.0)
-        visibility_w: β — 혼동 영역 보정              (default 0.7)
-        structure_w:  η — 전체 구조 보존 (SSIM)         (default 0.5)
+    Args (β v1.1 defaults — v1.0 was 1.0/0.7/0.5/0.1, identity collapse):
+        preserve_w:   α — 비혼동 영역 원본 보존        (default 0.5)
+        visibility_w: β — 혼동 영역 보정              (default 1.5)
+        structure_w:  η — 전체 구조 보존 (SSIM)         (default 0.3)
         color_w:      γ — 색 분포 보존 (mean/std)       (default 0.1)
     """
 
     def __init__(
         self,
-        preserve_w:   float = 1.0,
-        visibility_w: float = 0.7,
-        structure_w:  float = 0.5,
+        preserve_w:   float = 0.5,
+        visibility_w: float = 1.5,
+        structure_w:  float = 0.3,
         color_w:      float = 0.1,
     ):
         super().__init__()
