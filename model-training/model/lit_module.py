@@ -68,7 +68,7 @@ class CVDLitModule(pl.LightningModule):
         with torch.no_grad():
             sim_orig = simulate_cvd_batch(orig_t, cvd_val)
             sim_pred = simulate_cvd_batch(pred, cvd_val)
-            w = compute_confusion_weight(orig_t, sim_orig)        # (B, 1, H, W)
+            w = compute_confusion_weight(orig_t, sim_orig, cvd_val)   # (B, 1, H, W)
 
             diff = (sim_pred - orig_t).abs()
             visibility_l1_global = diff.mean()
@@ -88,7 +88,7 @@ class CVDLitModule(pl.LightningModule):
         with torch.no_grad():
             sim_orig = simulate_cvd_batch(orig_t, cvd_val)
             sim_pred = simulate_cvd_batch(pred, cvd_val)
-            w = compute_confusion_weight(orig_t, sim_orig)
+            w = compute_confusion_weight(orig_t, sim_orig, cvd_val)
 
             diff = (sim_pred - orig_t).abs()
             visibility_l1_global = diff.mean()

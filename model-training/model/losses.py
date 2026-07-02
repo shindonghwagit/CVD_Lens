@@ -122,21 +122,26 @@ def _gaussian_blur(x: torch.Tensor, sigma: float = 3.0, ksize: int = 11) -> torc
 
 
 # ── Confusion weight (spatial loss weighting) ─────────────────────────────
+# β v1.2: type-adaptive delta-E thresholds
+# v1.0/v1.1 used fixed (low=5.0, high=25.0) which is T-biased — P/D simulation
+# produces smaller color changes so most pixels never crossed threshold →
+# w ≈ 0 for P/D → visibility loss inactive → identity collapse.
+# v1.2: P/D use (2.0, 12.0); T uses (5.0, 25.0). Per-image via cvd_val.
 
 @torch.no_grad()
 def compute_confusion_weight(
     orig: torch.Tensor,
     sim_orig: torch.Tensor,
-    low: float = 5.0,
-    high: float = 25.0,
+    cvd_val: torch.Tensor,
     sigma: float = 3.0,
     ksize: int = 11,
 ) -> torch.Tensor:
     """
-    Spatial confusion weight w ∈ [0, 1] from Lab delta-E.
-    High where CVD distorts color a lot; low elsewhere. No gradient.
+    Spatial confusion weight w ∈ [0, 1] from Lab delta-E, with CVD-type-adaptive
+    thresholds. High where CVD distorts color a lot; low elsewhere. No gradient.
 
     orig, sim_orig: (B, 3, H, W) RGB [0, 1]
+    cvd_val:        (B,) — 0.0=p, 0.5=d, 1.0=t
     returns:        (B, 1, H, W) soft weight, same dtype as orig
     """
     # fp32 for Lab pow ops
@@ -145,6 +150,12 @@ def compute_confusion_weight(
     lab_o = _rgb_to_lab(orig32)
     lab_s = _rgb_to_lab(sim32)
     delta_e = torch.sqrt(((lab_o - lab_s) ** 2).sum(dim=1, keepdim=True) + 1e-6)
+
+    # Type-adaptive thresholds: T if cvd_val >= 0.75, else P/D
+    is_t = (cvd_val.to(delta_e.device).view(-1, 1, 1, 1) >= 0.75).float()
+    low = 2.0 * (1.0 - is_t) + 5.0 * is_t          # P/D: 2.0, T: 5.0
+    high = 12.0 * (1.0 - is_t) + 25.0 * is_t       # P/D: 12.0, T: 25.0
+
     w = ((delta_e - low) / (high - low)).clamp(0.0, 1.0)
     w = _gaussian_blur(w, sigma=sigma, ksize=ksize).clamp(0.0, 1.0)
     return w.to(orig.dtype)
@@ -191,8 +202,8 @@ class CVDCorrectionLoss(nn.Module):
         sim_orig = simulate_cvd_batch(orig, cvd_val)
         sim_pred = simulate_cvd_batch(pred, cvd_val)
 
-        # Spatial weight w (no grad)
-        w = compute_confusion_weight(orig, sim_orig)        # (B, 1, H, W)
+        # Spatial weight w (no grad, type-adaptive threshold)
+        w = compute_confusion_weight(orig, sim_orig, cvd_val)   # (B, 1, H, W)
 
         # 1) Preserve: 비혼동 영역에서 원본 유지
         L_preserve = ((1.0 - w) * (pred - orig).abs()).mean()
