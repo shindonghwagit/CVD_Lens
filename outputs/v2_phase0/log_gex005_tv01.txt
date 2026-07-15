@@ -1,0 +1,72 @@
+Device: cpu
+Config: field_size=64  lr=0.02  iters=400  init=identity β0=0.0  λ_tv=0.01  λ_n=0.15  λ_c=1.0  λ_g=0.15  λ_excess=0.05
+
+=== Protanopia (severity=1.0) ===
+  it=   0  total=1.7371  L_c=1.306  L_g=2.875  L_n=0.000  L_tv=0.0000  |Δ|=0.0000  ratio=1.000  ratio_w=1.000  SI=0.000  lr=2.00e-02  |conf|=0.0e+00
+  it=  40  total=0.0867  L_c=0.039  L_g=0.263  L_n=0.018  L_tv=0.5786  |Δ|=0.0166  ratio=1.056  ratio_w=1.154  SI=0.293  lr=1.95e-02  |conf|=1.1e-08
+  it=  80  total=0.0567  L_c=0.025  L_g=0.144  L_n=0.019  L_tv=0.6781  |Δ|=0.0182  ratio=1.065  ratio_w=1.173  SI=0.298  lr=1.82e-02  |conf|=1.2e-08
+  it= 120  total=0.0469  L_c=0.021  L_g=0.107  L_n=0.020  L_tv=0.7133  |Δ|=0.0190  ratio=1.067  ratio_w=1.182  SI=0.295  lr=1.62e-02  |conf|=2.0e-08
+  it= 160  total=0.0402  L_c=0.018  L_g=0.079  L_n=0.021  L_tv=0.7325  |Δ|=0.0194  ratio=1.069  ratio_w=1.186  SI=0.296  lr=1.37e-02  |conf|=2.6e-08
+  it= 200  total=0.0371  L_c=0.017  L_g=0.066  L_n=0.021  L_tv=0.7404  |Δ|=0.0197  ratio=1.070  ratio_w=1.190  SI=0.295  lr=1.09e-02  |conf|=1.6e-08
+  it= 240  total=0.0357  L_c=0.016  L_g=0.062  L_n=0.021  L_tv=0.7430  |Δ|=0.0199  ratio=1.070  ratio_w=1.192  SI=0.295  lr=8.15e-03  |conf|=1.9e-08
+  it= 280  total=0.0349  L_c=0.015  L_g=0.060  L_n=0.021  L_tv=0.7439  |Δ|=0.0200  ratio=1.070  ratio_w=1.194  SI=0.294  lr=5.65e-03  |conf|=1.8e-08
+  it= 320  total=0.0344  L_c=0.015  L_g=0.058  L_n=0.021  L_tv=0.7442  |Δ|=0.0200  ratio=1.070  ratio_w=1.195  SI=0.294  lr=3.68e-03  |conf|=2.0e-08
+  it= 360  total=0.0341  L_c=0.015  L_g=0.058  L_n=0.021  L_tv=0.7444  |Δ|=0.0201  ratio=1.070  ratio_w=1.196  SI=0.294  lr=2.42e-03  |conf|=1.5e-08
+  it= 399  total=0.0339  L_c=0.015  L_g=0.057  L_n=0.021  L_tv=0.7448  |Δ|=0.0201  ratio=1.071  ratio_w=1.197  SI=0.294  lr=2.00e-03  |conf|=1.6e-08
+  Saved: C:\Users\SCH\graduation_project\outputs\v2_phase0\validate_000000000724_p_gex005_tv01.png
+
+=== Deuteranopia (severity=1.0) ===
+  it=   0  total=1.4688  L_c=1.104  L_g=2.432  L_n=0.000  L_tv=0.0000  |Δ|=0.0000  ratio=1.000  ratio_w=1.000  SI=0.000  lr=2.00e-02  |conf|=0.0e+00
+  it=  40  total=0.0550  L_c=0.022  L_g=0.161  L_n=0.021  L_tv=0.6027  |Δ|=0.0203  ratio=1.063  ratio_w=1.182  SI=0.314  lr=1.95e-02  |conf|=1.9e-08
+  it=  80  total=0.0296  L_c=0.013  L_g=0.043  L_n=0.024  L_tv=0.6894  |Δ|=0.0224  ratio=1.074  ratio_w=1.215  SI=0.317  lr=1.82e-02  |conf|=1.9e-08
+  it= 120  total=0.0242  L_c=0.010  L_g=0.025  L_n=0.025  L_tv=0.7037  |Δ|=0.0233  ratio=1.076  ratio_w=1.225  SI=0.313  lr=1.62e-02  |conf|=2.0e-08
+  it= 160  total=0.0220  L_c=0.008  L_g=0.020  L_n=0.025  L_tv=0.7089  |Δ|=0.0237  ratio=1.077  ratio_w=1.232  SI=0.310  lr=1.37e-02  |conf|=2.4e-08
+  it= 200  total=0.0202  L_c=0.007  L_g=0.013  L_n=0.025  L_tv=0.7095  |Δ|=0.0240  ratio=1.078  ratio_w=1.237  SI=0.309  lr=1.09e-02  |conf|=2.3e-08
+  it= 240  total=0.0194  L_c=0.007  L_g=0.011  L_n=0.025  L_tv=0.7091  |Δ|=0.0241  ratio=1.078  ratio_w=1.239  SI=0.308  lr=8.15e-03  |conf|=2.0e-08
+  it= 280  total=0.0189  L_c=0.007  L_g=0.009  L_n=0.026  L_tv=0.7080  |Δ|=0.0242  ratio=1.078  ratio_w=1.241  SI=0.307  lr=5.65e-03  |conf|=2.7e-08
+  it= 320  total=0.0186  L_c=0.006  L_g=0.009  L_n=0.026  L_tv=0.7067  |Δ|=0.0243  ratio=1.078  ratio_w=1.242  SI=0.307  lr=3.68e-03  |conf|=3.0e-08
+  it= 360  total=0.0184  L_c=0.006  L_g=0.008  L_n=0.026  L_tv=0.7056  |Δ|=0.0243  ratio=1.078  ratio_w=1.243  SI=0.307  lr=2.42e-03  |conf|=2.3e-08
+  it= 399  total=0.0183  L_c=0.006  L_g=0.008  L_n=0.026  L_tv=0.7050  |Δ|=0.0243  ratio=1.078  ratio_w=1.243  SI=0.307  lr=2.00e-03  |conf|=2.4e-08
+  Saved: C:\Users\SCH\graduation_project\outputs\v2_phase0\validate_000000000724_d_gex005_tv01.png
+
+=== Tritanopia (severity=1.0) ===
+  it=   0  total=1.6479  L_c=1.093  L_g=3.700  L_n=0.000  L_tv=0.0000  |Δ|=0.0000  ratio=1.000  ratio_w=1.000  SI=0.000  lr=2.00e-02  |conf|=0.0e+00
+  it=  40  total=0.1000  L_c=0.061  L_g=0.179  L_n=0.027  L_tv=0.7835  |Δ|=0.0249  ratio=1.144  ratio_w=1.390  SI=0.334  lr=1.95e-02  |conf|=1.5e-08
+  it=  80  total=0.0519  L_c=0.032  L_g=0.038  L_n=0.030  L_tv=0.9196  |Δ|=0.0281  ratio=1.158  ratio_w=1.419  SI=0.340  lr=1.82e-02  |conf|=1.5e-08
+  it= 120  total=0.0405  L_c=0.024  L_g=0.017  L_n=0.032  L_tv=0.9603  |Δ|=0.0294  ratio=1.160  ratio_w=1.420  SI=0.340  lr=1.62e-02  |conf|=1.5e-08
+  it= 160  total=0.0358  L_c=0.020  L_g=0.009  L_n=0.033  L_tv=0.9787  |Δ|=0.0301  ratio=1.161  ratio_w=1.419  SI=0.339  lr=1.37e-02  |conf|=1.5e-08
+  it= 200  total=0.0335  L_c=0.018  L_g=0.007  L_n=0.033  L_tv=0.9888  |Δ|=0.0306  ratio=1.160  ratio_w=1.417  SI=0.338  lr=1.09e-02  |conf|=2.2e-08
+  it= 240  total=0.0320  L_c=0.016  L_g=0.005  L_n=0.033  L_tv=0.9944  |Δ|=0.0309  ratio=1.160  ratio_w=1.415  SI=0.337  lr=8.15e-03  |conf|=1.5e-08
+  it= 280  total=0.0310  L_c=0.015  L_g=0.004  L_n=0.034  L_tv=0.9976  |Δ|=0.0311  ratio=1.160  ratio_w=1.414  SI=0.337  lr=5.65e-03  |conf|=1.5e-08
+  it= 320  total=0.0305  L_c=0.015  L_g=0.004  L_n=0.034  L_tv=0.9992  |Δ|=0.0312  ratio=1.160  ratio_w=1.414  SI=0.337  lr=3.68e-03  |conf|=1.5e-08
+  it= 360  total=0.0302  L_c=0.015  L_g=0.004  L_n=0.034  L_tv=1.0001  |Δ|=0.0313  ratio=1.160  ratio_w=1.413  SI=0.337  lr=2.42e-03  |conf|=1.5e-08
+  it= 399  total=0.0300  L_c=0.014  L_g=0.004  L_n=0.034  L_tv=1.0006  |Δ|=0.0314  ratio=1.160  ratio_w=1.413  SI=0.337  lr=2.00e-03  |conf|=2.2e-08
+  Saved: C:\Users\SCH\graduation_project\outputs\v2_phase0\validate_000000000724_t_gex005_tv01.png
+
+====================================================================
+VERDICT — Phase 0 v2 (3 criteria per type)
+====================================================================
+
+Protanopia:
+  [OK] |Δ| = 0.0201  (> 0.01, identity guard)
+  [X ] ratio = 1.071  (> 1.15, global)
+  [OK] ratio_w = 1.197  (> 1.15, confusion-weighted, PRIMARY)
+  [..] SI = 0.294  (elbow-relative, deferred to aggregation)
+  [OK] loss 1.7371 → 0.0339  (Δ=+1.7032)
+
+Deuteranopia:
+  [OK] |Δ| = 0.0243  (> 0.01, identity guard)
+  [X ] ratio = 1.078  (> 1.15, global)
+  [OK] ratio_w = 1.243  (> 1.15, confusion-weighted, PRIMARY)
+  [..] SI = 0.307  (elbow-relative, deferred to aggregation)
+  [OK] loss 1.4688 → 0.0183  (Δ=+1.4505)
+
+Tritanopia:
+  [OK] |Δ| = 0.0314  (> 0.01, identity guard)
+  [OK] ratio = 1.160  (> 1.15, global)
+  [OK] ratio_w = 1.413  (> 1.15, confusion-weighted, PRIMARY)
+  [..] SI = 0.337  (elbow-relative, deferred to aggregation)
+  [OK] loss 1.6479 → 0.0300  (Δ=+1.6179)
+
+*** PHASE 0 v2 PASSED ***
+Verdict → C:\Users\SCH\graduation_project\outputs\v2_phase0\verdict_gex005_tv01.json

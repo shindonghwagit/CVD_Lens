@@ -65,22 +65,36 @@ def contrast_loss(
     lab_sim_out: torch.Tensor,
     w: torch.Tensor,
     scales: tuple = (1, 2, 4, 8),
+    lambda_excess: float = 0.0,
 ) -> torch.Tensor:
     """
-    Multi-scale ONE-SIDED contrast magnitude matching.
+    Multi-scale contrast magnitude matching (one-sided under-recovery, plus
+    an optional fine-scale excess term).
 
         C(x) = sqrt( sum_{ch, dir} grad^2 )
-        L_c  = mean( m * relu( C(orig) - C(sim(out)) )^2 )
+        L_c  = mean_{s∈scales}(m · relu(C_o − C_a)²)
+             + λ_excess · mean(m · relu(C_a − C_o)²)   at scale=1 only
+
+    NEGATIVE RESULT (Exp 1-D, 2026-07-13): the excess term was intended to
+    close the free-lunch loophole where one-sided L_c allows speckle in
+    uniform-original confusion regions "for free." Four formulations were
+    swept (un-gated ∈ {0.005, 0.01, 0.02, 0.05, 0.1, 0.2}, tight sigmoid
+    gate on C_o, and fine-scale-only ∈ {0.05, 0.1, 0.2}). Every setting
+    with a non-negligible effect on SI collapsed ratio_w below 1.15 for
+    Prot/Deut — because speckle and legitimate coarse-scale over-recovery
+    share the same field-magnitude budget in confusion regions, so a
+    magnitude-based penalty cannot distinguish them.
+
+    The parameter is kept for future experiments (e.g., combined with a
+    bilateral-grid field predictor whose inductive smoothness would
+    disentangle the two signals), but the Phase 0 v2 training config uses
+    λ_excess = 0. Speckle suppression is delegated to Phase 1's model
+    architecture instead of the loss.
 
     Why not per-channel gradient matching:
         Per-channel matching penalizes the *very* re-encoding we want,
         e.g. a lost a*-channel red/green edge encoded via b* (blue/yellow).
         Only the total magnitude across channels matters for the CVD viewer.
-
-    Why one-sided (relu):
-        We only care that CVD-view contrast is not BELOW the normal-view
-        contrast. Over-recovery is naturally bounded by L_natural + physical
-        clamp, and penalizing it here would push toward identity.
     """
     total = 0.0
     for s in scales:
@@ -89,8 +103,12 @@ def contrast_loss(
         m = _downsample(w, s)
         C_o = _contrast_magnitude(lo)
         C_a = _contrast_magnitude(la)
-        deficit = torch.relu(C_o - C_a)                    # (B, 1, H, W)
-        total = total + (m * deficit.pow(2)).mean()
+        deficit = torch.relu(C_o - C_a)
+        term = (m * deficit.pow(2)).mean()
+        if lambda_excess > 0.0 and s == 1:
+            excess = torch.relu(C_a - C_o)
+            term = term + lambda_excess * (m * excess.pow(2)).mean()
+        total = total + term
     return total / len(scales)
 
 
@@ -193,6 +211,7 @@ class CVDLossV2(nn.Module):
         lambda_c: float = 1.0,
         lambda_g: float = 0.15,
         lambda_n: float = 0.15,
+        lambda_excess: float = 0.0,
         use_lpips: bool = True,
         k_pairs: int = 2048,
     ):
@@ -200,6 +219,7 @@ class CVDLossV2(nn.Module):
         self.lambda_c = lambda_c
         self.lambda_g = lambda_g
         self.lambda_n = lambda_n
+        self.lambda_excess = lambda_excess
         self.k_pairs = k_pairs
         self.naturalness = NaturalnessLoss(use_lpips=use_lpips)
 
@@ -220,7 +240,8 @@ class CVDLossV2(nn.Module):
         lab_orig = rgb_to_lab(orig_linear.float())
         lab_sim_out = rgb_to_lab(sim_out.float())
 
-        L_c = contrast_loss(lab_orig, lab_sim_out, w)
+        L_c = contrast_loss(lab_orig, lab_sim_out, w,
+                            lambda_excess=self.lambda_excess)
         L_g = pairwise_de_loss(lab_orig, lab_sim_out, w, k_pairs=self.k_pairs,
                                generator=generator)
         L_n = self.naturalness(out_srgb, orig_srgb, sim_out, sim_orig)
