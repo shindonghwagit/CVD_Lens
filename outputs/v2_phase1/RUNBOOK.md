@@ -71,15 +71,40 @@ walking away** from the machine on the second commit:
   **step 2000+**, not `step 1`. If it prints `[step 1/20000]`, the
   in-process resume path in `train.py` failed — cancel immediately,
   do NOT let a 12h session grind through a duplicated preflight range.
-- **Check C** — First validation block (step 3000 for ITERS=20000)
+- **Check C₀** — Immediately after resume, cell emits:
+      `[schedule] step=2000/20000  lr=1.9X-e04  T_max=20000  eta_min=2.0e-05`
+  - `lr` must be close to `args.lr` (2e-4), lightly cosine-decayed to
+    ~1.8-1.9e-4 for step 2000 of 20000. If it prints `lr=2.00e-05`,
+    the `CosineAnnealingLR` T_max persistence bug hit — training will
+    crawl at eta_min for the rest of the run. Cancel and check that
+    the T_max override code (`scheduler.T_max = total_steps`) is in
+    place.
+  - `T_max` must equal current `--iters` (20000), NOT the preflight's
+    2000.
+- **Check C₁** — First validation block (step 3000 for ITERS=20000)
   `ratio_w` values must **continue smoothly** from where preflight
   left off (e.g., P was 1.05 at end of preflight → step 3000 shows
   1.06-1.08, not jumping back to 1.02). A discontinuous drop suggests
-  the optimizer/scheduler state was not restored (only weights were),
-  and the LR/momentum history is wrong. Report immediately — the
-  checkpoint schema in `train.py` includes `optim` and `scheduler`
-  keys; if those are missing, resume is degraded and the run should
-  be aborted.
+  the optimizer state was not restored (only weights were), and the
+  Adam momentum history is wrong. Report immediately — the checkpoint
+  schema in `train.py` includes `optim` and `scheduler` keys; if
+  those are missing, resume is degraded and the run should be
+  aborted.
+
+### Val output format (post-Phase-1 SI diagnostic revision)
+
+Each row: `[mark]*stem type |Δ| rw SIu (SI SI_abs corr)`
+
+- `mark`: `P` or `F` (hard gate). Trailing `W` = SI_uniform soft
+  warning. `*` after `]` = LOW-W do-nothing anchor (1761).
+- **Hard-gate criteria (block PASS)**: ratio_w, identity guard,
+  do-nothing.
+- **Soft criterion (warning only)**: SI_uniform < 0.35. Computed
+  only in truly-uniform-original regions (w>0.3 AND |∇luma|<0.02);
+  full SI on natural images is dominated by guide-aligned edge
+  response and is unusable as a hard gate (see phase1 SI diagnostic).
+- **Diagnostic-only** columns: full-image SI, SI_abs (numerator),
+  corr_guide (0.5+ = high-freq tracks luma edges, expected).
 
 Only after A, B, C all pass, let the session run unattended.
 

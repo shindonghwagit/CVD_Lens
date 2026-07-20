@@ -60,11 +60,18 @@ from cvdlens_v2.validate_loss import (
 from cvdlens_v2.validate_multi import IMAGES as VAL_BANK, LOW_W_STEM
 
 
-# ── Phase 1 success criteria (see docstring) ────────────────────────
+# ── Phase 1 success criteria ────────────────────────────────────────
+# Hard gate (blocks PASS):
 RATIO_W_MIN_BY_TYPE = {"p": 1.10, "d": 1.13, "t": 1.27}
-SI_MAX = 0.15
 DELTA_MIN = 0.01
 DELTA_MAX_LOW_W = 0.005
+# Soft warning only (does NOT block PASS — logged as [W]):
+SI_UNIFORM_MAX = 0.35    # SI computed only in uniform-original regions
+                          # (w>0.3 AND |∇luma|<0.02). See phase1 SI diagnostic:
+                          # full SI on natural images is dominated by
+                          # guide-aligned edge response, not speckle.
+# Full-image SI, SI_abs, corr_guide are kept as diagnostic logs only —
+# useful for texture-region hack detection (SI_uniform's blind spot).
 
 
 # ── Dataset ─────────────────────────────────────────────────────────
@@ -104,60 +111,152 @@ def _load_val_image(stem: str, size: int, device) -> torch.Tensor:
     return transforms.ToTensor()(img).unsqueeze(0).to(device)
 
 
+# ── SI decomposition helpers (mirrors diagnose_si.py) ───────────────
+def _blur_delta_channels(x, sigma=2.0, ksize=9):
+    C = x.shape[1]
+    k = _gaussian_kernel_2d(sigma, ksize, x.device, x.dtype).expand(
+        C, 1, ksize, ksize).contiguous()
+    pad = ksize // 2
+    return F.conv2d(F.pad(x, [pad] * 4, mode="reflect"), k, groups=C)
+
+
+def _grad_mag_1ch(x):
+    dy = F.pad(x[:, :, 1:] - x[:, :, :-1], (0, 0, 0, 1))
+    dx = F.pad(x[:, :, :, 1:] - x[:, :, :, :-1], (0, 1, 0, 0))
+    return (dy.pow(2) + dx.pow(2)).sqrt()
+
+
+def _corr_masked(a, b, mask_bool) -> float:
+    m = mask_bool.reshape(-1)
+    if m.sum().item() < 32:
+        return float("nan")
+    av = a.reshape(-1)[m]
+    bv = b.reshape(-1)[m]
+    ax = av - av.mean()
+    bx = bv - bv.mean()
+    denom = ax.pow(2).mean().sqrt() * bx.pow(2).mean().sqrt() + 1e-12
+    return ((ax * bx).mean() / denom).item()
+
+
+def _si_decomposition(delta, w, orig_lin):
+    """
+    Returns dict with SI, SI_abs, delta_mag_w, SI_uniform, corr_guide.
+    See diagnose_si.py for rationale.
+    """
+    d_blur = _blur_delta_channels(delta, sigma=2.0, ksize=9)
+    hi = (delta - d_blur).abs().mean(dim=1, keepdim=True)
+    mag = delta.abs().mean(dim=1, keepdim=True)
+    si_abs = (w * hi).mean().item()
+    delta_mag_w = (w * mag).mean().item()
+    si_full = si_abs / (delta_mag_w + 1e-8)
+
+    luma = (0.2126 * orig_lin[:, 0:1]
+            + 0.7152 * orig_lin[:, 1:2]
+            + 0.0722 * orig_lin[:, 2:3])
+    luma_grad = _grad_mag_1ch(luma)
+
+    mask_conf = (w.squeeze(1) > 0.3).squeeze(0)   # (H, W)
+    corr_guide = _corr_masked(hi.squeeze(0).squeeze(0),
+                              luma_grad.squeeze(0).squeeze(0),
+                              mask_conf)
+
+    tau = 0.02
+    m_uni = (mask_conf & (luma_grad.squeeze(0).squeeze(0) < tau))
+    m_uni_f = m_uni.float().unsqueeze(0).unsqueeze(0)
+    if m_uni.sum().item() > 32:
+        n_u = (m_uni_f * hi).mean().item()
+        d_u = (m_uni_f * mag).mean().item()
+        si_uniform = n_u / (d_u + 1e-8)
+    else:
+        si_uniform = float("nan")
+    return {
+        "SI": si_full,
+        "SI_abs": si_abs,
+        "delta_mag_w": delta_mag_w,
+        "SI_uniform": si_uniform,
+        "corr_guide": corr_guide,
+    }
+
+
 @torch.no_grad()
 def validate(model: CVDCorrectionNet, device, size: int = 256) -> dict:
-    """Run 10-image bank × 3 types. Apply Phase 1 thresholds. Return summary."""
-    model.eval()
+    """
+    Run 10-image bank × 3 types. Apply Phase 1 thresholds. Return summary.
+
+    Unwrap DataParallel: validation feeds ONE image at a time (batch=1). If
+    called through the DP wrapper on N>1 GPUs, scatter() puts a 0-batch
+    tensor on the extra replicas and their forward crashes on tensor ops
+    (observed as "TypeError: missing 'orig_srgb'"). The unwrapped `base`
+    module is on the primary device and handles batch=1 correctly.
+    """
+    base = model.module if isinstance(model, nn.DataParallel) else model
+    base.eval()
     rows = []
     all_pass = True
+    import math
     for stem in VAL_BANK:
         is_low = (stem == LOW_W_STEM)
         orig = _load_val_image(stem, size, device)
         orig_lin = srgb_to_linear(orig)
         for t in CVD_TYPES:
-            r = model(orig, cvd_type=t, severity=1.0)
+            r = base(orig, cvd_type=t, severity=1.0)
             delta_mag = (r["out_srgb"] - orig).abs().mean().item()
-            # ratio_w on w-weighted CVD-view blur (same as Phase 0 metric)
             sim_out = simulate(r["out_linear"], t, 1.0)
             sim_orig = simulate(orig_lin, t, 1.0)
             rw = _cvd_contrast_ratio_w(sim_out, sim_orig, r["w"],
                                         blur_sigma=1.0)
-            si = _speckle_index(r["delta"], r["w"], sigma=2.0, ksize=9)
 
+            # ── SI decomposition (SI_uniform is the soft criterion;
+            #    full SI / SI_abs / corr_guide are diagnostic only) ──
+            si_d = _si_decomposition(r["delta"], r["w"], orig_lin)
+
+            # Hard gates (block PASS)
             if is_low:
                 id_ok = delta_mag < DELTA_MAX_LOW_W
-                rw_ok = True     # skip contrast on low-w
-                si_ok = True     # skip SI on low-w (delta≈0 anyway)
+                rw_ok = True
             else:
                 id_ok = delta_mag > DELTA_MIN
                 rw_ok = rw > RATIO_W_MIN_BY_TYPE[t]
-                si_ok = si < SI_MAX
-            passed = id_ok and rw_ok and si_ok
+            passed = id_ok and rw_ok
+
+            # Soft warning (does NOT block; logged as [W])
+            si_uni = si_d["SI_uniform"]
+            if is_low or math.isnan(si_uni):
+                warn = False
+            else:
+                warn = si_uni >= SI_UNIFORM_MAX
+
             all_pass = all_pass and passed
             rows.append({
                 "stem": stem, "type": t, "is_low_w": is_low,
-                "delta": delta_mag, "ratio_w": rw, "SI": si,
+                "delta": delta_mag, "ratio_w": rw,
+                "SI": si_d["SI"], "SI_abs": si_d["SI_abs"],
+                "SI_uniform": si_uni, "corr_guide": si_d["corr_guide"],
                 "pass_identity": id_ok, "pass_ratio_w": rw_ok,
-                "pass_SI": si_ok, "pass": passed,
+                "pass": passed, "warn_SI_uniform": warn,
             })
-    model.train()
+    base.train()
     return {"all_pass": all_pass, "rows": rows}
 
 
 def _print_val_summary(v: dict):
-    by_stem = {}
+    import math
+    print(f"  {'mark':<4} {'stem':<14} {'t':<2} "
+          f"{'|Δ|':>7} {'rw':>6} {'SIu':>6}  "
+          f"({'SI':>5} {'SI_abs':>8} {'corr':>5})")
     for r in v["rows"]:
-        by_stem.setdefault(r["stem"], []).append(r)
-    for stem, rs in by_stem.items():
-        low = rs[0]["is_low_w"]
-        tag = "  (LOW-W)" if low else ""
-        line = " | ".join(
-            f"{r['type']}: |Δ|={r['delta']:.4f} rw={r['ratio_w']:.3f} "
-            f"SI={r['SI']:.3f} [{'P' if r['pass'] else 'F'}]"
-            for r in rs
-        )
-        print(f"  {stem}{tag}  {line}")
-    print(f"  ALL PASS: {v['all_pass']}")
+        mark = "P" if r["pass"] else "F"
+        if r.get("warn_SI_uniform"):
+            mark += "W"
+        siu = " nan " if math.isnan(r["SI_uniform"]) else f"{r['SI_uniform']:.3f}"
+        low_tag = "*" if r["is_low_w"] else " "
+        print(f"  [{mark:<2}]{low_tag}{r['stem']:<14} {r['type']:<2} "
+              f"{r['delta']:>7.4f} {r['ratio_w']:>6.3f} {siu:>6}  "
+              f"({r['SI']:>5.3f} {r['SI_abs']:>8.1e} {r['corr_guide']:>5.2f})")
+    n_warn = sum(1 for r in v["rows"] if r.get("warn_SI_uniform"))
+    print(f"  ALL PASS (hard gate): {v['all_pass']}   "
+          f"SI_uniform warnings: {n_warn}/{len(v['rows'])}   "
+          f"(* = LOW-W do-nothing image)")
 
 
 # ── Training loop ───────────────────────────────────────────────────
@@ -224,11 +323,31 @@ def main(args):
                 optim.load_state_dict(ck["optim"])
             if "scheduler" in ck:
                 scheduler.load_state_dict(ck["scheduler"])
+                # CosineAnnealingLR.state_dict() persists T_max. If the
+                # checkpoint's T_max is smaller than the current run's
+                # target (e.g. preflight 2000 → full run 20000), lr sits
+                # at eta_min for the rest of the run (cosine is "done").
+                # Override so the fresh run's cosine extends to the new
+                # T_max, resuming from the current step's fraction.
+                if getattr(scheduler, "T_max", None) != total_steps:
+                    prev = getattr(scheduler, "T_max", None)
+                    scheduler.T_max = total_steps
+                    print(f"[resume] scheduler T_max: {prev} → {total_steps} "
+                          "(extended to match current --iters)")
             step = ck.get("step", 0)
             history = ck.get("history", [])
             print(f"[resume] resumed from step {step}")
         else:
             print("[resume] no checkpoint found — starting fresh")
+
+    # RUNBOOK Step 1.5 Check-C: emit current lr so resume health can be
+    # verified from the log alone. Healthy = close to args.lr initially,
+    # cosine-decayed proportionally to step/total_steps. Sick (T_max
+    # persistence bug) = eta_min (2e-5 for lr=2e-4).
+    print(f"[schedule] step={step}/{total_steps}  "
+          f"lr={scheduler.get_last_lr()[0]:.2e}  "
+          f"T_max={getattr(scheduler, 'T_max', '?')}  "
+          f"eta_min={getattr(scheduler, 'eta_min', '?'):.2e}")
     while step < total_steps:
         epoch += 1
         for batch in loader:

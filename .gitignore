@@ -78,3 +78,6 @@ outputs/*
 !outputs/v2_phase1/
 outputs/v2_phase1/val_step*.json
 outputs/v2_phase1/history.json
+# render_witness.py + diagnose_si.py 산출물 — 재생성 가능
+outputs/v2_phase1/witness/
+outputs/v2_phase1/si_diagnostic_*.txt

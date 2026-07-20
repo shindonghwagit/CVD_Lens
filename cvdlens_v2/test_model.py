@@ -137,6 +137,46 @@ def test_uniform_patch_delta_smooth():
 
 
 # ─────────────────────────────────────────────────────────────────────
+# Unit test (d): validate() unwraps DataParallel before batch=1 forward
+# ─────────────────────────────────────────────────────────────────────
+def test_validate_unwraps_data_parallel():
+    """
+    Regression for the bug where `validate(model, ...)` was called with
+    a DataParallel wrapper and batch-size-1 val images. Scatter puts a
+    0-batch tensor on the extra replicas → forward crashes with
+    "TypeError: missing 'orig_srgb'" (torchvision's mobilenet arg check
+    misfires on the empty batch).
+
+    We can't emulate multi-GPU DataParallel on a CPU box, so this test
+    only checks the *unwrap contract*: after `base = model.module if
+    isinstance(model, nn.DataParallel) else model`, `base` must be the
+    underlying `CVDCorrectionNet` and callable with batch=1 inputs.
+    """
+    import torch.nn as nn
+
+    _seed(5)
+    net = CVDCorrectionNet(pretrained_backbone=False)
+    dp = nn.DataParallel(net)                       # wraps even on CPU
+
+    # Unwrap logic (must match train.py::validate)
+    base = dp.module if isinstance(dp, nn.DataParallel) else dp
+    assert base is net, "unwrap must return the underlying module"
+
+    # batch=1 forward on the unwrapped base must not raise
+    orig = torch.rand(1, 3, 128, 128)
+    with torch.no_grad():
+        r = base(orig, cvd_type="p", severity=1.0)
+    assert r["out_srgb"].shape == orig.shape, \
+        f"unexpected output shape {r['out_srgb'].shape}"
+
+    # Sanity: bare (non-DP) model also unwraps to itself
+    base2 = net.module if isinstance(net, nn.DataParallel) else net
+    assert base2 is net
+
+    print("[OK] test_validate_unwraps_data_parallel — DP unwrap contract holds")
+
+
+# ─────────────────────────────────────────────────────────────────────
 # Smoke: forward → loss → backward (graph connectivity, gradient flow)
 # ─────────────────────────────────────────────────────────────────────
 def smoke_forward_backward():
@@ -242,6 +282,7 @@ def main():
     test_zero_w_is_identity()
     test_delta_orthogonal_to_confusion_line()
     test_uniform_patch_delta_smooth()
+    test_validate_unwraps_data_parallel()
     smoke_forward_backward()
     tmp = Path(__file__).parent / "_tmp_test_artifacts"
     tmp.mkdir(exist_ok=True)
