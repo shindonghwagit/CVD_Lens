@@ -35,8 +35,9 @@ import torch.nn.functional as F
 from torchvision.models import mobilenet_v3_small
 
 from .basis import compose_delta, get_basis, get_confusion_dir
-from .color import srgb_to_linear, linear_to_srgb
-from .confusion import compute_confusion_weight
+from .color import srgb_to_linear, linear_to_srgb, rgb_to_lab, delta_e_lab
+from .confusion import compute_confusion_weight, _THRESHOLDS, _blur
+from .simulation import machado_matrix_tensor
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -348,13 +349,23 @@ def grid_tv(grid_5d: torch.Tensor) -> torch.Tensor:
 
 def wrap_for_onnx(model: CVDCorrectionNet, cvd_type: str) -> nn.Module:
     """
-    Freeze cvd_type into a wrapper so ONNX export sees a pure-tensor
-    forward. The exported model takes (orig_srgb, severity) only.
+    Freeze cvd_type into a wrapper so ONNX export sees a pure-tensor forward.
+    The exported graph is **self-contained**: inputs are only
+        (orig_srgb: (1,3,H,W), severity: (1,1))  →  out_srgb: (1,3,H,W)
+
+    The confusion weight `w` is computed *inside* the graph (Lab ΔE between the
+    original and its Machado-simulated version, then thresholded + blurred), so
+    the browser needs no external `w` sub-graph. Severity is a live tensor input
+    on both paths: it feeds the FiLM MLP (→ d_lum/d_c) AND the Machado matrix
+    (via `machado_matrix_tensor`, tensor-traceable), so changing severity at
+    inference genuinely changes the output.
     """
     idx = CVD_TYPES.index(cvd_type)
     basis = get_basis(cvd_type)              # (2, 3), CPU
     b_L = basis[0].view(1, 3, 1, 1)
     b_C = basis[1].view(1, 3, 1, 1)
+    low, high = _THRESHOLDS[cvd_type]
+    _sigma, _ksize = 3.0, 11                 # matches compute_confusion_weight
 
     class ONNXWrapper(nn.Module):
         def __init__(self):
@@ -362,22 +373,27 @@ def wrap_for_onnx(model: CVDCorrectionNet, cvd_type: str) -> nn.Module:
             self.core = model
             self.register_buffer("_bL", b_L.clone())
             self.register_buffer("_bC", b_C.clone())
-            # Pre-registered w computation is heavy (Lab conversion). For
-            # the smoke test we bypass w — assume w is fed externally OR
-            # provide identity here. Real inference uses a small
-            # confusion-weight sub-graph traced separately.
 
-        def forward(self, orig_srgb, severity, w):
+        def _confusion_w(self, orig_lin, sev):
+            # Severity-live confusion weight (mirrors confusion.compute_confusion_weight
+            # but with a tensor-traceable Machado matrix so severity is not frozen).
+            mat = machado_matrix_tensor(cvd_type, sev).to(orig_lin.dtype)
+            sim = torch.einsum('ij,bjhw->bihw', mat, orig_lin).clamp(0.0, 1.0)
+            dE = delta_e_lab(rgb_to_lab(orig_lin), rgb_to_lab(sim))   # (B,1,H,W)
+            w = ((dE - low) / (high - low)).clamp(0.0, 1.0)
+            return _blur(w, _sigma, _ksize).clamp(0.0, 1.0)
+
+        def forward(self, orig_srgb, severity):
             B = orig_srgb.shape[0]
-            device = orig_srgb.device
             dtype = orig_srgb.dtype
-            cvd_onehot = torch.zeros(B, 3, device=device, dtype=dtype)
+            cvd_onehot = torch.zeros(B, 3, device=orig_srgb.device, dtype=dtype)
             cvd_onehot[:, idx] = 1.0
             sev = severity.expand(B, 1).to(dtype=dtype)
             interm = self.core.predict_fields(orig_srgb, cvd_onehot, sev)
-            d_lum, d_c = interm["d_lum"], interm["d_c"]
+            orig_lin, d_lum, d_c = interm["orig_lin"], interm["d_lum"], interm["d_c"]
+            w = self._confusion_w(orig_lin, sev)
             delta = d_lum * self._bL.to(dtype) + d_c * self._bC.to(dtype)
-            out_lin = (interm["orig_lin"] + w * delta).clamp(0.0, 1.0)
+            out_lin = (orig_lin + w * delta).clamp(0.0, 1.0)
             return linear_to_srgb(out_lin)
 
     return ONNXWrapper()

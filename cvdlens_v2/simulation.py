@@ -100,6 +100,27 @@ def _machado_matrix(cvd_type: str, severity: float) -> np.ndarray:
     return (1.0 - frac) * keys[lo] + frac * keys[hi]
 
 
+def machado_matrix_tensor(cvd_type: str, severity: torch.Tensor) -> torch.Tensor:
+    """
+    ONNX-traceable, severity-LIVE Machado matrix. `severity` is a tensor (any
+    shape with 1 element); returns a (3, 3) tensor.
+
+    Uses tent-weight interpolation over the 11 keypoints:
+        w_k = relu(1 - |s·10 - k|),   mat = Σ_k w_k · keys[k]
+    which is *exactly* the piecewise-linear interpolation of `_machado_matrix`
+    (identical at every keypoint and on each segment), but expressed in pure
+    tensor ops so severity survives ONNX tracing instead of being frozen at
+    trace time. Verified equal to `_machado_matrix` in the module self-test.
+    """
+    keys = torch.as_tensor(_MACHADO[cvd_type], dtype=severity.dtype,
+                           device=severity.device)          # (11, 3, 3)
+    s = severity.reshape(()).clamp(0.0, 1.0)
+    idx_f = s * 10.0
+    ks = torch.arange(11, dtype=severity.dtype, device=severity.device)
+    wts = (1.0 - (idx_f - ks).abs()).clamp(min=0.0)          # (11,)
+    return (wts.view(11, 1, 1) * keys).sum(dim=0)            # (3, 3)
+
+
 # ── Unified simulator ────────────────────────────────────────────────────
 
 def simulate(

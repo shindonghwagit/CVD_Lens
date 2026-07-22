@@ -229,14 +229,13 @@ def smoke_onnx_export_static(tmp_path: Path):
 
     dummy_srgb = torch.rand(1, 3, 256, 256)
     dummy_sev = torch.tensor([[1.0]])
-    dummy_w = torch.rand(1, 1, 256, 256)
 
     with torch.no_grad():
-        pt_out = wrapped(dummy_srgb, dummy_sev, dummy_w)
+        pt_out = wrapped(dummy_srgb, dummy_sev)
 
     out_path = tmp_path / "cvdcorrection_p_static.onnx"
     export_kwargs = dict(
-        input_names=["srgb", "severity", "w"],
+        input_names=["srgb", "severity"],
         output_names=["out_srgb"],
         opset_version=16,
         # STATIC — no dynamic_axes on any input/output
@@ -244,11 +243,11 @@ def smoke_onnx_export_static(tmp_path: Path):
     # Prefer legacy tracer if new dynamo pipeline is default (avoids
     # Dim.DYNAMIC inference clashes on static inputs).
     try:
-        torch.onnx.export(wrapped, (dummy_srgb, dummy_sev, dummy_w),
+        torch.onnx.export(wrapped, (dummy_srgb, dummy_sev),
                           str(out_path), dynamo=False, **export_kwargs)
     except TypeError:
         # Older torch: no dynamo kwarg
-        torch.onnx.export(wrapped, (dummy_srgb, dummy_sev, dummy_w),
+        torch.onnx.export(wrapped, (dummy_srgb, dummy_sev),
                           str(out_path), **export_kwargs)
     size_kb = out_path.stat().st_size / 1024
     print(f"[export] wrote {out_path.name} ({size_kb:.0f} KB)")
@@ -266,7 +265,6 @@ def smoke_onnx_export_static(tmp_path: Path):
     ort_out = sess.run(["out_srgb"], {
         "srgb": dummy_srgb.numpy(),
         "severity": dummy_sev.numpy(),
-        "w": dummy_w.numpy(),
     })[0]
     diff = (torch.from_numpy(ort_out) - pt_out).abs().max().item()
     assert diff < 1e-3, \
