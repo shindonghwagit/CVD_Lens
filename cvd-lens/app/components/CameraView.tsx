@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CVDType, useCVDModel } from "../hooks/useCVDModel";
+// Note: still-cut only. Real-time stream correction is Step 2.5 (out of scope).
 
 const CVD_LABELS: Record<CVDType, string> = {
   p: "적색맹 (Protanopia)",
@@ -35,7 +36,10 @@ export default function CameraView() {
   const [sliderX, setSliderX]     = useState(50);
   const [dragging, setDragging]   = useState(false);
 
-  const { ready, error, infer } = useCVDModel();
+  const { ready, error, infer, preload, backend, lastMs } = useCVDModel();
+
+  // Lazy-load the model when the camera surface mounts (not the landing page).
+  useEffect(() => { preload(cvdType); }, [preload, cvdType]);
 
   async function startCamera() {
     try {
@@ -209,6 +213,11 @@ export default function CameraView() {
             </div>
             <span className="absolute top-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">원본</span>
             <span className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full text-white" style={{ background: "var(--color-brand)" }}>보정</span>
+            {backend && (
+              <span className="absolute bottom-2 right-2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/40 text-white/70">
+                {backend}{lastMs != null ? ` · ${lastMs.toFixed(0)}ms` : ""}
+              </span>
+            )}
             {processing && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                 <p className="text-white text-sm">처리 중...</p>
@@ -242,7 +251,7 @@ export default function CameraView() {
         </div>
       )}
 
-      {!ready && <p className="text-sm" style={{ color: "#d89a2b" }}>서버 연결 중...</p>}
+      {!ready && <p className="text-sm" style={{ color: "#d89a2b" }}>준비 중...</p>}
       {error && <p className="text-sm" style={{ color: "#d5383a" }}>오류: {error}</p>}
     </div>
   );

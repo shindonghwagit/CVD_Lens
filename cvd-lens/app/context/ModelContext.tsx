@@ -6,7 +6,11 @@ import { useCVDModel, CVDType } from "../hooks/useCVDModel";
 interface ModelContextValue {
   ready: boolean;
   error: string | null;
-  infer: (imageData: ImageData, cvdType: CVDType) => Promise<ImageData>;
+  backend: string;
+  lastMs: number | null;
+  preload: (type: CVDType) => Promise<void>;
+  infer: (imageData: ImageData, cvdType: CVDType, severity?: number) => Promise<ImageData>;
+  simulate: (imageData: ImageData, cvdType: CVDType) => Promise<ImageData>;
 }
 
 const ModelContext = createContext<ModelContextValue | null>(null);
