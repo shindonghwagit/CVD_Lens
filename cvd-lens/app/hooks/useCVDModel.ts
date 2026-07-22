@@ -1,69 +1,74 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { CVDType } from "@/lib/cvdEngine";
 
-export type { CVDType };
+export type CVDType = "p" | "d" | "t";
 
-/**
- * useCVDModel — IN-BROWSER inference (Phase 2 default).
- *
- * Was a FastAPI server round-trip; that path is preserved in lib/serverEngine.ts
- * as a documented fallback ("browser inference default, server inference
- * alternative"). cvdEngine (ort-web) is dynamically imported so it is NOT in the
- * landing bundle and only loads when a correction surface actually runs.
- *
- * `infer` gained a `severity` arg (default 1.0) — web UI slider value.
- */
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
 export function useCVDModel() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [backend, setBackend] = useState<string>("");
-  const [lastMs, setLastMs] = useState<number | null>(null);
 
-  // Browser inference is available as soon as we're on the client. No model is
-  // loaded here (would pull ~2.5 MB on the landing page); sessions load lazily.
+  // 서버 상태 확인
   useEffect(() => {
-    setReady(true);
-  }, []);
+    let cancelled = false;
+    let retryTimeout: ReturnType<typeof setTimeout>;
 
-  /** Optional warm-up: load a type's session ahead of first use (call on a
-   *  correction surface's mount, never on the landing). */
-  const preload = useCallback(async (type: CVDType) => {
-    try {
-      const eng = await import("@/lib/cvdEngine");
-      setBackend(await eng.init(type));
-      setError(null);
-    } catch (e) {
-      setError(`모델 로드 실패: ${(e as Error)?.message ?? String(e)}`);
-    }
-  }, []);
-
-  const infer = useCallback(
-    async (imageData: ImageData, cvdType: CVDType, severity = 1.0): Promise<ImageData> => {
+    async function ping() {
       try {
-        const eng = await import("@/lib/cvdEngine");
-        const { image, ms, backend: b } = await eng.correct(imageData, cvdType, severity);
-        setBackend(b);
-        setLastMs(ms);
-        setError(null);
-        return image;
-      } catch (e) {
-        setError(`추론 실패: ${(e as Error)?.message ?? String(e)}`);
-        throw e;
+        const res = await fetch(`${API_URL}/health`, { signal: AbortSignal.timeout(3000) });
+        if (!cancelled && res.ok) {
+          setReady(true);
+          setError(null);
+          return;
+        }
+      } catch {
+        // 재시도
       }
-    },
-    []
-  );
+      if (!cancelled) {
+        setError("서버에 연결할 수 없습니다. (localhost:8000)");
+        retryTimeout = setTimeout(ping, 3000);
+      }
+    }
 
-  /** Brettel CVD simulation (comparison view). */
-  const simulate = useCallback(
-    async (imageData: ImageData, cvdType: CVDType): Promise<ImageData> => {
-      const eng = await import("@/lib/cvdEngine");
-      return eng.simulate(imageData, cvdType);
-    },
-    []
-  );
+    ping();
+    return () => {
+      cancelled = true;
+      clearTimeout(retryTimeout);
+    };
+  }, []);
 
-  return { ready, error, backend, lastMs, preload, infer, simulate };
+  const infer = useCallback(async (
+    imageData: ImageData,
+    cvdType: CVDType
+  ): Promise<ImageData> => {
+    // ImageData → JPEG Blob
+    const canvas = document.createElement("canvas");
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+    canvas.getContext("2d")!.putImageData(imageData, 0, 0);
+
+    const blob = await new Promise<Blob>((resolve) =>
+      canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85)
+    );
+
+    const form = new FormData();
+    form.append("image", blob, "frame.jpg");
+    form.append("cvd_type", cvdType);
+
+    const res = await fetch(`${API_URL}/infer`, { method: "POST", body: form });
+    if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
+
+    // JPEG 응답 → ImageData
+    const resBlob = await res.blob();
+    const bitmap = await createImageBitmap(resBlob);
+    const outCanvas = document.createElement("canvas");
+    outCanvas.width = imageData.width;
+    outCanvas.height = imageData.height;
+    outCanvas.getContext("2d")!.drawImage(bitmap, 0, 0, imageData.width, imageData.height);
+    return outCanvas.getContext("2d")!.getImageData(0, 0, imageData.width, imageData.height);
+  }, []);
+
+  return { ready, error, infer };
 }
