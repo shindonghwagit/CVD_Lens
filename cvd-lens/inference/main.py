@@ -22,14 +22,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL_PATH = Path(__file__).parent / "model" / "cvdlens_fp32.onnx"
-session = rt.InferenceSession(
-    str(MODEL_PATH),
-    providers=["CUDAExecutionProvider", "CPUExecutionProvider"],
-)
+# ── Phase 1 model_best (step 9000): one self-contained graph per CVD type. ──
+# Inputs: srgb (1,3,256,256) float32, severity (1,1) float32.  Output: out_srgb.
+# Replaces the pre-pivot 4-channel cvdlens_fp32.onnx.
+MODEL_DIR = Path(__file__).parent / "model"
+_PROVIDERS = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+SESSIONS = {
+    t: rt.InferenceSession(str(MODEL_DIR / f"cvdlens_{t}.onnx"), providers=_PROVIDERS)
+    for t in ("p", "d", "t")
+}
+DEFAULT_TYPE = "d"
 
-CVD_VALUES = {"p": 0.0, "d": 0.5, "t": 1.0}
 
+def _run(rgb256: np.ndarray, cvd_type: str, severity: float) -> np.ndarray:
+    """rgb256: (256,256,3) float32 in [0,1] → corrected (256,256,3) uint8."""
+    sess = SESSIONS.get(cvd_type, SESSIONS[DEFAULT_TYPE])
+    chw = rgb256.transpose(2, 0, 1)[np.newaxis]                      # (1,3,256,256)
+    sev = np.array([[severity]], dtype=np.float32)                   # (1,1)
+    out = sess.run(["out_srgb"], {"srgb": chw.astype(np.float32), "severity": sev})[0]
+    out = np.clip(out[0].transpose(1, 2, 0) * 255, 0, 255).astype(np.uint8)
+    return out
 
 
 @app.get("/health")
@@ -38,7 +50,11 @@ def health():
 
 
 @app.post("/infer")
-async def infer(image: UploadFile = File(...), cvd_type: str = Form(...)):
+async def infer(
+    image: UploadFile = File(...),
+    cvd_type: str = Form(...),
+    severity: float = Form(1.0),   # optional; older frontend omits → 1.0
+):
     data = await image.read()
     img = Image.open(io.BytesIO(data)).convert("RGB")
 
@@ -47,17 +63,11 @@ async def infer(image: UploadFile = File(...), cvd_type: str = Form(...)):
     img = img.crop(((w - side) // 2, (h - side) // 2, (w + side) // 2, (h + side) // 2))
     img = img.resize((256, 256), Image.LANCZOS)
 
-    arr = np.array(img, dtype=np.float32) / 255.0
-    arr = arr.transpose(2, 0, 1)
-    cvd_val = CVD_VALUES.get(cvd_type, 0.5)
-    cvd_ch = np.full((1, 256, 256), cvd_val, dtype=np.float32)
-    inp = np.concatenate([arr, cvd_ch], axis=0)[np.newaxis]
-
-    output = session.run(["output"], {"input": inp})[0]
-    output = np.clip(output[0].transpose(1, 2, 0) * 255, 0, 255).astype(np.uint8)
+    arr = np.asarray(img, dtype=np.float32) / 255.0
+    out = _run(arr, cvd_type, severity)
 
     buf = io.BytesIO()
-    Image.fromarray(output).save(buf, format="JPEG", quality=90)
+    Image.fromarray(out).save(buf, format="JPEG", quality=90)
     buf.seek(0)
     return StreamingResponse(buf, media_type="image/jpeg")
 
@@ -68,19 +78,13 @@ _FFMPEG = (
 )
 
 
-def _correct_frame(frame_bgr: np.ndarray, cvd_val: float) -> np.ndarray:
+def _correct_frame(frame_bgr: np.ndarray, cvd_type: str, severity: float = 1.0) -> np.ndarray:
     """BGR frame (any size) → corrected BGR frame at same size."""
     orig_h, orig_w = frame_bgr.shape[:2]
     rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
     rgb_256 = cv2.resize(rgb, (256, 256), interpolation=cv2.INTER_LINEAR)
 
-    arr    = rgb_256.astype(np.float32) / 255.0
-    arr    = arr.transpose(2, 0, 1)
-    cvd_ch = np.full((1, 256, 256), cvd_val, dtype=np.float32)
-    inp    = np.concatenate([arr, cvd_ch], axis=0)[np.newaxis]
-
-    out = session.run(["output"], {"input": inp})[0]
-    out = np.clip(out[0].transpose(1, 2, 0) * 255, 0, 255).astype(np.uint8)
+    out = _run(rgb_256.astype(np.float32) / 255.0, cvd_type, severity)
     out_bgr = cv2.cvtColor(out, cv2.COLOR_RGB2BGR)
 
     if (orig_w, orig_h) != (256, 256):
@@ -89,10 +93,13 @@ def _correct_frame(frame_bgr: np.ndarray, cvd_val: float) -> np.ndarray:
 
 
 @app.post("/infer/video")
-async def infer_video(video: UploadFile = File(...), cvd_type: str = Form(...)):
+async def infer_video(
+    video: UploadFile = File(...),
+    cvd_type: str = Form(...),
+    severity: float = Form(1.0),
+):
     import subprocess
 
-    cvd_val = CVD_VALUES.get(cvd_type, 0.5)
     suffix  = Path(video.filename or "input.mp4").suffix or ".mp4"
     tmp_in  = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
     tmp_out = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
@@ -129,7 +136,7 @@ async def infer_video(video: UploadFile = File(...), cvd_type: str = Form(...)):
             ret, frame = cap.read()
             if not ret:
                 break
-            corrected = _correct_frame(frame, cvd_val)
+            corrected = _correct_frame(frame, cvd_type, severity)
             if enc_w != w or enc_h != h:
                 corrected = cv2.copyMakeBorder(corrected, 0, enc_h - h, 0, enc_w - w, cv2.BORDER_REPLICATE)
             proc.stdin.write(corrected.tobytes())
