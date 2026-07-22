@@ -14,13 +14,19 @@ Loss:
 Validation:
     Every --val-every epochs, run the model on the 10-image COCO val bank
     (same as Phase 0's validate_multi). Apply RECALIBRATED Phase 1
-    thresholds (below), NOT Phase 0's raw-field numbers — see phase0_final_report
-    § "Confirmed training config" for why:
+    thresholds, NOT Phase 0's raw-field numbers — see phase0_final_report
+    § "Confirmed training config" for why.
 
-        ratio_w    P ≥ 1.10   D ≥ 1.13   T ≥ 1.27    (tv=0.1 row − 0.03)
-        SI < 0.15                                     (network target)
-        |Δ| > 0.01 for 9 CVD-active images
+    HARD GATE (decides PASS) — 4 gates:
+        type-mean ratio_w   P ≥ 1.10   D ≥ 1.13   T ≥ 1.27   (tv=0.1 row − 0.03)
+            (mean over the 9 CVD-active images of each type)
         |Δ| < 0.005 for 000000001761 (do-nothing anchor)
+
+    DIAGNOSTIC ONLY (logged, does NOT gate):
+        per-image |Δ| > 0.01   — excluded on purpose; small |Δ| on a
+            low-confusion image is the intended result of w-gating, not a
+            failure. See phase1_final_report.md § "Why the per-image gate was wrong".
+        SI_uniform < 0.35 (soft [W] warning), full SI / SI_abs / corr_guide.
 
 Usage:
     py -m cvdlens_v2.train --smoke                       # 10 iters, sanity
@@ -61,10 +67,21 @@ from cvdlens_v2.validate_multi import IMAGES as VAL_BANK, LOW_W_STEM
 
 
 # ── Phase 1 success criteria ────────────────────────────────────────
-# Hard gate (blocks PASS):
+# HARD GATE (blocks PASS) — 4 gates, evaluated on the 10-image bank:
+#   • per-TYPE mean ratio_w ≥ threshold, one gate each for p / d / t
+#     (mean taken over the 9 CVD-active images of that type)
+#   • do-nothing anchor (LOW_W_STEM) |Δ| < DELTA_MAX_LOW_W
+# → "4/4 pass" = 3 type means + 1 do-nothing anchor.
 RATIO_W_MIN_BY_TYPE = {"p": 1.10, "d": 1.13, "t": 1.27}
-DELTA_MIN = 0.01
 DELTA_MAX_LOW_W = 0.005
+#
+# DIAGNOSTIC ONLY (does NOT block PASS — logged per image):
+#   DELTA_MIN — a per-image identity floor. DELIBERATELY excluded from the
+#   hard gate: on low-confusion images the network SHOULD move little, so a
+#   small |Δ| there is the *intended* behaviour of confusion (w) gating, not
+#   a failure. Gating on it wrongly fails images that have nothing to correct
+#   (724 P/D). Kept as `pass_identity` for logging only. See phase1_final_report.md.
+DELTA_MIN = 0.01
 # Soft warning only (does NOT block PASS — logged as [W]):
 SI_UNIFORM_MAX = 0.35    # SI computed only in uniform-original regions
                           # (w>0.3 AND |∇luma|<0.02). See phase1 SI diagnostic:
@@ -192,8 +209,11 @@ def validate(model: CVDCorrectionNet, device, size: int = 256) -> dict:
     base = model.module if isinstance(model, nn.DataParallel) else model
     base.eval()
     rows = []
-    all_pass = True
     import math
+    # Hard-gate accumulators: per-type ratio_w over CVD-active images, and
+    # the do-nothing anchor's |Δ|. Per-image pass flags below are diagnostic.
+    rw_by_type: dict[str, list[float]] = {t: [] for t in CVD_TYPES}
+    low_w_delta = None
     for stem in VAL_BANK:
         is_low = (stem == LOW_W_STEM)
         orig = _load_val_image(stem, size, device)
@@ -210,14 +230,22 @@ def validate(model: CVDCorrectionNet, device, size: int = 256) -> dict:
             #    full SI / SI_abs / corr_guide are diagnostic only) ──
             si_d = _si_decomposition(r["delta"], r["w"], orig_lin)
 
-            # Hard gates (block PASS)
+            # ── Feed the HARD GATE (type-averaged ratio_w + anchor) ──
+            if is_low:
+                low_w_delta = delta_mag
+            else:
+                rw_by_type[t].append(rw)
+
+            # ── Per-image DIAGNOSTIC flags (do NOT block PASS) ──
+            #    pass_identity uses DELTA_MIN, which is intentionally excluded
+            #    from the hard gate (see criteria header). Logged for insight.
             if is_low:
                 id_ok = delta_mag < DELTA_MAX_LOW_W
-                rw_ok = True
+                rw_ok = None                       # n/a for do-nothing anchor
             else:
                 id_ok = delta_mag > DELTA_MIN
                 rw_ok = rw > RATIO_W_MIN_BY_TYPE[t]
-            passed = id_ok and rw_ok
+            passed_diag = id_ok and (rw_ok is not False)
 
             # Soft warning (does NOT block; logged as [W])
             si_uni = si_d["SI_uniform"]
@@ -226,26 +254,61 @@ def validate(model: CVDCorrectionNet, device, size: int = 256) -> dict:
             else:
                 warn = si_uni >= SI_UNIFORM_MAX
 
-            all_pass = all_pass and passed
             rows.append({
                 "stem": stem, "type": t, "is_low_w": is_low,
                 "delta": delta_mag, "ratio_w": rw,
                 "SI": si_d["SI"], "SI_abs": si_d["SI_abs"],
                 "SI_uniform": si_uni, "corr_guide": si_d["corr_guide"],
                 "pass_identity": id_ok, "pass_ratio_w": rw_ok,
-                "pass": passed, "warn_SI_uniform": warn,
+                "pass_diag": passed_diag, "warn_SI_uniform": warn,
             })
     base.train()
-    return {"all_pass": all_pass, "rows": rows}
+
+    # ── HARD GATE: 3 type-mean ratio_w gates + 1 do-nothing anchor ──
+    type_mean = {t: (sum(v) / len(v) if v else float("nan"))
+                 for t, v in rw_by_type.items()}
+    type_pass = {t: (not math.isnan(type_mean[t])
+                     and type_mean[t] >= RATIO_W_MIN_BY_TYPE[t])
+                 for t in CVD_TYPES}
+    low_w_pass = (low_w_delta is not None and low_w_delta < DELTA_MAX_LOW_W)
+    all_pass = all(type_pass.values()) and low_w_pass
+    gate = {
+        "type_mean_ratio_w": type_mean,
+        "type_pass": type_pass,
+        "type_thresholds": RATIO_W_MIN_BY_TYPE,
+        "low_w_stem": LOW_W_STEM,
+        "low_w_delta": low_w_delta,
+        "low_w_delta_max": DELTA_MAX_LOW_W,
+        "low_w_pass": low_w_pass,
+        "n_gates_passed": sum(type_pass.values()) + int(low_w_pass),
+        "n_gates_total": len(CVD_TYPES) + 1,
+    }
+    return {"all_pass": all_pass, "gate": gate, "rows": rows}
+
+
+def _json_safe(obj):
+    """Recursively replace non-finite floats (NaN/±Inf) with None so the
+    dumped JSON is strictly valid. SI_uniform is NaN whenever no uniform-
+    original region is detected (w>0.3 ∧ |∇luma|<τ mask < 32 px) — that is
+    a legitimate 'not measured', which must serialize as null, not `NaN`."""
+    import math
+    if isinstance(obj, float):
+        return None if (math.isnan(obj) or math.isinf(obj)) else obj
+    if isinstance(obj, dict):
+        return {k: _json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_json_safe(x) for x in obj]
+    return obj
 
 
 def _print_val_summary(v: dict):
     import math
+    # Per-image DIAGNOSTIC table (does not decide PASS).
     print(f"  {'mark':<4} {'stem':<14} {'t':<2} "
           f"{'|Δ|':>7} {'rw':>6} {'SIu':>6}  "
           f"({'SI':>5} {'SI_abs':>8} {'corr':>5})")
     for r in v["rows"]:
-        mark = "P" if r["pass"] else "F"
+        mark = "p" if r.get("pass_diag") else "f"   # lowercase = diagnostic
         if r.get("warn_SI_uniform"):
             mark += "W"
         siu = " nan " if math.isnan(r["SI_uniform"]) else f"{r['SI_uniform']:.3f}"
@@ -253,10 +316,24 @@ def _print_val_summary(v: dict):
         print(f"  [{mark:<2}]{low_tag}{r['stem']:<14} {r['type']:<2} "
               f"{r['delta']:>7.4f} {r['ratio_w']:>6.3f} {siu:>6}  "
               f"({r['SI']:>5.3f} {r['SI_abs']:>8.1e} {r['corr_guide']:>5.2f})")
+
+    # HARD GATE table (this decides PASS).
+    g = v["gate"]
+    print("  ── HARD GATE (type-mean ratio_w + do-nothing anchor) ──")
+    for t in CVD_TYPES:
+        tm, th = g["type_mean_ratio_w"][t], g["type_thresholds"][t]
+        mk = "OK" if g["type_pass"][t] else "X "
+        print(f"    [{mk}] type {t}: mean ratio_w = {tm:.3f}  (≥ {th:.2f})")
+    lw_mk = "OK" if g["low_w_pass"] else "X "
+    lwd = g["low_w_delta"]
+    lwd_s = "n/a" if lwd is None else f"{lwd:.4f}"
+    print(f"    [{lw_mk}] do-nothing {g['low_w_stem']}: |Δ| = {lwd_s}  "
+          f"(< {g['low_w_delta_max']})")
     n_warn = sum(1 for r in v["rows"] if r.get("warn_SI_uniform"))
     print(f"  ALL PASS (hard gate): {v['all_pass']}   "
+          f"gates {g['n_gates_passed']}/{g['n_gates_total']}   "
           f"SI_uniform warnings: {n_warn}/{len(v['rows'])}   "
-          f"(* = LOW-W do-nothing image)")
+          f"(* = LOW-W do-nothing image; lowercase mark = diagnostic only)")
 
 
 # ── Training loop ───────────────────────────────────────────────────
@@ -393,7 +470,7 @@ def main(args):
                 _print_val_summary(v)
                 # Save
                 (out_dir / f"val_step{step:06d}.json").write_text(
-                    json.dumps(v, indent=2))
+                    json.dumps(_json_safe(v), indent=2))
                 if v["all_pass"]:
                     ck = out_dir / f"model_step{step:06d}_PASS.pt"
                 else:

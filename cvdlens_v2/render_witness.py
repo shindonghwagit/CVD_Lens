@@ -103,11 +103,23 @@ def main(args):
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    for stem in [s.strip() for s in args.stems.split(",") if s.strip()]:
+    # Two modes:
+    #   --pairs "724:p,1296:d,..."  → render only those (stem, type) panels
+    #   --stems "724,632,..."       → render all 3 types per stem (default)
+    if args.pairs:
+        plan: dict[str, list[str]] = {}
+        for tok in [s.strip() for s in args.pairs.split(",") if s.strip()]:
+            stem, t = tok.split(":")
+            plan.setdefault(stem.strip(), []).append(t.strip())
+    else:
+        plan = {s.strip(): ["p", "d", "t"]
+                for s in args.stems.split(",") if s.strip()}
+
+    for stem, types in plan.items():
         img_path = f"{args.val_dir}/{stem}.jpg"
-        print(f"\n[{stem}]")
+        print(f"\n[{stem}]  types={types}")
         orig = load_image(img_path, size=args.size, device=device)
-        for t in ["p", "d", "t"]:
+        for t in types:
             out_path = out_dir / f"witness_{stem}_{t}_step{step}.png"
             render(net, orig, t, step, out_path)
 
@@ -117,6 +129,8 @@ if __name__ == "__main__":
     p.add_argument("--ckpt", required=True)
     p.add_argument("--val-dir", default="C:/Users/SCH/coco/val2017")
     p.add_argument("--stems", default="000000000724,000000000632,000000001584")
+    p.add_argument("--pairs", default="",
+                   help="comma list of stem:type, e.g. 000000000724:p,000000001296:d")
     p.add_argument("--size", type=int, default=256)
     p.add_argument("--out-dir",
                    default="C:/Users/SCH/graduation_project/outputs/v2_phase1/witness")
