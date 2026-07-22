@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useModel } from "../context/ModelContext";
 import { CVDType } from "../hooks/useCVDModel";
+import { simulate } from "@/lib/cvdSim";
 
 const CVD_LABELS: Record<CVDType, string> = {
   p: "적색맹 (Protanopia)",
@@ -26,11 +27,22 @@ function resizeDataURL(src: string, size: number): Promise<string> {
   });
 }
 
+function imageDataToURL(id: ImageData): string {
+  const c = document.createElement("canvas");
+  c.width = id.width; c.height = id.height;
+  c.getContext("2d")!.putImageData(id, 0, 0);
+  return c.toDataURL("image/jpeg", 0.85);
+}
+
 export default function ImageCorrection() {
   const { ready, error, infer } = useModel();
   const [cvdType, setCvdType] = useState<CVDType>("d");
+  const [severity, setSeverity] = useState(1.0);
   const [original, setOriginal] = useState<string | null>(null);
   const [corrected, setCorrected] = useState<string | null>(null);
+  const [showSim, setShowSim] = useState(false);
+  const [simOrig, setSimOrig] = useState<string | null>(null);
+  const [simOut, setSimOut] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [sliderX, setSliderX] = useState(50);
@@ -38,10 +50,36 @@ export default function ImageCorrection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const processImage = useCallback(async (file: File, type: CVDType) => {
+  // Kept ImageData for re-inference on severity/type change (no file re-read)
+  // and for client-side sim (no extra server round-trip).
+  const sourceIDRef = useRef<ImageData | null>(null);
+  const correctedIDRef = useRef<ImageData | null>(null);
+
+  const computeSims = useCallback((type: CVDType) => {
+    if (!sourceIDRef.current || !correctedIDRef.current) return;
+    setSimOrig(imageDataToURL(simulate(sourceIDRef.current, type)));
+    setSimOut(imageDataToURL(simulate(correctedIDRef.current, type)));
+  }, []);
+
+  const runInference = useCallback(async (type: CVDType, sev: number) => {
+    if (!ready || !sourceIDRef.current) return;
+    setProcessing(true);
+    try {
+      const result = await infer(sourceIDRef.current, type, sev);
+      correctedIDRef.current = result;
+      setCorrected(imageDataToURL(result));
+      if (showSim) computeSims(type);
+    } finally {
+      setProcessing(false);
+      setSaveState("idle");
+    }
+  }, [ready, infer, showSim, computeSims]);
+
+  const processImage = useCallback(async (file: File, type: CVDType, sev: number) => {
     if (!ready) return;
     setProcessing(true);
     setCorrected(null);
+    setSimOrig(null); setSimOut(null);
 
     const bitmap = await createImageBitmap(file);
     const canvas = document.createElement("canvas");
@@ -55,15 +93,9 @@ export default function ImageCorrection() {
     ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, MODEL_SIZE, MODEL_SIZE);
 
     setOriginal(canvas.toDataURL());
-
-    const imageData = ctx.getImageData(0, 0, MODEL_SIZE, MODEL_SIZE);
-    const result = await infer(imageData, type);
-
-    ctx.putImageData(result, 0, 0);
-    setCorrected(canvas.toDataURL());
-    setProcessing(false);
-    setSaveState("idle");
-  }, [ready, infer]);
+    sourceIDRef.current = ctx.getImageData(0, 0, MODEL_SIZE, MODEL_SIZE);
+    await runInference(type, sev);
+  }, [ready, runInference]);
 
   const saveCorrection = useCallback(async () => {
     if (!original || !corrected || saveState === "saving") return;
@@ -86,8 +118,8 @@ export default function ImageCorrection() {
 
   const onFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
-    processImage(file, cvdType);
-  }, [processImage, cvdType]);
+    processImage(file, cvdType, severity);
+  }, [processImage, cvdType, severity]);
 
   const pendingFileRef = useRef<File | null>(null);
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,14 +127,28 @@ export default function ImageCorrection() {
     if (file) { pendingFileRef.current = file; onFile(file); }
   };
 
+  // Re-infer on CVD type change (reuse stored source; no file re-read).
   const prevCvdType = useRef(cvdType);
   useEffect(() => {
     if (prevCvdType.current === cvdType) return;
     prevCvdType.current = cvdType;
-    if (pendingFileRef.current && ready) {
-      processImage(pendingFileRef.current, cvdType);
-    }
-  }, [cvdType, processImage, ready]);
+    if (sourceIDRef.current && ready) runInference(cvdType, severity);
+  }, [cvdType, ready, severity, runInference]);
+
+  // Debounced re-infer on severity change (~300ms — server round-trip).
+  const sevTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSeverity = useCallback((v: number) => {
+    setSeverity(v);
+    if (!sourceIDRef.current) return;
+    if (sevTimer.current) clearTimeout(sevTimer.current);
+    sevTimer.current = setTimeout(() => runInference(cvdType, v), 300);
+  }, [cvdType, runInference]);
+
+  // Recompute sim views when toggled on (or when corrected changes while on).
+  useEffect(() => {
+    if (showSim) computeSims(cvdType);
+    else { setSimOrig(null); setSimOut(null); }
+  }, [showSim, corrected, cvdType, computeSims]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -177,7 +223,7 @@ export default function ImageCorrection() {
         </div>
       )}
 
-      {/* 비교 슬라이더 */}
+      {/* 비교 슬라이더 + 컨트롤 */}
       {original && (
         <div className="flex flex-col items-center gap-4 w-full max-w-sm">
           <div
@@ -212,6 +258,48 @@ export default function ImageCorrection() {
             )}
           </div>
 
+          {/* severity 슬라이더 */}
+          <div className="w-full flex items-center gap-3">
+            <span className="text-xs whitespace-nowrap" style={{ color: "var(--fg-muted)" }}>보정 강도</span>
+            <input
+              type="range" min={0} max={1} step={0.05} value={severity}
+              onChange={(e) => onSeverity(parseFloat(e.target.value))}
+              className="flex-1 accent-[var(--color-brand)]"
+              aria-label="보정 강도"
+            />
+            <span className="text-xs font-mono w-9 text-right" style={{ color: "var(--fg)" }}>
+              {severity.toFixed(2)}
+            </span>
+          </div>
+
+          {/* CVD 시뮬레이션 보기 토글 */}
+          <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: "var(--fg-muted)" }}>
+            <input type="checkbox" checked={showSim} onChange={(e) => setShowSim(e.target.checked)} className="accent-[var(--color-brand)]" />
+            CVD 시뮬레이션 보기
+          </label>
+
+          {/* sim 비교 (같은 화면 나란히) */}
+          {showSim && (
+            <div className="w-full grid grid-cols-2 gap-3">
+              <figure className="flex flex-col gap-1">
+                <div className="aspect-square rounded-lg overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+                  {simOrig && <img src={simOrig} alt="sim original" className="w-full h-full object-cover" />}
+                </div>
+                <figcaption className="text-[11px] text-center" style={{ color: "var(--fg-subtle)" }}>
+                  색각이상자가 보는 원본
+                </figcaption>
+              </figure>
+              <figure className="flex flex-col gap-1">
+                <div className="aspect-square rounded-lg overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+                  {simOut && <img src={simOut} alt="sim corrected" className="w-full h-full object-cover" />}
+                </div>
+                <figcaption className="text-[11px] text-center" style={{ color: "var(--fg-subtle)" }}>
+                  색각이상자가 보는 보정본
+                </figcaption>
+              </figure>
+            </div>
+          )}
+
           <div className="flex items-center gap-3">
             {corrected && !processing && (
               <button
@@ -227,7 +315,7 @@ export default function ImageCorrection() {
               </button>
             )}
             <button
-              onClick={() => { setOriginal(null); setCorrected(null); setSaveState("idle"); pendingFileRef.current = null; fileInputRef.current && (fileInputRef.current.value = ""); }}
+              onClick={() => { setOriginal(null); setCorrected(null); setSaveState("idle"); setShowSim(false); sourceIDRef.current = null; correctedIDRef.current = null; pendingFileRef.current = null; fileInputRef.current && (fileInputRef.current.value = ""); }}
               className="text-sm transition-colors"
               style={{ color: "var(--fg-subtle)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}

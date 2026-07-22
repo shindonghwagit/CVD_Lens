@@ -2,6 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CVDType, useCVDModel } from "../hooks/useCVDModel";
+import { simulate } from "@/lib/cvdSim";
+
+function imageDataToURL(id: ImageData): string {
+  const c = document.createElement("canvas");
+  c.width = id.width; c.height = id.height;
+  c.getContext("2d")!.putImageData(id, 0, 0);
+  return c.toDataURL("image/jpeg", 0.85);
+}
 
 const CVD_LABELS: Record<CVDType, string> = {
   p: "적색맹 (Protanopia)",
@@ -34,8 +42,26 @@ export default function CameraView() {
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [sliderX, setSliderX]     = useState(50);
   const [dragging, setDragging]   = useState(false);
+  const [showSim, setShowSim]     = useState(false);
+  const [simOrig, setSimOrig]     = useState<string | null>(null);
+  const [simOut, setSimOut]       = useState<string | null>(null);
 
   const { ready, error, infer } = useCVDModel();
+
+  // Kept ImageData for client-side sim (no extra server round-trip).
+  const sourceIDRef = useRef<ImageData | null>(null);
+  const correctedIDRef = useRef<ImageData | null>(null);
+
+  const computeSims = useCallback((type: CVDType) => {
+    if (!sourceIDRef.current || !correctedIDRef.current) return;
+    setSimOrig(imageDataToURL(simulate(sourceIDRef.current, type)));
+    setSimOut(imageDataToURL(simulate(correctedIDRef.current, type)));
+  }, []);
+
+  useEffect(() => {
+    if (showSim) computeSims(cvdType);
+    else { setSimOrig(null); setSimOut(null); }
+  }, [showSim, corrected, cvdType, computeSims]);
 
   async function startCamera() {
     try {
@@ -75,15 +101,18 @@ export default function CameraView() {
 
     try {
       const imageData = ctx.getImageData(0, 0, 512, 512);
+      sourceIDRef.current = imageData;
       const result = await infer(imageData, cvdType);
+      correctedIDRef.current = result;
       ctx.putImageData(result, 0, 0);
       setCorrected(canvas.toDataURL("image/jpeg", 0.9));
+      if (showSim) computeSims(cvdType);
       setSaveState("idle");
     } catch (e) {
       console.error("보정 오류:", e);
     }
     setProcessing(false);
-  }, [ready, cvdType, infer]);
+  }, [ready, cvdType, infer, showSim, computeSims]);
 
   const saveCorrection = useCallback(async () => {
     if (!original || !corrected || saveState === "saving") return;
@@ -215,6 +244,29 @@ export default function CameraView() {
               </div>
             )}
           </div>
+
+          {/* CVD 시뮬레이션 보기 토글 */}
+          <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: "var(--fg-muted)" }}>
+            <input type="checkbox" checked={showSim} onChange={(e) => setShowSim(e.target.checked)} className="accent-[var(--color-brand)]" />
+            CVD 시뮬레이션 보기
+          </label>
+          {showSim && (
+            <div className="w-full grid grid-cols-2 gap-3">
+              <figure className="flex flex-col gap-1">
+                <div className="aspect-square rounded-lg overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+                  {simOrig && <img src={simOrig} alt="sim original" className="w-full h-full object-cover" />}
+                </div>
+                <figcaption className="text-[11px] text-center" style={{ color: "var(--fg-subtle)" }}>색각이상자가 보는 원본</figcaption>
+              </figure>
+              <figure className="flex flex-col gap-1">
+                <div className="aspect-square rounded-lg overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+                  {simOut && <img src={simOut} alt="sim corrected" className="w-full h-full object-cover" />}
+                </div>
+                <figcaption className="text-[11px] text-center" style={{ color: "var(--fg-subtle)" }}>색각이상자가 보는 보정본</figcaption>
+              </figure>
+            </div>
+          )}
+
           <div className="flex items-center gap-3">
             {corrected && !processing && (
               <button
@@ -230,7 +282,7 @@ export default function CameraView() {
               </button>
             )}
             <button
-              onClick={() => { setOriginal(null); setCorrected(null); setSaveState("idle"); }}
+              onClick={() => { setOriginal(null); setCorrected(null); setSaveState("idle"); setShowSim(false); sourceIDRef.current = null; correctedIDRef.current = null; }}
               className="text-sm transition-colors"
               style={{ color: "var(--fg-subtle)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}

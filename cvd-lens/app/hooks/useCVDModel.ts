@@ -41,7 +41,8 @@ export function useCVDModel() {
 
   const infer = useCallback(async (
     imageData: ImageData,
-    cvdType: CVDType
+    cvdType: CVDType,
+    severity = 1.0
   ): Promise<ImageData> => {
     // ImageData → JPEG Blob
     const canvas = document.createElement("canvas");
@@ -56,6 +57,7 @@ export function useCVDModel() {
     const form = new FormData();
     form.append("image", blob, "frame.jpg");
     form.append("cvd_type", cvdType);
+    form.append("severity", String(severity));
 
     const res = await fetch(`${API_URL}/infer`, { method: "POST", body: form });
     if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
