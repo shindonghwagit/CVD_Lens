@@ -81,3 +81,6 @@ outputs/v2_phase1/history.json
 # render_witness.py + diagnose_si.py 산출물 — 재생성 가능
 outputs/v2_phase1/witness/
 outputs/v2_phase1/si_diagnostic_*.txt
+# Phase 2: RUNBOOK + 검증 이미지만 트래킹. onnx는 inference/model/에 이미 있음(중복 제외).
+!outputs/v2_phase2/
+outputs/v2_phase2/*.onnx
