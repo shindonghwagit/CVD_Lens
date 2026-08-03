@@ -43,6 +43,7 @@ export default function CameraView() {
   const [original, setOriginal]   = useState<string | null>(null);
   const [corrected, setCorrected] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [slowLoad, setSlowLoad]   = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [compareMode, setCompareMode] = useState<"side" | "overlay">("side");
   const [sliderX, setSliderX]     = useState(50);
@@ -67,6 +68,14 @@ export default function CameraView() {
     if (showSim) computeSims(cvdType);
     else { setSimOrig(null); setSimOut(null); }
   }, [showSim, corrected, cvdType, computeSims]);
+
+  // Cold-start hint: after 5s of processing, swap the overlay copy so the user
+  // knows a sleeping Render instance may take up to ~1min on the first request.
+  useEffect(() => {
+    if (!processing) { setSlowLoad(false); return; }
+    const t = setTimeout(() => setSlowLoad(true), 5000);
+    return () => clearTimeout(t);
+  }, [processing]);
 
   async function startCamera() {
     try {
@@ -162,6 +171,15 @@ export default function CameraView() {
     };
   }, [dragging, onSliderMove]);
 
+  const processingOverlay = (
+    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-3 px-4 text-center">
+      <div className="w-6 h-6 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+      <p className="text-white text-sm leading-snug">
+        {slowLoad ? "서버를 깨우는 중입니다 — 첫 요청은 최대 1분 걸릴 수 있어요" : "처리 중..."}
+      </p>
+    </div>
+  );
+
   return (
     <div className="flex flex-col items-center gap-6">
       <div className="flex gap-2 flex-wrap justify-center">
@@ -252,11 +270,7 @@ export default function CameraView() {
               <div className="relative aspect-square rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
                 {corrected && <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />}
                 <span className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full text-white" style={{ background: "var(--color-brand)" }}>보정</span>
-                {processing && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <p className="text-white text-sm">처리 중...</p>
-                  </div>
-                )}
+                {processing && processingOverlay}
               </div>
             </div>
           ) : (
@@ -281,11 +295,7 @@ export default function CameraView() {
               </div>
               <span className="absolute top-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">원본</span>
               <span className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full text-white" style={{ background: "var(--color-brand)" }}>보정</span>
-              {processing && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                  <p className="text-white text-sm">처리 중...</p>
-                </div>
-              )}
+              {processing && processingOverlay}
             </div>
           )}
 

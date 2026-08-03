@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import CameraView from "../components/CameraView";
 import ImageCorrection from "../components/ImageCorrection";
 import VideoCorrection from "../components/VideoCorrection";
@@ -14,6 +14,14 @@ function CorrectionContent() {
   const router = useRouter();
   const raw = searchParams.get("tab");
   const tab: Tab = raw === "image" ? "image" : raw === "video" ? "video" : "camera";
+
+  // Pre-warm the inference server on mount: Render free instances sleep, so a
+  // fire-and-forget /health ping starts waking it while the user reads the page.
+  // Response is intentionally not awaited; failures are ignored.
+  useEffect(() => {
+    const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    fetch(`${api}/health`).catch(() => {});
+  }, []);
 
   const setTab = (next: Tab) => {
     const params = new URLSearchParams(searchParams.toString());
