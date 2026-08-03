@@ -37,6 +37,16 @@ function imageDataToURL(id: ImageData): string {
   return c.toDataURL("image/jpeg", 0.92);
 }
 
+// Reject if the inference request hasn't resolved within `ms`. Client-side
+// guard for a surfaced error state; the request contract itself is unchanged.
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
+  ]);
+}
+const REQUEST_TIMEOUT = 30000;
+
 export default function ImageCorrection() {
   const { ready, error, infer } = useModel();
   const [cvdType, setCvdType] = useState<CVDType>("d");
@@ -48,6 +58,7 @@ export default function ImageCorrection() {
   const [simOut, setSimOut] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [slowLoad, setSlowLoad] = useState(false);
+  const [reqError, setReqError] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [compareMode, setCompareMode] = useState<"side" | "overlay">("side");
   const [sliderX, setSliderX] = useState(50);
@@ -68,17 +79,25 @@ export default function ImageCorrection() {
 
   const runInference = useCallback(async (type: CVDType, sev: number) => {
     if (!ready || !sourceIDRef.current) return;
+    setReqError(false);
     setProcessing(true);
     try {
-      const result = await infer(sourceIDRef.current, type, sev);
+      const result = await withTimeout(infer(sourceIDRef.current, type, sev), REQUEST_TIMEOUT);
       correctedIDRef.current = result;
       setCorrected(imageDataToURL(result));
       if (showSim) computeSims(type);
+    } catch (e) {
+      console.error("보정 요청 실패:", e);
+      setReqError(true);
     } finally {
       setProcessing(false);
       setSaveState("idle");
     }
   }, [ready, infer, showSim, computeSims]);
+
+  const retry = useCallback(() => {
+    if (sourceIDRef.current) runInference(cvdType, severity);
+  }, [cvdType, severity, runInference]);
 
   const processImage = useCallback(async (file: File, type: CVDType, sev: number) => {
     if (!ready) return;
@@ -368,6 +387,22 @@ export default function ImageCorrection() {
             </div>
           )}
 
+          {reqError && !processing && (
+            <div
+              className="w-full flex flex-col items-center gap-2 rounded-lg border px-4 py-3 text-center"
+              style={{ background: "#d5383a10", borderColor: "#d5383a44" }}
+            >
+              <p className="text-sm" style={{ color: "#d5383a" }}>서버 연결에 실패했어요. 잠시 후 다시 시도해주세요</p>
+              <button
+                onClick={retry}
+                className="px-4 py-1.5 rounded-full text-sm font-medium text-white transition-colors"
+                style={{ background: "var(--color-brand)" }}
+              >
+                다시 시도
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-3 flex-wrap justify-center">
             {corrected && !processing && (
               <button
@@ -392,7 +427,7 @@ export default function ImageCorrection() {
               </button>
             )}
             <button
-              onClick={() => { setOriginal(null); setCorrected(null); setSaveState("idle"); setShowSim(false); sourceIDRef.current = null; correctedIDRef.current = null; pendingFileRef.current = null; fileInputRef.current && (fileInputRef.current.value = ""); }}
+              onClick={() => { setOriginal(null); setCorrected(null); setSaveState("idle"); setShowSim(false); setReqError(false); sourceIDRef.current = null; correctedIDRef.current = null; pendingFileRef.current = null; fileInputRef.current && (fileInputRef.current.value = ""); }}
               className="text-sm transition-colors"
               style={{ color: "var(--fg-subtle)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
