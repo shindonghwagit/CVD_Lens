@@ -187,10 +187,12 @@ export default function ImageCorrection() {
 
   // Cold-start hint: after 5s of processing, swap the overlay copy so the user
   // knows a sleeping Render instance may take up to ~1min on the first request.
+  // Reset happens in cleanup (when processing ends) to avoid a synchronous
+  // setState in the effect body.
   useEffect(() => {
-    if (!processing) { setSlowLoad(false); return; }
+    if (!processing) return;
     const t = setTimeout(() => setSlowLoad(true), 5000);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); setSlowLoad(false); };
   }, [processing]);
 
   const onDrop = (e: React.DragEvent) => {
