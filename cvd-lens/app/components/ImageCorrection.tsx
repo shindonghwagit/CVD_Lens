@@ -48,6 +48,7 @@ export default function ImageCorrection() {
   const [simOut, setSimOut] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const [compareMode, setCompareMode] = useState<"side" | "overlay">("side");
   const [sliderX, setSliderX] = useState(50);
   const [dragging, setDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -229,38 +230,76 @@ export default function ImageCorrection() {
 
       {/* 비교 슬라이더 + 컨트롤 */}
       {original && (
-        <div className="flex flex-col items-center gap-4 w-full max-w-sm">
-          <div
-            ref={containerRef}
-            className="relative w-full max-w-lg aspect-square rounded-xl overflow-hidden cursor-ew-resize select-none border"
-            style={{ borderColor: "var(--border)" }}
-            onMouseDown={() => setDragging(true)}
-            onTouchStart={() => setDragging(true)}
-          >
-            {corrected && (
-              <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
-            )}
-            {original && (
-              <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderX}%` }}>
-                <img src={original} alt="original" className="absolute inset-0 w-full h-full max-w-none object-cover" draggable={false} />
+        <div className="flex flex-col items-center gap-4 w-full max-w-2xl">
+          {/* 비교 모드 토글: 나란히(기본) ↔ 겹쳐 보기(wipe) */}
+          <div className="inline-flex p-0.5 rounded-full border" style={{ background: "var(--bg-muted)", borderColor: "var(--border)" }}>
+            {(["side", "overlay"] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setCompareMode(mode)}
+                className="px-4 py-1.5 rounded-full text-xs font-medium transition-colors"
+                style={{
+                  background: compareMode === mode ? "var(--bg-elevated)" : "transparent",
+                  color: compareMode === mode ? "var(--fg)" : "var(--fg-muted)",
+                  boxShadow: compareMode === mode ? "var(--shadow-soft)" : "none",
+                }}
+              >
+                {mode === "side" ? "나란히" : "겹쳐 보기"}
+              </button>
+            ))}
+          </div>
+
+          {compareMode === "side" ? (
+            /* 나란히: 왼쪽=원본, 오른쪽=보정 (모바일 폭에서는 세로 스택) */
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="relative aspect-square rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+                {original && <img src={original} alt="original" className="absolute inset-0 w-full h-full object-cover" draggable={false} />}
+                <span className="absolute top-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">원본</span>
               </div>
-            )}
-            <div className="absolute top-0 bottom-0 w-0.5 shadow-lg" style={{ left: `${sliderX}%`, background: "var(--bg-elevated)" }}>
-              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full shadow-lg flex items-center justify-center" style={{ background: "var(--bg-elevated)" }}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "var(--fg)" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l-4 3 4 3M16 9l4 3-4 3" />
-                </svg>
+              <div className="relative aspect-square rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+                {corrected && <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />}
+                <span className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full text-white" style={{ background: "var(--color-brand)" }}>보정</span>
+                {processing && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <p className="text-white text-sm">처리 중...</p>
+                  </div>
+                )}
               </div>
             </div>
-            <span className="absolute top-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">원본</span>
-            <span className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full text-white" style={{ background: "var(--color-brand)" }}>보정</span>
-
-            {processing && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                <p className="text-white text-sm">처리 중...</p>
+          ) : (
+            /* 겹쳐 보기: wipe 슬라이더 (세밀 비교용) */
+            <div
+              ref={containerRef}
+              className="relative w-full max-w-lg aspect-square rounded-xl overflow-hidden cursor-ew-resize select-none border"
+              style={{ borderColor: "var(--border)" }}
+              onMouseDown={() => setDragging(true)}
+              onTouchStart={() => setDragging(true)}
+            >
+              {corrected && (
+                <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+              )}
+              {original && (
+                <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderX}%` }}>
+                  <img src={original} alt="original" className="absolute inset-0 w-full h-full max-w-none object-cover" draggable={false} />
+                </div>
+              )}
+              <div className="absolute top-0 bottom-0 w-0.5 shadow-lg" style={{ left: `${sliderX}%`, background: "var(--bg-elevated)" }}>
+                <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full shadow-lg flex items-center justify-center" style={{ background: "var(--bg-elevated)" }}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "var(--fg)" }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l-4 3 4 3M16 9l4 3-4 3" />
+                  </svg>
+                </div>
               </div>
-            )}
-          </div>
+              <span className="absolute top-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">원본</span>
+              <span className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full text-white" style={{ background: "var(--color-brand)" }}>보정</span>
+
+              {processing && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                  <p className="text-white text-sm">처리 중...</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* severity 슬라이더 */}
           <div className="w-full flex items-center gap-3">
