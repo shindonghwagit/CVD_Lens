@@ -89,16 +89,45 @@ server fallback) can reuse it directly.
 
 ### Step 2.5 — real-time camera stream  ⏳ NOT STARTED (out of scope, await instruction)
 
-## Step 3 — Quantitative evaluation + Daltonize comparison  ⏳ NOT STARTED
+## Step 3 — Quantitative evaluation + Daltonize comparison  ✅ DONE
 
-- CRR-NP (contrast-recovery vs naturalness-preservation) on a held-out COCO set.
-- Head-to-head vs Daltonize (Brettel + error-shift, `simulation.daltonize` — the
-  single in-repo target generator; no external daltonize libs).
-- Metrics: `ratio_w`, |Δ|, SI, naturalness; per-type. Reuse the Phase 1 gate
-  vocabulary. Feeds the paper's comparison section.
+CRR-NP head-to-head vs `simulation.daltonize` (Brettel/error-shift, the single
+in-repo target generator; no external daltonize libs). 60 held-out COCO images
+(top/mid/low confusion-mass, seed 20260803), disjoint from the Phase 1 bank (10)
+and held-out set (8). 60 × 3 types × 2 methods = 360 cases.
+
+**Code** (`cvdlens_v2/`): `step3_eval_set.py` (stratified sampler),
+`step3_metrics.py` (CRR=`ratio_w`, NP=|Δ|+LPIPS-vgg, secondary SI_uniform/
+corr_guide), `step3_eval.py` (runner + scatter + witnesses + report).
+**Artifacts** (`outputs/v2_phase3/`): `eval_set.json`, `eval_results.json`,
+`step3_scatter.png`, `step3_case_{bigwin,similar,lose}.png`, `step3_report.md`.
+
+Fairness: both methods at 256², same simulator (machado, sev 1.0), same
+confusion weight w (function of the original only).
+
+**Result — hypothesis SUPPORTED (reported as measured):**
+| axis | CVDLens | Daltonize | note |
+|---|---|---|---|
+| CRR (top+mid, w-meaningful) | **1.353** | 1.029 | daltonize ≈ no net weighted-contrast gain on the CVD view |
+| NP \|Δ\| (all tiers) | **0.0192** | 0.0308 | less damage; Wilcoxon p<0.05 every type |
+| NP LPIPS | **0.0458** | 0.0664 | perceptually closer to original |
+| low-tier \|Δ\| (do-nothing) | **0.0010** | 0.0043 | CVDLens leaves low-confusion images ~untouched |
+
+CVDLens wins BOTH axes: recovers more contrast where it matters AND damages
+less. This confirms the Phase 0 preview ("daltonize destroys P/D local contrast,
+6.23→4.34"). Negative-honesty: one w-meaningful case (`000000183104`/p) has
+CVDLens recovering *slightly* less than daltonize (ΔCRR −0.026) — but even there
+CVDLens is more natural (|Δ| −0.019, LPIPS −0.035). See step3_report.md.
+Caveat: low-tier `ratio_w` is numerically unstable (w̄≈0) → used only as a
+naturalness check, excluded from the CRR verdict. This is the paper's
+comparison-section data.
+
+Next (optional): Step 2.5 real-time camera stream; paper write-up.
 
 ---
 
 ## Status
 - Step 1: **complete** (export + parity + baseline bench).
-- Next: Step 2 on instruction.
+- Step 2: **complete** (server inference retained; ONNX browser path preserved).
+- Step 3: **complete** (CRR/NP vs daltonize — hypothesis supported).
+- Next: Step 2.5 (camera stream) / paper write-up on instruction.

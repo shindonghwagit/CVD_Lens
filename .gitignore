@@ -84,3 +84,5 @@ outputs/v2_phase1/si_diagnostic_*.txt
 # Phase 2: RUNBOOK + 검증 이미지만 트래킹. onnx는 inference/model/에 이미 있음(중복 제외).
 !outputs/v2_phase2/
 outputs/v2_phase2/*.onnx
+# Phase 3: CRR/NP 평가 산출물(eval set/results, 리포트, 그림) 트래킹.
+!outputs/v2_phase3/
