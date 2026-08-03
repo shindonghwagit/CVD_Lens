@@ -322,17 +322,22 @@ export default function ImageCorrection() {
           )}
 
           {/* severity 슬라이더 */}
-          <div className="w-full flex items-center gap-3">
-            <span className="text-xs whitespace-nowrap" style={{ color: "var(--fg-muted)" }}>보정 강도</span>
-            <input
-              type="range" min={0} max={1} step={0.05} value={severity}
-              onChange={(e) => onSeverity(parseFloat(e.target.value))}
-              className="flex-1 accent-[var(--color-brand)]"
-              aria-label="보정 강도"
-            />
-            <span className="text-xs font-mono w-9 text-right" style={{ color: "var(--fg)" }}>
-              {severity.toFixed(2)}
-            </span>
+          <div className="w-full flex flex-col gap-1.5">
+            <div className="flex items-center gap-3">
+              <span className="text-xs whitespace-nowrap" style={{ color: "var(--fg-muted)" }}>보정 강도</span>
+              <input
+                type="range" min={0} max={1} step={0.05} value={severity}
+                onChange={(e) => onSeverity(parseFloat(e.target.value))}
+                className="flex-1 accent-[var(--color-brand)]"
+                aria-label="보정 강도"
+              />
+              <span className="text-xs font-mono w-9 text-right" style={{ color: "var(--fg)" }}>
+                {severity.toFixed(2)}
+              </span>
+            </div>
+            <p className="text-[11px] leading-snug" style={{ color: "var(--fg-subtle)" }}>
+              1.0 = 완전 색각이상 기준 최대 보정 · 경도 색약은 0.4–0.7 권장
+            </p>
           </div>
 
           {/* CVD 시뮬레이션 보기 토글 */}
