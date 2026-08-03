@@ -122,6 +122,16 @@ export default function ImageCorrection() {
     }
   }, [original, corrected, cvdType, saveState]);
 
+  // Download the corrected JPEG as {원본파일명}_corrected_{type}.jpg.
+  const downloadCorrected = useCallback(() => {
+    if (!corrected) return;
+    const base = pendingFileRef.current?.name.replace(/\.[^./\\]+$/, "") || "image";
+    const a = document.createElement("a");
+    a.href = corrected;
+    a.download = `${base}_corrected_${cvdType}.jpg`;
+    a.click();
+  }, [corrected, cvdType]);
+
   const onFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
     processImage(file, cvdType, severity);
@@ -353,7 +363,16 @@ export default function ImageCorrection() {
             </div>
           )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            {corrected && !processing && (
+              <button
+                onClick={downloadCorrected}
+                className="px-4 py-2 rounded-full text-sm font-medium transition-colors text-white"
+                style={{ background: "var(--color-brand)" }}
+              >
+                이미지 저장
+              </button>
+            )}
             {corrected && !processing && (
               <button
                 onClick={saveCorrection}

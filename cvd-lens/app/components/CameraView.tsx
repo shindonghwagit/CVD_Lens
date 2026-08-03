@@ -129,6 +129,16 @@ export default function CameraView() {
     setProcessing(false);
   }, [ready, cvdType, infer, showSim, computeSims]);
 
+  // Download the corrected JPEG. Camera captures have no source filename,
+  // so the base is a fixed "capture" — capture_corrected_{type}.jpg.
+  const downloadCorrected = useCallback(() => {
+    if (!corrected) return;
+    const a = document.createElement("a");
+    a.href = corrected;
+    a.download = `capture_corrected_${cvdType}.jpg`;
+    a.click();
+  }, [corrected, cvdType]);
+
   const saveCorrection = useCallback(async () => {
     if (!original || !corrected || saveState === "saving") return;
     setSaveState("saving");
@@ -321,7 +331,16 @@ export default function CameraView() {
             </div>
           )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            {corrected && !processing && (
+              <button
+                onClick={downloadCorrected}
+                className="px-4 py-2 rounded-full text-sm font-medium transition-colors text-white"
+                style={{ background: "var(--color-brand)" }}
+              >
+                이미지 저장
+              </button>
+            )}
             {corrected && !processing && (
               <button
                 onClick={saveCorrection}
