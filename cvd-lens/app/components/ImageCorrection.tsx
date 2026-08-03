@@ -11,7 +11,10 @@ const CVD_LABELS: Record<CVDType, string> = {
   t: "청색맹 (Tritanopia)",
 };
 
-const MODEL_SIZE = 512;
+// Cap on the square side uploaded to the server. Kept equal to the backend's
+// MAX_SIDE (cvd-lens/inference/main.py) — the server re-caps the long side to
+// this anyway, so sending more only wastes bandwidth. Sync manually if changed.
+const MAX_UPLOAD = 2048;
 const THUMB_SIZE = 256;
 
 function resizeDataURL(src: string, size: number): Promise<string> {
@@ -31,7 +34,7 @@ function imageDataToURL(id: ImageData): string {
   const c = document.createElement("canvas");
   c.width = id.width; c.height = id.height;
   c.getContext("2d")!.putImageData(id, 0, 0);
-  return c.toDataURL("image/jpeg", 0.85);
+  return c.toDataURL("image/jpeg", 0.92);
 }
 
 export default function ImageCorrection() {
@@ -82,18 +85,19 @@ export default function ImageCorrection() {
     setSimOrig(null); setSimOut(null);
 
     const bitmap = await createImageBitmap(file);
+    const side = Math.min(bitmap.width, bitmap.height);
+    const target = Math.min(side, MAX_UPLOAD);   // cap the long side; never upscale a small image
     const canvas = document.createElement("canvas");
-    canvas.width = MODEL_SIZE;
-    canvas.height = MODEL_SIZE;
+    canvas.width = target;
+    canvas.height = target;
     const ctx = canvas.getContext("2d")!;
 
-    const side = Math.min(bitmap.width, bitmap.height);
     const sx = (bitmap.width - side) / 2;
     const sy = (bitmap.height - side) / 2;
-    ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, MODEL_SIZE, MODEL_SIZE);
+    ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, target, target);
 
-    setOriginal(canvas.toDataURL());
-    sourceIDRef.current = ctx.getImageData(0, 0, MODEL_SIZE, MODEL_SIZE);
+    setOriginal(canvas.toDataURL("image/jpeg", 0.95));   // JPEG (not PNG): a 2048² PNG dataURL is multi-MB
+    sourceIDRef.current = ctx.getImageData(0, 0, target, target);
     await runInference(type, sev);
   }, [ready, runInference]);
 

@@ -51,7 +51,7 @@ export function useCVDModel() {
     canvas.getContext("2d")!.putImageData(imageData, 0, 0);
 
     const blob = await new Promise<Blob>((resolve) =>
-      canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85)
+      canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.92)   // match server JPEG q92; minimize upload-side loss
     );
 
     const form = new FormData();

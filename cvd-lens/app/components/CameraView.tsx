@@ -8,8 +8,12 @@ function imageDataToURL(id: ImageData): string {
   const c = document.createElement("canvas");
   c.width = id.width; c.height = id.height;
   c.getContext("2d")!.putImageData(id, 0, 0);
-  return c.toDataURL("image/jpeg", 0.85);
+  return c.toDataURL("image/jpeg", 0.92);
 }
+
+// Cap on the captured square side. Kept equal to the backend's MAX_SIDE
+// (cvd-lens/inference/main.py). Sync manually if changed.
+const MAX_UPLOAD = 2048;
 
 const CVD_LABELS: Record<CVDType, string> = {
   p: "적색맹 (Protanopia)",
@@ -89,23 +93,24 @@ export default function CameraView() {
     setProcessing(true);
     setCorrected(null);
 
-    const canvas = document.createElement("canvas");
-    canvas.width = 512; canvas.height = 512;
-    const ctx = canvas.getContext("2d")!;
     const vw = video.videoWidth, vh = video.videoHeight;
     const side = Math.min(vw, vh);
-    ctx.drawImage(video, (vw - side) / 2, (vh - side) / 2, side, side, 0, 0, 512, 512);
+    const target = Math.min(side, MAX_UPLOAD);   // cap; camera frames are usually well under this
+    const canvas = document.createElement("canvas");
+    canvas.width = target; canvas.height = target;
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(video, (vw - side) / 2, (vh - side) / 2, side, side, 0, 0, target, target);
 
-    setOriginal(canvas.toDataURL("image/jpeg", 0.9));
+    setOriginal(canvas.toDataURL("image/jpeg", 0.92));
     stopCamera();
 
     try {
-      const imageData = ctx.getImageData(0, 0, 512, 512);
+      const imageData = ctx.getImageData(0, 0, target, target);
       sourceIDRef.current = imageData;
       const result = await infer(imageData, cvdType);
       correctedIDRef.current = result;
       ctx.putImageData(result, 0, 0);
-      setCorrected(canvas.toDataURL("image/jpeg", 0.9));
+      setCorrected(canvas.toDataURL("image/jpeg", 0.92));
       if (showSim) computeSims(cvdType);
       setSaveState("idle");
     } catch (e) {
