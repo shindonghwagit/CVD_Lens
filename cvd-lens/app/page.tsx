@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import HeroVisual from "./components/HeroVisual";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function useFadeIn() {
   const ref = useRef<HTMLDivElement>(null);
@@ -30,6 +31,37 @@ const CVD_TYPES = [
   { type: "DEUTAN", kor: "녹색맹" },
   { type: "TRITAN", kor: "청색맹" },
 ];
+
+// Real /correction screenshot for a feature card. Until the asset is dropped in
+// (see docs/landing-screenshots.md), the file 404s and we fall back to the
+// striped placeholder — no broken-image icon, no code change needed on swap.
+function ScreenshotPreview({ src, label }: { src: string; label: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <div
+        className="absolute inset-0 flex items-center justify-center font-mono text-[11px] tracking-[0.1em]"
+        style={{
+          background:
+            "repeating-linear-gradient(45deg, var(--bg-muted), var(--bg-muted) 10px, var(--bg-elevated) 10px, var(--bg-elevated) 20px)",
+          color: "var(--fg-subtle)",
+        }}
+      >
+        {label}
+      </div>
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt={label}
+      fill
+      sizes="(max-width: 768px) 100vw, 40vw"
+      className="object-cover object-top"
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 const FEATURES = [
   {
@@ -169,35 +201,28 @@ export default function Home() {
               className="aspect-[16/10] rounded-2xl border relative overflow-hidden shadow-soft group-hover:-translate-y-1 group-hover:shadow-lift transition-all"
               style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}
             >
-              {/* Plate preview for first card, others get placeholder */}
+              {/* 01 ASSESSMENT keeps the plate montage; 02/03 show real screenshots */}
               {i === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center gap-4">
                   {["06", "01", "08"].map((id, j) => (
                     <div
                       key={id}
-                      className="w-[130px] h-[130px] rounded-full overflow-hidden shadow-lift"
+                      className="relative w-[130px] h-[130px] rounded-full overflow-hidden shadow-lift"
                       style={{ transform: `translateY(${j === 1 ? "-10px" : "0"}) rotate(${(j - 1) * 4}deg)` }}
                     >
-                      <img
+                      <Image
                         src={`/ishihara/Ishihara_${id}.jpg`}
                         alt={`이시하라 플레이트 ${id}`}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="130px"
+                        className="object-cover"
                       />
                     </div>
                   ))}
                 </div>
               )}
-              {i !== 0 && (
-                <div
-                  className="absolute inset-0 flex items-center justify-center font-mono text-[11px] tracking-[0.1em]"
-                  style={{
-                    background: "repeating-linear-gradient(45deg, var(--bg-muted), var(--bg-muted) 10px, var(--bg-elevated) 10px, var(--bg-elevated) 20px)",
-                    color: "var(--fg-subtle)",
-                  }}
-                >
-                  {i === 1 ? "IMAGE PREVIEW" : "CAMERA PREVIEW"}
-                </div>
-              )}
+              {i === 1 && <ScreenshotPreview src="/landing/preview_image.jpg" label="IMAGE PREVIEW" />}
+              {i === 2 && <ScreenshotPreview src="/landing/preview_camera.jpg" label="CAMERA PREVIEW" />}
 
               <div
                 className="absolute top-4 right-4 w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center transition-transform group-hover:-rotate-45 group-hover:scale-105 z-10"

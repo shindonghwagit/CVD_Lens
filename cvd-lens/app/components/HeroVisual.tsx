@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function HeroVisual() {
@@ -53,20 +54,25 @@ export default function HeroVisual() {
         보정 · corrected
       </span>
 
-      {/* Corrected (right side, full width with filter) */}
-      <img
-        src="/ishihara/Ishihara_01.jpg"
-        alt="corrected"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: "saturate(2.2) contrast(1.15) brightness(1.05)" }}
+      {/* Corrected (right side, full frame) — real model output (Deuteranopia, sev 1.0) */}
+      <Image
+        src="/landing/hero_corrected.jpg"
+        alt="색각이상(녹색맹) 보정본 — 붉은 버스가 노랑으로 이동해 배경과 구분됩니다"
+        fill
+        sizes="(max-width: 768px) 100vw, 45vw"
+        priority
+        className="object-cover"
         draggable={false}
       />
 
-      {/* Original (left side, same size, clipped via clipPath) */}
-      <img
-        src="/ishihara/Ishihara_01.jpg"
-        alt="original"
-        className="absolute inset-0 w-full h-full object-cover"
+      {/* Original (left side, same frame, clipped via clipPath) */}
+      <Image
+        src="/landing/hero_original.jpg"
+        alt="원본 — 색각이상 사용자가 구분하기 어려운 붉은 버스"
+        fill
+        sizes="(max-width: 768px) 100vw, 45vw"
+        priority
+        className="object-cover"
         style={{ clipPath: `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)` }}
         draggable={false}
       />
