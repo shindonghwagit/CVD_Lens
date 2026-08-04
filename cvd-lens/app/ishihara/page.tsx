@@ -25,8 +25,9 @@ export default function IshiharaPage() {
           </h1>
         </div>
         <p className="text-[15px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
-          아래 플레이트에 숨어있는 숫자를 입력해주세요. 판독이 어렵다면 AI 보정을 켜서
-          보조를 받을 수 있습니다. 총 4장 · 약 2분이 소요됩니다.
+          아래 플레이트에 숨어있는 숫자를 입력해주세요. 진단은 보정 없이 진행되며,
+          결과 화면에서 틀린 도판을 AI 보정으로 다시 볼 수 있습니다. 적록 계열(적색맹·녹색맹)
+          스크리닝이며 총 5장 · 약 2분이 소요됩니다.
         </p>
       </div>
 
@@ -40,7 +41,8 @@ export default function IshiharaPage() {
 
       {/* Disclaimer */}
       <p className="mt-6 text-xs font-mono tracking-[0.04em]" style={{ color: "var(--fg-subtle)" }}>
-        ※ 본 결과는 참고용 자가 진단이며 의학적 진단을 대체하지 않습니다. 정밀 검사는 안과 전문의에게 문의하세요.
+        ※ 본 검사는 적록 계열(적색맹·녹색맹) 스크리닝이며 청색 계열(청색맹) 감별은 포함하지 않습니다.
+        참고용 자가 진단으로 의학적 진단을 대체하지 않으니, 정밀 검사는 안과 전문의에게 문의하세요.
       </p>
     </div>
   );

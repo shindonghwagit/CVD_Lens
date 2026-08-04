@@ -6,6 +6,7 @@ import { Suspense, useEffect } from "react";
 import CameraView from "../components/CameraView";
 import ImageCorrection from "../components/ImageCorrection";
 import VideoCorrection from "../components/VideoCorrection";
+import { CVDType } from "../hooks/useCVDModel";
 
 type Tab = "camera" | "image" | "video";
 
@@ -14,6 +15,11 @@ function CorrectionContent() {
   const router = useRouter();
   const raw = searchParams.get("tab");
   const tab: Tab = raw === "image" ? "image" : raw === "video" ? "video" : "camera";
+
+  // Optional ?type= from the ishihara result → default CVD type in the image tab.
+  const typeRaw = searchParams.get("type");
+  const initialType: CVDType | undefined =
+    typeRaw === "p" || typeRaw === "d" || typeRaw === "t" ? typeRaw : undefined;
 
   // Pre-warm the inference server on mount: Render free instances sleep, so a
   // fire-and-forget /health ping starts waking it while the user reads the page.
@@ -105,7 +111,7 @@ function CorrectionContent() {
         className="rounded-[20px] border p-6 md:p-8 shadow-soft"
         style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}
       >
-        {tab === "image" ? <ImageCorrection /> : tab === "video" ? <VideoCorrection /> : <CameraView />}
+        {tab === "image" ? <ImageCorrection initialType={initialType} /> : tab === "video" ? <VideoCorrection /> : <CameraView />}
       </div>
     </div>
   );

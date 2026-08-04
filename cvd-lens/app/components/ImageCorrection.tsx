@@ -47,9 +47,10 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 }
 const REQUEST_TIMEOUT = 30000;
 
-export default function ImageCorrection() {
+export default function ImageCorrection({ initialType }: { initialType?: CVDType } = {}) {
   const { ready, error, infer } = useModel();
-  const [cvdType, setCvdType] = useState<CVDType>("d");
+  // 진단 결과에서 넘어온 타입(?type=)을 기본 선택으로. 없으면 녹색맹(d).
+  const [cvdType, setCvdType] = useState<CVDType>(initialType ?? "d");
   const [severity, setSeverity] = useState(1.0);
   const [original, setOriginal] = useState<string | null>(null);
   const [corrected, setCorrected] = useState<string | null>(null);
