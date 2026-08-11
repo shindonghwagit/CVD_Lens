@@ -45,8 +45,9 @@ function resizeDataURL(src: string, size: number): Promise<string> {
 }
 
 // 카메라 탭은 severity 슬라이더가 없어 hook 기본(1.0) 대신 이 값을 명시적으로 넘긴다.
-// 0.7 = 이상삼색형 다수인 실사용자 권장값. 논문/평가 조건(severity 1.0)과 분리된다.
-const CAMERA_SEVERITY = 0.7;
+// 0.6 = 이상삼색형 다수인 실사용자 권장값(ImageCorrection 슬라이더 기본과 일치).
+// 논문/평가 조건(severity 1.0)과 분리된다.
+const CAMERA_SEVERITY = 0.6;
 
 export default function CameraView() {
   const videoRef    = useRef<HTMLVideoElement>(null);

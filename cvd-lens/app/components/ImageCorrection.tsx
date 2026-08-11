@@ -51,10 +51,11 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
   const { ready, error, infer } = useModel();
   // 진단 결과에서 넘어온 타입(?type=)을 기본 선택으로. 없으면 녹색맹(d).
   const [cvdType, setCvdType] = useState<CVDType>(initialType ?? "d");
-  // 기본 0.7: 실사용자 다수인 이상삼색형(anomalous trichromat) 권장값. severity 1.0은
-  // 완전 색각이상 기준 최대 보정으로 실사진(피부톤 등)에서 과격하게 보인다. 논문/평가
-  // 조건은 severity 1.0 유지 — 이 기본값은 UI 수용성용이며 평가와 분리된다.
-  const [severity, setSeverity] = useState(0.7);
+  // 기본 0.6: 실사용자 다수인 이상삼색형(anomalous trichromat) 권장값. severity 1.0은
+  // 완전 색각이상 기준 최대 보정으로 실사진에서 과격하게 보인다 — deutan 잔디 형광화,
+  // protan 빨강 과채도/균일영역 얼룩(artifact_analysis 조사 참조). 논문/평가 조건은
+  // severity 1.0 유지 — 이 기본값은 UI 수용성용이며 평가와 분리된다.
+  const [severity, setSeverity] = useState(0.6);
   const [original, setOriginal] = useState<string | null>(null);
   const [corrected, setCorrected] = useState<string | null>(null);
   const [showSim, setShowSim] = useState(false);
