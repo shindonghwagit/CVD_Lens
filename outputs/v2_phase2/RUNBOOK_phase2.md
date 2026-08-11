@@ -126,6 +126,26 @@ Next (optional): Step 2.5 real-time camera stream; paper write-up.
 
 ---
 
+## UI default severity — 사이트 기본 0.7 (2026-08-11)
+
+**변경:** 웹 UI 보정 기본 severity 1.0 → **0.7**.
+- `cvd-lens/app/components/ImageCorrection.tsx` — `useState(0.7)` (슬라이더 초기값).
+- `cvd-lens/app/components/CameraView.tsx` — `CAMERA_SEVERITY = 0.7` (슬라이더 없음,
+  `infer(..., CAMERA_SEVERITY)`로 명시 전달). hook 전역 기본(useCVDModel `severity=1.0`)은
+  이시하라 보정 데모 등 다른 호출자에 영향을 주지 않도록 **바꾸지 않음**.
+
+**근거:** 사이트 기본 0.7 = 이상삼색형(anomalous trichromat) 다수인 실사용자 권장값.
+severity 1.0(완전 이색형 기준 최대 보정)은 실사진에서 과격하게 보인다 — 특히 인물에서
+빨간 옷의 대폭 이동은 P 보정의 의도된 동작이나 피부톤이 노랗게 밀리는 것이 수용성 이슈.
+슬라이더 범위(0–1)·캡션("1.0 = 완전 색각이상 기준 최대 보정 · 경도 색약은 0.4–0.7 권장")은
+유지하여 최대 보정도 선택 가능.
+
+**논문/평가 조건은 severity 1.0으로 변경 없음.** 이 기본값은 UI 수용성 목적이며 Step 3
+CRR/NP 평가(severity 1.0)와 완전히 분리된다. 피부톤 이동 정량 진단은
+`outputs/v2_phase3/skin_analysis.json` 참조.
+
+---
+
 ## Status
 - Step 1: **complete** (export + parity + baseline bench).
 - Step 2: **complete** (server inference retained; ONNX browser path preserved).

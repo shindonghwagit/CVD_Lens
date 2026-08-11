@@ -44,6 +44,10 @@ function resizeDataURL(src: string, size: number): Promise<string> {
   });
 }
 
+// 카메라 탭은 severity 슬라이더가 없어 hook 기본(1.0) 대신 이 값을 명시적으로 넘긴다.
+// 0.7 = 이상삼색형 다수인 실사용자 권장값. 논문/평가 조건(severity 1.0)과 분리된다.
+const CAMERA_SEVERITY = 0.7;
+
 export default function CameraView() {
   const videoRef    = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -131,7 +135,7 @@ export default function CameraView() {
     try {
       const imageData = ctx.getImageData(0, 0, target, target);
       sourceIDRef.current = imageData;
-      const result = await withTimeout(infer(imageData, cvdType), REQUEST_TIMEOUT);
+      const result = await withTimeout(infer(imageData, cvdType, CAMERA_SEVERITY), REQUEST_TIMEOUT);
       correctedIDRef.current = result;
       ctx.putImageData(result, 0, 0);
       setCorrected(canvas.toDataURL("image/jpeg", 0.92));
@@ -150,7 +154,7 @@ export default function CameraView() {
     setReqError(false);
     setProcessing(true);
     try {
-      const result = await withTimeout(infer(sourceIDRef.current, cvdType), REQUEST_TIMEOUT);
+      const result = await withTimeout(infer(sourceIDRef.current, cvdType, CAMERA_SEVERITY), REQUEST_TIMEOUT);
       correctedIDRef.current = result;
       setCorrected(imageDataToURL(result));
       if (showSim) computeSims(cvdType);

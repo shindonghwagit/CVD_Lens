@@ -86,3 +86,10 @@ outputs/v2_phase1/si_diagnostic_*.txt
 outputs/v2_phase2/*.onnx
 # Phase 3: CRR/NP 평가 산출물(eval set/results, 리포트, 그림) 트래킹.
 !outputs/v2_phase3/
+# 단, 피부톤 진단 그림은 재생성 가능(cvdlens_v2.skin_analysis, seed 고정)한 진단/데모용이라 제외.
+# 수치 근거는 skin_analysis.json + skin_analysis_summary.md에 보존.
+outputs/v2_phase3/skin_masks.png
+outputs/v2_phase3/skin_severity_compare.png
+
+# 논문 장별 초안은 git 밖에서 관리(로컬 유지). outline.md는 계속 추적.
+paper/draft/
