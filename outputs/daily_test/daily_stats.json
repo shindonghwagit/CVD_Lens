@@ -1,0 +1,242 @@
+[
+  {
+    "tag": "food_tomatoes_p_s0.6",
+    "cat": "food_tomatoes",
+    "type": "p",
+    "sev": 0.6,
+    "deE_mean": 6.8,
+    "deE_p99": 41.06,
+    "sat_delta": 0.002,
+    "crr": 0.998
+  },
+  {
+    "tag": "food_tomatoes_p_s1.0",
+    "cat": "food_tomatoes",
+    "type": "p",
+    "sev": 1.0,
+    "deE_mean": 6.96,
+    "deE_p99": 41.55,
+    "sat_delta": 0.0072,
+    "crr": 0.999
+  },
+  {
+    "tag": "food_tomatoes_d_s0.6",
+    "cat": "food_tomatoes",
+    "type": "d",
+    "sev": 0.6,
+    "deE_mean": 5.96,
+    "deE_p99": 34.9,
+    "sat_delta": 0.0145,
+    "crr": 0.986
+  },
+  {
+    "tag": "food_tomatoes_d_s1.0",
+    "cat": "food_tomatoes",
+    "type": "d",
+    "sev": 1.0,
+    "deE_mean": 6.09,
+    "deE_p99": 35.21,
+    "sat_delta": 0.0203,
+    "crr": 0.986
+  },
+  {
+    "tag": "food_tomatoes_t_s0.6",
+    "cat": "food_tomatoes",
+    "type": "t",
+    "sev": 0.6,
+    "deE_mean": 1.74,
+    "deE_p99": 16.31,
+    "sat_delta": 0.0042,
+    "crr": 1.051
+  },
+  {
+    "tag": "food_tomatoes_t_s1.0",
+    "cat": "food_tomatoes",
+    "type": "t",
+    "sev": 1.0,
+    "deE_mean": 3.09,
+    "deE_p99": 25.6,
+    "sat_delta": 0.0069,
+    "crr": 1.081
+  },
+  {
+    "tag": "skin_portrait_p_s0.6",
+    "cat": "skin_portrait",
+    "type": "p",
+    "sev": 0.6,
+    "deE_mean": 2.01,
+    "deE_p99": 10.61,
+    "sat_delta": 0.008,
+    "crr": 1.037
+  },
+  {
+    "tag": "skin_portrait_p_s1.0",
+    "cat": "skin_portrait",
+    "type": "p",
+    "sev": 1.0,
+    "deE_mean": 2.51,
+    "deE_p99": 11.74,
+    "sat_delta": 0.0116,
+    "crr": 1.039
+  },
+  {
+    "tag": "skin_portrait_d_s0.6",
+    "cat": "skin_portrait",
+    "type": "d",
+    "sev": 0.6,
+    "deE_mean": 1.84,
+    "deE_p99": 9.5,
+    "sat_delta": 0.0137,
+    "crr": 1.037
+  },
+  {
+    "tag": "skin_portrait_d_s1.0",
+    "cat": "skin_portrait",
+    "type": "d",
+    "sev": 1.0,
+    "deE_mean": 2.32,
+    "deE_p99": 10.46,
+    "sat_delta": 0.0196,
+    "crr": 1.038
+  },
+  {
+    "tag": "skin_portrait_t_s0.6",
+    "cat": "skin_portrait",
+    "type": "t",
+    "sev": 0.6,
+    "deE_mean": 0.99,
+    "deE_p99": 4.46,
+    "sat_delta": -0.002,
+    "crr": 1.026
+  },
+  {
+    "tag": "skin_portrait_t_s1.0",
+    "cat": "skin_portrait",
+    "type": "t",
+    "sev": 1.0,
+    "deE_mean": 2.0,
+    "deE_p99": 11.47,
+    "sat_delta": 0.0031,
+    "crr": 1.031
+  },
+  {
+    "tag": "traffic_street_p_s0.6",
+    "cat": "traffic_street",
+    "type": "p",
+    "sev": 0.6,
+    "deE_mean": 1.04,
+    "deE_p99": 4.79,
+    "sat_delta": -0.002,
+    "crr": 0.978
+  },
+  {
+    "tag": "traffic_street_p_s1.0",
+    "cat": "traffic_street",
+    "type": "p",
+    "sev": 1.0,
+    "deE_mean": 1.32,
+    "deE_p99": 6.08,
+    "sat_delta": -0.0041,
+    "crr": 0.979
+  },
+  {
+    "tag": "traffic_street_d_s0.6",
+    "cat": "traffic_street",
+    "type": "d",
+    "sev": 0.6,
+    "deE_mean": 1.02,
+    "deE_p99": 4.44,
+    "sat_delta": -0.0014,
+    "crr": 0.977
+  },
+  {
+    "tag": "traffic_street_d_s1.0",
+    "cat": "traffic_street",
+    "type": "d",
+    "sev": 1.0,
+    "deE_mean": 1.24,
+    "deE_p99": 5.43,
+    "sat_delta": -0.0029,
+    "crr": 0.978
+  },
+  {
+    "tag": "traffic_street_t_s0.6",
+    "cat": "traffic_street",
+    "type": "t",
+    "sev": 0.6,
+    "deE_mean": 0.75,
+    "deE_p99": 3.14,
+    "sat_delta": -0.0004,
+    "crr": 0.958
+  },
+  {
+    "tag": "traffic_street_t_s1.0",
+    "cat": "traffic_street",
+    "type": "t",
+    "sev": 1.0,
+    "deE_mean": 1.07,
+    "deE_p99": 7.28,
+    "sat_delta": 0.0065,
+    "crr": 0.966
+  },
+  {
+    "tag": "nature_autumn_p_s0.6",
+    "cat": "nature_autumn",
+    "type": "p",
+    "sev": 0.6,
+    "deE_mean": 6.46,
+    "deE_p99": 25.3,
+    "sat_delta": 0.0467,
+    "crr": 1.206
+  },
+  {
+    "tag": "nature_autumn_p_s1.0",
+    "cat": "nature_autumn",
+    "type": "p",
+    "sev": 1.0,
+    "deE_mean": 6.92,
+    "deE_p99": 25.79,
+    "sat_delta": 0.0529,
+    "crr": 1.223
+  },
+  {
+    "tag": "nature_autumn_d_s0.6",
+    "cat": "nature_autumn",
+    "type": "d",
+    "sev": 0.6,
+    "deE_mean": 5.13,
+    "deE_p99": 18.01,
+    "sat_delta": 0.0799,
+    "crr": 1.128
+  },
+  {
+    "tag": "nature_autumn_d_s1.0",
+    "cat": "nature_autumn",
+    "type": "d",
+    "sev": 1.0,
+    "deE_mean": 5.43,
+    "deE_p99": 18.12,
+    "sat_delta": 0.0887,
+    "crr": 1.135
+  },
+  {
+    "tag": "nature_autumn_t_s0.6",
+    "cat": "nature_autumn",
+    "type": "t",
+    "sev": 0.6,
+    "deE_mean": 1.98,
+    "deE_p99": 15.11,
+    "sat_delta": 0.0073,
+    "crr": 1.013
+  },
+  {
+    "tag": "nature_autumn_t_s1.0",
+    "cat": "nature_autumn",
+    "type": "t",
+    "sev": 1.0,
+    "deE_mean": 4.76,
+    "deE_p99": 23.21,
+    "sat_delta": 0.0355,
+    "crr": 1.042
+  }
+]
