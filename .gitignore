@@ -106,5 +106,6 @@ outputs/daily_test/**/*.jpg
 paper/draft/
 
 # 파이프라인 개선/진단 리포트(reports/): 리포트(.md)·수치(.json)만 트래킹,
-# 재생성 가능한 그림(PNG)은 제외 — diag_*.py / reeval_guided.py로 재현.
+# 재생성 가능한 그림(PNG)·이미지(JPG)는 제외 — diag_*.py / reeval_guided.py로 재현.
 reports/**/*.png
+reports/**/*.jpg

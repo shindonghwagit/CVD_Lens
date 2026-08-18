@@ -1,0 +1,34 @@
+{
+  "endpoint": "https://cvd-lens.onrender.com",
+  "all_pass": true,
+  "rows": [
+    {
+      "case": "stop_sign_p",
+      "ok_image": true,
+      "guided": "guided_ON",
+      "d_on": 0.0049,
+      "d_off": 0.016
+    },
+    {
+      "case": "stop_sign_d",
+      "ok_image": true,
+      "guided": "guided_ON",
+      "d_on": 0.0047,
+      "d_off": 0.0174
+    },
+    {
+      "case": "traffic_street_p",
+      "ok_image": true,
+      "guided": "guided_ON",
+      "d_on": 0.0058,
+      "d_off": 0.0061
+    },
+    {
+      "case": "traffic_street_d",
+      "ok_image": true,
+      "guided": "guided_ON",
+      "d_on": 0.0059,
+      "d_off": 0.0063
+    }
+  ]
+}
