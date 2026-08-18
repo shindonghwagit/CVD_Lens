@@ -10,6 +10,14 @@ guide: the delta is snapped to the original's edges (region boundaries sharpen)
 and flattened inside uniform-guide regions (low-frequency delta gradient removed),
 without touching the ONNX model.
 
+MEMORY: the full 3x3 covariance/inverse is ~25 float32 arrays; at 2048² that is
+~420 MB and OOMs a 512 MB instance. `guided_filter(max_side=...)` runs the *fast*
+variant — linear coefficients (a, b) are computed on a downscaled guide, then
+UPSAMPLED and applied against the full-resolution guide (q = ā·I + b̄). Because a,b
+are smooth, low-res coefficients are near-lossless; and because the apply uses the
+full-res guide, edge sharpness (which drives the CRR recovery) is preserved — unlike
+naively upsampling the filtered result.
+
 CANONICAL COPY. `cvdlens_v2` local eval scripts import THIS file (via sys.path) so
 the deployed pipeline and the offline evaluation apply an identical filter.
 """
@@ -25,26 +33,12 @@ def _box(x: np.ndarray, r: int) -> np.ndarray:
                          normalize=True, borderType=cv2.BORDER_REFLECT)
 
 
-def guided_filter(guide: np.ndarray, src: np.ndarray,
-                  radius: int, eps: float) -> np.ndarray:
-    """Color-guided filter.
-
-    Args:
-        guide: (H,W,3) float32 in [0,1] — the original image.
-        src:   (H,W,C) or (H,W) float32 — signal to filter (the delta).
-        radius: box radius (window = 2*radius+1).
-        eps:    covariance regularization (larger = smoother).
-    Returns:
-        Filtered src, same shape/dtype-ish as input (float32).
-    """
-    I = np.ascontiguousarray(guide, dtype=np.float32)
-    r = int(max(1, radius))
+def _inv_cov(I: np.ndarray, r: int, eps: float):
+    """Return (mean_I channels, inverse guide-covariance entries) at I's resolution."""
     Ir, Ig, Ib = I[..., 0], I[..., 1], I[..., 2]
-
-    mean_I = _box(I, r)                                   # (H,W,3)
+    mean_I = _box(I, r)
     mI_r, mI_g, mI_b = mean_I[..., 0], mean_I[..., 1], mean_I[..., 2]
 
-    # Guide covariance (symmetric 3x3 per pixel), diagonal regularized by eps.
     var_rr = _box(Ir * Ir, r) - mI_r * mI_r + eps
     var_rg = _box(Ir * Ig, r) - mI_r * mI_g
     var_rb = _box(Ir * Ib, r) - mI_r * mI_b
@@ -52,7 +46,6 @@ def guided_filter(guide: np.ndarray, src: np.ndarray,
     var_gb = _box(Ig * Ib, r) - mI_g * mI_b
     var_bb = _box(Ib * Ib, r) - mI_b * mI_b + eps
 
-    # Closed-form inverse of the symmetric 3x3 (cofactors / determinant).
     inv_rr = var_gg * var_bb - var_gb * var_gb
     inv_rg = var_rb * var_gb - var_rg * var_bb
     inv_rb = var_rg * var_gb - var_rb * var_gg
@@ -61,28 +54,72 @@ def guided_filter(guide: np.ndarray, src: np.ndarray,
     inv_bb = var_rr * var_gg - var_rg * var_rg
     det = var_rr * inv_rr + var_rg * inv_rg + var_rb * inv_rb
     det = np.where(np.abs(det) < 1e-12, 1e-12, det)
-    inv_rr /= det; inv_rg /= det; inv_rb /= det
-    inv_gg /= det; inv_gb /= det; inv_bb /= det
+    return (mI_r, mI_g, mI_b), (inv_rr / det, inv_rg / det, inv_rb / det,
+                                inv_gg / det, inv_gb / det, inv_bb / det)
 
-    src = np.ascontiguousarray(src, dtype=np.float32)
+
+def _channel_coeffs(I, mI, inv, p, r):
+    """Mean linear coefficients (ā_r, ā_g, ā_b, b̄) for one input channel p."""
+    Ir, Ig, Ib = I[..., 0], I[..., 1], I[..., 2]
+    mI_r, mI_g, mI_b = mI
+    inv_rr, inv_rg, inv_rb, inv_gg, inv_gb, inv_bb = inv
+    mean_p = _box(p, r)
+    cov_r = _box(Ir * p, r) - mI_r * mean_p
+    cov_g = _box(Ig * p, r) - mI_g * mean_p
+    cov_b = _box(Ib * p, r) - mI_b * mean_p
+    a_r = inv_rr * cov_r + inv_rg * cov_g + inv_rb * cov_b
+    a_g = inv_rg * cov_r + inv_gg * cov_g + inv_gb * cov_b
+    a_b = inv_rb * cov_r + inv_gb * cov_g + inv_bb * cov_b
+    b = mean_p - a_r * mI_r - a_g * mI_g - a_b * mI_b
+    return _box(a_r, r), _box(a_g, r), _box(a_b, r), _box(b, r)
+
+
+def guided_filter(guide: np.ndarray, src: np.ndarray, radius: int, eps: float,
+                  max_side: int | None = None) -> np.ndarray:
+    """Color-guided filter (fast variant when max_side caps the resolution).
+
+    Args:
+        guide: (H,W,3) float32 in [0,1] — the original image.
+        src:   (H,W,C) or (H,W) float32 — signal to filter (the delta).
+        radius: box radius at NATIVE resolution (scaled with the image).
+        eps:    covariance regularization.
+        max_side: if set and max(H,W) > max_side, compute coefficients on a
+                  downscaled guide and apply them at full res (memory-bounded).
+    Returns:
+        Filtered src, native resolution, float32.
+    """
+    I = np.ascontiguousarray(guide, dtype=np.float32)
+    H, W = I.shape[:2]
     single = src.ndim == 2
-    if single:
-        src = src[..., None]
+    src3 = np.ascontiguousarray(src if not single else src[..., None], dtype=np.float32)
 
-    out = np.empty_like(src)
-    for c in range(src.shape[2]):
-        p = src[..., c]
-        mean_p = _box(p, r)
-        cov_r = _box(Ir * p, r) - mI_r * mean_p
-        cov_g = _box(Ig * p, r) - mI_g * mean_p
-        cov_b = _box(Ib * p, r) - mI_b * mean_p
+    cap = bool(max_side and max(H, W) > max_side)
+    if cap:
+        scale = max_side / max(H, W)
+        gw, gh = max(1, round(W * scale)), max(1, round(H * scale))
+        I_c = cv2.resize(I, (gw, gh), interpolation=cv2.INTER_AREA)
+        r_c = max(1, int(round(radius * scale)))
+    else:
+        I_c, r_c = I, max(1, radius)
 
-        a_r = inv_rr * cov_r + inv_rg * cov_g + inv_rb * cov_b
-        a_g = inv_rg * cov_r + inv_gg * cov_g + inv_gb * cov_b
-        a_b = inv_rb * cov_r + inv_gb * cov_g + inv_bb * cov_b
-        b = mean_p - a_r * mI_r - a_g * mI_g - a_b * mI_b
+    mI, inv = _inv_cov(I_c, r_c, eps)
+    Ir, Ig, Ib = I[..., 0], I[..., 1], I[..., 2]
 
-        out[..., c] = (_box(a_r, r) * Ir + _box(a_g, r) * Ig
-                       + _box(a_b, r) * Ib + _box(b, r))
+    out = np.empty((H, W, src3.shape[2]), dtype=np.float32)
+    for c in range(src3.shape[2]):
+        p = src3[..., c]
+        p_c = cv2.resize(p, (gw, gh), interpolation=cv2.INTER_AREA) if cap else p
+        ma_r, ma_g, ma_b, mb = _channel_coeffs(I_c, mI, inv, p_c, r_c)
+        if cap:
+            # Upsample the (smooth) coefficients, apply against the full-res guide.
+            # One reused native temp (in-place *=, +=) keeps peak memory bounded.
+            q = cv2.resize(mb, (W, H), interpolation=cv2.INTER_LINEAR)
+            for ma, Ich in ((ma_r, Ir), (ma_g, Ig), (ma_b, Ib)):
+                tmp = cv2.resize(ma, (W, H), interpolation=cv2.INTER_LINEAR)
+                tmp *= Ich
+                q += tmp
+            out[..., c] = q
+        else:
+            out[..., c] = ma_r * Ir + ma_g * Ig + ma_b * Ib + mb
 
     return out[..., 0] if single else out

@@ -111,7 +111,13 @@ delta를 진짜 에지에 집중시켜, **더 적은 변화(ΔE·NP↓)로 더 �
    또는 PNG 응답이 CRR<1 경계 케이스에 도움 — 저비용 옵션으로 검토 가치.
 
 ### 다음 결정 필요 / 후속 결과 (2026-08-18 갱신)
-- (A) guided filter 배포 반영 — **진행 중**(기본 ON, config `CVDLENS_GUIDED_FILTER`).
+- (A) guided filter 배포 반영 — **배포됨**(기본 ON, config `CVDLENS_GUIDED_FILTER`).
+  - **메모리 수정(2026-08-18):** 원해상도(2048²) color guided filter는 3×3 공분산/역행렬
+    ~25개 전배열(~420MB)로 Render 512MB 인스턴스를 OOM시킴. **fast guided filter**로 전환 —
+    계수(a,b)를 축소 해상도(`GUIDED_MAX_SIDE=512`)에서 구해 업샘플, 풀해상 guide에 적용
+    (q=ā·I+b̄). 계수는 매끄럽고 apply는 풀해상 guide를 쓰므로 에지(=CRR 회복 동인) 보존.
+    검증: 6개 대표 케이스에서 캡(512)이 native-guided CRR을 동등~소폭 상회, ΔE/NP 동일.
+    2048² 최악 케이스 서버 RSS 225MB(이전 ~577MB). ONNX/지표 정의 불변.
 - (B) 작은 영역 희석(문제2) — **타일 추론 ablation 완료**(`reports/tiled_inference/`):
   N×N 타일링이 작은빨강 ΔE를 p +81%/d +74% 상승시켜 dilution 완화 → **grid 셀 점유율이
   근본 원인임을 입증**. 부작용 미미하나 ~N² 추론 비용. 배포 반영은 별도 결정(비용/효과).

@@ -35,6 +35,7 @@ SESSIONS = {
 # Post-processing defaults (match the server config unless overridden per call).
 DEFAULT_RADIUS_DIVISOR = _server_config.GUIDED_RADIUS_DIVISOR
 DEFAULT_EPS = _server_config.GUIDED_EPS
+DEFAULT_MAX_SIDE = _server_config.GUIDED_MAX_SIDE
 
 
 def cap_long_side(img_f32, max_side=MAX_SIDE):
@@ -90,7 +91,7 @@ def correct(img_f32, cvd_type, severity, *, use_guided,
         rdiv = DEFAULT_RADIUS_DIVISOR if radius_divisor is None else radius_divisor
         e = DEFAULT_EPS if eps is None else eps
         radius = max(1, max(h, w) // rdiv)
-        delta_post = guided_filter(img_f32, delta_pre, radius, e)
+        delta_post = guided_filter(img_f32, delta_pre, radius, e, max_side=DEFAULT_MAX_SIDE)
     else:
         e = None
         delta_post = delta_pre

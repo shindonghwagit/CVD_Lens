@@ -93,7 +93,8 @@ def _correct_image(img_f32: np.ndarray, cvd_type: str, severity: float) -> np.nd
     # Model is untouched — this operates on the composited delta only.
     if config.GUIDED_FILTER_ENABLED:
         radius = max(1, max(h, w) // config.GUIDED_RADIUS_DIVISOR)
-        delta_full = guided_filter(img_f32, delta_full, radius, config.GUIDED_EPS)
+        delta_full = guided_filter(img_f32, delta_full, radius, config.GUIDED_EPS,
+                                   max_side=config.GUIDED_MAX_SIDE)
 
     return np.clip(img_f32 + delta_full, 0.0, 1.0)
 
