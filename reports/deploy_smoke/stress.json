@@ -1,0 +1,77 @@
+{
+  "endpoint": "https://cvd-lens.onrender.com",
+  "clean": true,
+  "attempt": 1,
+  "results": [
+    {
+      "i": 0,
+      "case": "stop_sign_p",
+      "ok": true,
+      "kb": 146,
+      "s": 4.4
+    },
+    {
+      "i": 1,
+      "case": "stop_sign_d",
+      "ok": true,
+      "kb": 146,
+      "s": 3.0
+    },
+    {
+      "i": 2,
+      "case": "food_tomatoes_p",
+      "ok": true,
+      "kb": 845,
+      "s": 8.1
+    },
+    {
+      "i": 3,
+      "case": "food_tomatoes_d",
+      "ok": true,
+      "kb": 842,
+      "s": 6.4
+    },
+    {
+      "i": 4,
+      "case": "stop_sign_p",
+      "ok": true,
+      "kb": 146,
+      "s": 2.8
+    },
+    {
+      "i": 5,
+      "case": "stop_sign_d",
+      "ok": true,
+      "kb": 146,
+      "s": 2.6
+    },
+    {
+      "i": 6,
+      "case": "food_tomatoes_p",
+      "ok": true,
+      "kb": 845,
+      "s": 7.3
+    },
+    {
+      "i": 7,
+      "case": "food_tomatoes_d",
+      "ok": true,
+      "kb": 842,
+      "s": 7.2
+    },
+    {
+      "i": 8,
+      "case": "stop_sign_p",
+      "ok": true,
+      "kb": 146,
+      "s": 3.4
+    },
+    {
+      "i": 9,
+      "case": "stop_sign_d",
+      "ok": true,
+      "kb": 146,
+      "s": 2.2
+    }
+  ]
+}
