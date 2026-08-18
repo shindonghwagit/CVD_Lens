@@ -1,0 +1,36 @@
+[
+  {
+    "tag": "traffic_street_p",
+    "cat": "traffic_street",
+    "type": "p",
+    "n_regions": 103,
+    "area_min": 12,
+    "area_max": 1709,
+    "area_median": 31.0,
+    "corr_logarea_vs_delta_off": 0.325,
+    "corr_logarea_vs_delta_on": 0.342,
+    "small_region_mean_delta_off": 0.02278,
+    "small_region_mean_delta_on": 0.01739,
+    "small_region_guided_lift": -23.7,
+    "large_region_mean_delta_off": 0.03273,
+    "large_region_mean_delta_on": 0.02319,
+    "dilution_confirmed": true
+  },
+  {
+    "tag": "traffic_street_d",
+    "cat": "traffic_street",
+    "type": "d",
+    "n_regions": 103,
+    "area_min": 12,
+    "area_max": 1709,
+    "area_median": 31.0,
+    "corr_logarea_vs_delta_off": 0.325,
+    "corr_logarea_vs_delta_on": 0.305,
+    "small_region_mean_delta_off": 0.02252,
+    "small_region_mean_delta_on": 0.01741,
+    "small_region_guided_lift": -22.7,
+    "large_region_mean_delta_off": 0.03146,
+    "large_region_mean_delta_on": 0.02105,
+    "dilution_confirmed": true
+  }
+]

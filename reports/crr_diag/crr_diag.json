@@ -1,0 +1,65 @@
+[
+  {
+    "tag": "food_tomatoes_d",
+    "cat": "food_tomatoes",
+    "type": "d",
+    "sev": 1.0,
+    "crr_full": 1.041,
+    "crr_mask_a1": 1.058,
+    "sweep": {
+      "a0.0": 1.0,
+      "a0.5": 1.012,
+      "a1.0": 1.058,
+      "a1.5": 1.101,
+      "a2.0": 1.127
+    },
+    "conf_axis_abs_mean": 0.006973,
+    "chroma_axis_abs_mean": 0.013412,
+    "chroma_frac_positive": 0.416,
+    "sim_lap_energy_ratio": 1.005,
+    "mask_px": 1768207,
+    "verdict": "magnitude_deficit"
+  },
+  {
+    "tag": "traffic_street_p",
+    "cat": "traffic_street",
+    "type": "p",
+    "sev": 1.0,
+    "crr_full": 1.004,
+    "crr_mask_a1": 1.01,
+    "sweep": {
+      "a0.0": 1.0,
+      "a0.5": 1.004,
+      "a1.0": 1.01,
+      "a1.5": 1.016,
+      "a2.0": 1.021
+    },
+    "conf_axis_abs_mean": 9.2e-05,
+    "chroma_axis_abs_mean": 0.006639,
+    "chroma_frac_positive": 0.011,
+    "sim_lap_energy_ratio": 0.996,
+    "mask_px": 85353,
+    "verdict": "magnitude_deficit"
+  },
+  {
+    "tag": "traffic_street_d",
+    "cat": "traffic_street",
+    "type": "d",
+    "sev": 1.0,
+    "crr_full": 1.004,
+    "crr_mask_a1": 1.009,
+    "sweep": {
+      "a0.0": 1.0,
+      "a0.5": 1.003,
+      "a1.0": 1.009,
+      "a1.5": 1.013,
+      "a2.0": 1.018
+    },
+    "conf_axis_abs_mean": 0.00034,
+    "chroma_axis_abs_mean": 0.006311,
+    "chroma_frac_positive": 0.024,
+    "sim_lap_energy_ratio": 0.995,
+    "mask_px": 85353,
+    "verdict": "magnitude_deficit"
+  }
+]

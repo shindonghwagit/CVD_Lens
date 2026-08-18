@@ -1,0 +1,182 @@
+{
+  "rows": [
+    {
+      "case": "traffic_street_p",
+      "fmt": "raw",
+      "quality": null,
+      "crr": 1.02,
+      "bytes": null
+    },
+    {
+      "case": "traffic_street_p",
+      "fmt": "PNG",
+      "quality": null,
+      "crr": 1.021,
+      "bytes": 2339739
+    },
+    {
+      "case": "traffic_street_p",
+      "fmt": "JPEG",
+      "quality": 92,
+      "crr": 0.994,
+      "bytes": 501713
+    },
+    {
+      "case": "traffic_street_p",
+      "fmt": "JPEG",
+      "quality": 94,
+      "crr": 1.022,
+      "bytes": 610968
+    },
+    {
+      "case": "traffic_street_p",
+      "fmt": "JPEG",
+      "quality": 95,
+      "crr": 1.003,
+      "bytes": 645983
+    },
+    {
+      "case": "traffic_street_p",
+      "fmt": "JPEG",
+      "quality": 96,
+      "crr": 1.018,
+      "bytes": 688960
+    },
+    {
+      "case": "traffic_street_p",
+      "fmt": "JPEG",
+      "quality": 98,
+      "crr": 1.014,
+      "bytes": 807648
+    },
+    {
+      "case": "traffic_street_d",
+      "fmt": "raw",
+      "quality": null,
+      "crr": 1.021,
+      "bytes": null
+    },
+    {
+      "case": "traffic_street_d",
+      "fmt": "PNG",
+      "quality": null,
+      "crr": 1.023,
+      "bytes": 2354996
+    },
+    {
+      "case": "traffic_street_d",
+      "fmt": "JPEG",
+      "quality": 92,
+      "crr": 0.998,
+      "bytes": 502975
+    },
+    {
+      "case": "traffic_street_d",
+      "fmt": "JPEG",
+      "quality": 94,
+      "crr": 1.025,
+      "bytes": 611777
+    },
+    {
+      "case": "traffic_street_d",
+      "fmt": "JPEG",
+      "quality": 95,
+      "crr": 1.006,
+      "bytes": 646780
+    },
+    {
+      "case": "traffic_street_d",
+      "fmt": "JPEG",
+      "quality": 96,
+      "crr": 1.021,
+      "bytes": 689749
+    },
+    {
+      "case": "traffic_street_d",
+      "fmt": "JPEG",
+      "quality": 98,
+      "crr": 1.017,
+      "bytes": 808408
+    },
+    {
+      "case": "food_tomatoes_d",
+      "fmt": "raw",
+      "quality": null,
+      "crr": 1.205,
+      "bytes": null
+    },
+    {
+      "case": "food_tomatoes_d",
+      "fmt": "PNG",
+      "quality": null,
+      "crr": 1.211,
+      "bytes": 4046348
+    },
+    {
+      "case": "food_tomatoes_d",
+      "fmt": "JPEG",
+      "quality": 92,
+      "crr": 1.14,
+      "bytes": 756365
+    },
+    {
+      "case": "food_tomatoes_d",
+      "fmt": "JPEG",
+      "quality": 94,
+      "crr": 1.137,
+      "bytes": 907867
+    },
+    {
+      "case": "food_tomatoes_d",
+      "fmt": "JPEG",
+      "quality": 95,
+      "crr": 1.135,
+      "bytes": 1004605
+    },
+    {
+      "case": "food_tomatoes_d",
+      "fmt": "JPEG",
+      "quality": 96,
+      "crr": 1.132,
+      "bytes": 1132185
+    },
+    {
+      "case": "food_tomatoes_d",
+      "fmt": "JPEG",
+      "quality": 98,
+      "crr": 1.125,
+      "bytes": 1448709
+    }
+  ],
+  "per_case": {
+    "traffic_street_p": {
+      "raw": 1.02,
+      "PNG": 1.021,
+      "q92": 0.994,
+      "q94": 1.022,
+      "q95": 1.003,
+      "q96": 1.018,
+      "q98": 1.014
+    },
+    "traffic_street_d": {
+      "raw": 1.021,
+      "PNG": 1.023,
+      "q92": 0.998,
+      "q94": 1.025,
+      "q95": 1.006,
+      "q96": 1.021,
+      "q98": 1.017
+    },
+    "food_tomatoes_d": {
+      "raw": 1.205,
+      "PNG": 1.211,
+      "q92": 1.14,
+      "q94": 1.137,
+      "q95": 1.135,
+      "q96": 1.132,
+      "q98": 1.125
+    }
+  },
+  "selected_quality": 94,
+  "png_all_recovered": true
+}

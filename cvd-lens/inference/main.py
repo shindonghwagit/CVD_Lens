@@ -13,6 +13,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from PIL import Image
 
+import config
+from guided import guided_filter
+
 app = FastAPI()
 
 app.add_middleware(
@@ -83,6 +86,15 @@ def _correct_image(img_f32: np.ndarray, cvd_type: str, severity: float) -> np.nd
     out = _run_float(lb, cvd_type, severity)
     delta = (out - lb)[y0:y1, x0:x1]                      # content-box delta only
     delta_full = cv2.resize(delta, (w, h), interpolation=cv2.INTER_LINEAR)
+
+    # Guided-filter post-processing: snap the delta to the original's edges
+    # (region boundaries sharpen) and flatten it inside uniform-guide regions
+    # (removes the low-frequency delta gradient), using the original as guide.
+    # Model is untouched — this operates on the composited delta only.
+    if config.GUIDED_FILTER_ENABLED:
+        radius = max(1, max(h, w) // config.GUIDED_RADIUS_DIVISOR)
+        delta_full = guided_filter(img_f32, delta_full, radius, config.GUIDED_EPS)
+
     return np.clip(img_f32 + delta_full, 0.0, 1.0)
 
 
@@ -119,7 +131,7 @@ async def infer(
     out = _to_u8(_correct_image(arr, cvd_type, severity))
 
     buf = io.BytesIO()
-    Image.fromarray(out).save(buf, format="JPEG", quality=92)
+    Image.fromarray(out).save(buf, format="JPEG", quality=config.RESPONSE_JPEG_QUALITY)
     buf.seek(0)
     return StreamingResponse(buf, media_type="image/jpeg")
 

@@ -1,0 +1,112 @@
+{
+  "rows": [
+    {
+      "name": "traffic_street",
+      "type": "p",
+      "N": 1,
+      "deE_mean": 0.81,
+      "deE_max": 17.9,
+      "sat_delta": -0.0068,
+      "crr": 1.02,
+      "np_delta": 0.0023,
+      "small_red_dE": 1.93,
+      "corr_logarea_delta": 0.342,
+      "n_tiles": 1,
+      "infer_s": 0.19
+    },
+    {
+      "name": "traffic_street",
+      "type": "p",
+      "N": 2,
+      "deE_mean": 0.94,
+      "deE_max": 22.95,
+      "sat_delta": -0.0069,
+      "crr": 1.025,
+      "np_delta": 0.0026,
+      "small_red_dE": 3.15,
+      "corr_logarea_delta": 0.448,
+      "n_tiles": 4,
+      "infer_s": 0.15
+    },
+    {
+      "name": "traffic_street",
+      "type": "p",
+      "N": 3,
+      "deE_mean": 0.96,
+      "deE_max": 23.28,
+      "sat_delta": -0.0066,
+      "crr": 1.025,
+      "np_delta": 0.0026,
+      "small_red_dE": 3.5,
+      "corr_logarea_delta": 0.447,
+      "n_tiles": 9,
+      "infer_s": 0.27
+    },
+    {
+      "name": "traffic_street",
+      "type": "d",
+      "N": 1,
+      "deE_mean": 0.69,
+      "deE_max": 14.99,
+      "sat_delta": -0.0058,
+      "crr": 1.021,
+      "np_delta": 0.0031,
+      "small_red_dE": 1.51,
+      "corr_logarea_delta": 0.305,
+      "n_tiles": 1,
+      "infer_s": 0.07
+    },
+    {
+      "name": "traffic_street",
+      "type": "d",
+      "N": 2,
+      "deE_mean": 0.76,
+      "deE_max": 19.54,
+      "sat_delta": -0.0063,
+      "crr": 1.026,
+      "np_delta": 0.0032,
+      "small_red_dE": 2.29,
+      "corr_logarea_delta": 0.44,
+      "n_tiles": 4,
+      "infer_s": 0.15
+    },
+    {
+      "name": "traffic_street",
+      "type": "d",
+      "N": 3,
+      "deE_mean": 0.73,
+      "deE_max": 19.9,
+      "sat_delta": -0.0066,
+      "crr": 1.025,
+      "np_delta": 0.0031,
+      "small_red_dE": 2.62,
+      "corr_logarea_delta": 0.425,
+      "n_tiles": 9,
+      "infer_s": 0.32
+    }
+  ],
+  "verdict": {
+    "traffic_street_p": {
+      "small_red_dE_base": 1.93,
+      "small_red_dE_bestN": 3.5,
+      "small_red_rel": 0.813,
+      "crr_base": 1.02,
+      "crr_bestN": 1.025,
+      "np_base": 0.0023,
+      "np_bestN": 0.0026,
+      "infer_cost_x": 1.4,
+      "verdict": "tiling_marginal"
+    },
+    "traffic_street_d": {
+      "small_red_dE_base": 1.51,
+      "small_red_dE_bestN": 2.62,
+      "small_red_rel": 0.735,
+      "crr_base": 1.021,
+      "crr_bestN": 1.025,
+      "np_base": 0.0031,
+      "np_bestN": 0.0031,
+      "infer_cost_x": 4.6,
+      "verdict": "tiling_effective"
+    }
+  }
+}
