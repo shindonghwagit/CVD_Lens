@@ -36,8 +36,8 @@ from torchvision.models import mobilenet_v3_small
 
 from .basis import compose_delta, get_basis, get_confusion_dir
 from .color import srgb_to_linear, linear_to_srgb, rgb_to_lab, delta_e_lab
-from .confusion import compute_confusion_weight, _THRESHOLDS, _blur
-from .simulation import machado_matrix_tensor
+from .confusion import compute_confusion_weight, _THRESHOLDS, _T_BRETTEL, _blur
+from .simulation import machado_matrix_tensor, _BRETTEL_RGB
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -354,17 +354,28 @@ def wrap_for_onnx(model: CVDCorrectionNet, cvd_type: str) -> nn.Module:
         (orig_srgb: (1,3,H,W), severity: (1,1))  →  out_srgb: (1,3,H,W)
 
     The confusion weight `w` is computed *inside* the graph (Lab ΔE between the
-    original and its Machado-simulated version, then thresholded + blurred), so
+    original and its CVD-simulated version, then thresholded + blurred), so
     the browser needs no external `w` sub-graph. Severity is a live tensor input
     on both paths: it feeds the FiLM MLP (→ d_lum/d_c) AND the Machado matrix
     (via `machado_matrix_tensor`, tensor-traceable), so changing severity at
     inference genuinely changes the output.
+
+    TRITAN w mirror: for cvd_type=='t' the w-simulator is the fixed BRETTEL matrix
+    + retuned thresholds (12,30), matching confusion.compute_confusion_weight's
+    t-branch, so the exported graph gates identically to how the model was trained
+    (see reports/tritan_w_diagnosis/). p/d keep the live-severity Machado mirror.
     """
     idx = CVD_TYPES.index(cvd_type)
     basis = get_basis(cvd_type)              # (2, 3), CPU
     b_L = basis[0].view(1, 3, 1, 1)
     b_C = basis[1].view(1, 3, 1, 1)
-    low, high = _THRESHOLDS[cvd_type]
+    # tritan: fixed Brettel sim + retuned thresholds (t-only); p/d unchanged.
+    if cvd_type == "t":
+        low, high = _T_BRETTEL
+        _t_brettel_mat = torch.from_numpy(_BRETTEL_RGB["t"])
+    else:
+        low, high = _THRESHOLDS[cvd_type]
+        _t_brettel_mat = None
     _sigma, _ksize = 3.0, 11                 # matches compute_confusion_weight
 
     class ONNXWrapper(nn.Module):
@@ -375,9 +386,13 @@ def wrap_for_onnx(model: CVDCorrectionNet, cvd_type: str) -> nn.Module:
             self.register_buffer("_bC", b_C.clone())
 
         def _confusion_w(self, orig_lin, sev):
-            # Severity-live confusion weight (mirrors confusion.compute_confusion_weight
-            # but with a tensor-traceable Machado matrix so severity is not frozen).
-            mat = machado_matrix_tensor(cvd_type, sev).to(orig_lin.dtype)
+            # Mirrors confusion.compute_confusion_weight. p/d: severity-live Machado
+            # matrix (tensor-traceable). t: fixed Brettel matrix (severity ignored),
+            # matching the confusion.py t-branch so train == export.
+            if _t_brettel_mat is not None:
+                mat = _t_brettel_mat.to(device=orig_lin.device, dtype=orig_lin.dtype)
+            else:
+                mat = machado_matrix_tensor(cvd_type, sev).to(orig_lin.dtype)
             sim = torch.einsum('ij,bjhw->bihw', mat, orig_lin).clamp(0.0, 1.0)
             dE = delta_e_lab(rgb_to_lab(orig_lin), rgb_to_lab(sim))   # (B,1,H,W)
             w = ((dE - low) / (high - low)).clamp(0.0, 1.0)

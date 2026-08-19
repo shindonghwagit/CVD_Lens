@@ -75,9 +75,16 @@ def w_custom(img_lin, cvd_type, method, low, high):
 
 
 def w_variant(img_lin, cvd_type, variant):
+    # NOTE: production compute_confusion_weight now branches t→Brettel+(12,30). To keep
+    # the diagnosis baselines reproducible (W0=Machado+(5,25), W1=Brettel+(5,25)), t is
+    # computed explicitly here via w_custom; p/d still use the (unchanged) production fn.
     if variant == "W0":
+        if cvd_type == "t":
+            return w_custom(img_lin, "t", "machado", *_THRESHOLDS["t"])
         return compute_confusion_weight(img_lin, cvd_type, method="machado")
     if variant == "W1":
+        if cvd_type == "t":
+            return w_custom(img_lin, "t", "brettel", *_THRESHOLDS["t"])
         return compute_confusion_weight(img_lin, cvd_type, method="brettel")
     if variant == "W2":
         low, high, _ = calibrate(cvd_type, "machado")

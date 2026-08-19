@@ -5,6 +5,10 @@ Computed from Lab delta-E between original and CVD-simulated original,
 with thresholds tuned per CVD type (P/D simulation produces smaller
 delta-E than T, so lower thresholds for P/D).
 
+Tritan (t) is computed with the BRETTEL simulator + retuned thresholds (12,30):
+Machado-t under-moves real desaturated blue so its w collapses on sky/sea blue;
+Brettel moves it properly (reports/tritan_w_diagnosis/). t-ONLY — p/d unchanged.
+
 Fixed, differentiable, no learnable parameters.
 """
 
@@ -18,8 +22,12 @@ from .simulation import simulate
 _THRESHOLDS = {
     "p": (2.0, 12.0),
     "d": (2.0, 12.0),
-    "t": (5.0, 25.0),
+    "t": (5.0, 25.0),      # legacy Machado-t thresholds (production t uses _T_BRETTEL)
 }
+
+# Tritan-only: Brettel simulator + retuned thresholds. See module docstring and
+# reports/tritan_w_diagnosis/ (H1 confirmed: Machado-t under-moves real blue).
+_T_BRETTEL = (12.0, 30.0)
 
 
 def _gaussian_kernel_2d(sigma: float, ksize: int, device, dtype) -> torch.Tensor:
@@ -53,9 +61,16 @@ def compute_confusion_weight(
     Returns:
         w: (B, 1, H, W) soft mask in [0, 1]
     """
-    low, high = _THRESHOLDS[cvd_type]
     orig32 = rgb_linear.float()
-    sim32 = simulate(orig32, cvd_type, severity, method)
+    if cvd_type == "t":
+        # tritan-only branch: Brettel simulator (severity ignored, fixed 1.0) +
+        # retuned thresholds. Machado-t under-moves real desaturated blue.
+        low, high = _T_BRETTEL
+        sim32 = simulate(orig32, "t", 1.0, "brettel")
+    else:
+        # protan / deutan: unchanged Machado path (no code-path change).
+        low, high = _THRESHOLDS[cvd_type]
+        sim32 = simulate(orig32, cvd_type, severity, method)
     dE = delta_e_lab(rgb_to_lab(orig32), rgb_to_lab(sim32))         # (B, 1, H, W)
     w = ((dE - low) / (high - low)).clamp(0.0, 1.0)
     w = _blur(w, sigma, ksize).clamp(0.0, 1.0)
