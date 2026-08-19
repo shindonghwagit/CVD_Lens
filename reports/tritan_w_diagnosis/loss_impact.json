@@ -1,0 +1,59 @@
+{
+  "t_retune": [
+    12.0,
+    30.0
+  ],
+  "results": [
+    {
+      "name": "blue_sea",
+      "W0": {
+        "L_contrast": 0.02557,
+        "conf_region_weighted_deficit": 679.637,
+        "conf_share": 0.373,
+        "w_conf_mean": 0.347
+      },
+      "W1b": {
+        "L_contrast": 0.10325,
+        "conf_region_weighted_deficit": 1662.6777,
+        "conf_share": 0.215,
+        "w_conf_mean": 0.972
+      },
+      "Lc_ratio_W1b_over_W0": 4.04,
+      "conf_deficit_ratio_W1b_over_W0": 2.45
+    },
+    {
+      "name": "tennis_proxy",
+      "W0": {
+        "L_contrast": 37.44694,
+        "conf_region_weighted_deficit": 23507.4297,
+        "conf_share": 0.438,
+        "w_conf_mean": 0.979
+      },
+      "W1b": {
+        "L_contrast": 40.07742,
+        "conf_region_weighted_deficit": 26015.8281,
+        "conf_share": 0.427,
+        "w_conf_mean": 0.983
+      },
+      "Lc_ratio_W1b_over_W0": 1.07,
+      "conf_deficit_ratio_W1b_over_W0": 1.11
+    },
+    {
+      "name": "traffic_street",
+      "W0": {
+        "L_contrast": 0.01665,
+        "conf_region_weighted_deficit": 1074.9609,
+        "conf_share": 0.524,
+        "w_conf_mean": 0.115
+      },
+      "W1b": {
+        "L_contrast": 0.04688,
+        "conf_region_weighted_deficit": 2625.2236,
+        "conf_share": 0.474,
+        "w_conf_mean": 0.559
+      },
+      "Lc_ratio_W1b_over_W0": 2.82,
+      "conf_deficit_ratio_W1b_over_W0": 2.44
+    }
+  ]
+}

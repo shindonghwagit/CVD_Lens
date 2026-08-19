@@ -1,0 +1,352 @@
+{
+  "thresholds_W0": {
+    "p": [
+      2.0,
+      12.0
+    ],
+    "d": [
+      2.0,
+      12.0
+    ],
+    "t": [
+      5.0,
+      25.0
+    ]
+  },
+  "calibration": {
+    "p": {
+      "machado": {
+        "low": 12.9,
+        "high": 77.4,
+        "conf_dE": [
+          87.0,
+          77.4
+        ]
+      },
+      "brettel": {
+        "low": 11.02,
+        "high": 66.1,
+        "conf_dE": [
+          94.7,
+          66.1
+        ]
+      }
+    },
+    "d": {
+      "machado": {
+        "low": 13.25,
+        "high": 79.51,
+        "conf_dE": [
+          85.8,
+          79.5
+        ]
+      },
+      "brettel": {
+        "low": 11.31,
+        "high": 67.88,
+        "conf_dE": [
+          94.7,
+          67.9
+        ]
+      }
+    },
+    "t": {
+      "machado": {
+        "low": 17.2,
+        "high": 86.0,
+        "conf_dE": [
+          118.4,
+          86.0
+        ]
+      },
+      "brettel": {
+        "low": 0.0,
+        "high": 0.01,
+        "conf_dE": [
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "images": {
+    "blue_sea": {
+      "conf_frac": 0.131,
+      "achr_frac": 0.352,
+      "variants": {
+        "W0": {
+          "conf_w": 0.333,
+          "achr_w": 0.014
+        },
+        "W1": {
+          "conf_w": 0.982,
+          "achr_w": 0.22
+        },
+        "W2": {
+          "conf_w": 0.002,
+          "achr_w": 0.0
+        },
+        "W3": {
+          "conf_w": 1.0,
+          "achr_w": 0.955
+        },
+        "W1b": {
+          "conf_w": 0.966,
+          "achr_w": 0.084
+        }
+      }
+    },
+    "traffic_street": {
+      "conf_frac": 0.277,
+      "achr_frac": 0.47,
+      "variants": {
+        "W0": {
+          "conf_w": 0.127,
+          "achr_w": 0.019
+        },
+        "W1": {
+          "conf_w": 0.756,
+          "achr_w": 0.254
+        },
+        "W2": {
+          "conf_w": 0.004,
+          "achr_w": 0.0
+        },
+        "W3": {
+          "conf_w": 0.998,
+          "achr_w": 0.902
+        },
+        "W1b": {
+          "conf_w": 0.571,
+          "achr_w": 0.134
+        }
+      }
+    },
+    "tennis_proxy": {
+      "conf_frac": 0.431,
+      "achr_frac": 0.028,
+      "variants": {
+        "W0": {
+          "conf_w": 0.984,
+          "achr_w": 0.498
+        },
+        "W1": {
+          "conf_w": 0.984,
+          "achr_w": 0.498
+        },
+        "W2": {
+          "conf_w": 0.589,
+          "achr_w": 0.196
+        },
+        "W3": {
+          "conf_w": 0.986,
+          "achr_w": 0.562
+        },
+        "W1b": {
+          "conf_w": 0.984,
+          "achr_w": 0.498
+        }
+      }
+    }
+  },
+  "patches": {
+    "blue": {
+      "W0": 1.0,
+      "W1": 0.0,
+      "W2": 1.0,
+      "W3": 1.0,
+      "W1b": 0.0
+    },
+    "cyan": {
+      "W0": 0.0,
+      "W1": 1.0,
+      "W2": 0.0,
+      "W3": 1.0,
+      "W1b": 1.0
+    },
+    "yellow": {
+      "W0": 1.0,
+      "W1": 0.0,
+      "W2": 1.0,
+      "W3": 1.0,
+      "W1b": 0.0
+    },
+    "purple": {
+      "W0": 1.0,
+      "W1": 1.0,
+      "W2": 0.687,
+      "W3": 1.0,
+      "W1b": 1.0
+    },
+    "gray": {
+      "W0": 0.0,
+      "W1": 0.0,
+      "W2": 0.0,
+      "W3": 0.013,
+      "W1b": 0.0
+    },
+    "skin": {
+      "W0": 0.547,
+      "W1": 1.0,
+      "W2": 0.0,
+      "W3": 1.0,
+      "W1b": 1.0
+    }
+  },
+  "pd_preservation": {
+    "blue_sea": {
+      "p": {
+        "W0": {
+          "conf_w": NaN,
+          "achr_w": 0.085
+        },
+        "W1": {
+          "conf_w": NaN,
+          "achr_w": 0.102
+        },
+        "W2": {
+          "conf_w": NaN,
+          "achr_w": 0.001
+        },
+        "W3": {
+          "conf_w": NaN,
+          "achr_w": 0.003
+        },
+        "W1b": {
+          "conf_w": NaN,
+          "achr_w": 0.085
+        }
+      },
+      "d": {
+        "W0": {
+          "conf_w": NaN,
+          "achr_w": 0.09
+        },
+        "W1": {
+          "conf_w": NaN,
+          "achr_w": 0.116
+        },
+        "W2": {
+          "conf_w": NaN,
+          "achr_w": 0.001
+        },
+        "W3": {
+          "conf_w": NaN,
+          "achr_w": 0.003
+        },
+        "W1b": {
+          "conf_w": NaN,
+          "achr_w": 0.09
+        }
+      }
+    },
+    "traffic_street": {
+      "p": {
+        "W0": {
+          "conf_w": 0.413,
+          "achr_w": 0.066
+        },
+        "W1": {
+          "conf_w": 0.439,
+          "achr_w": 0.093
+        },
+        "W2": {
+          "conf_w": 0.051,
+          "achr_w": 0.001
+        },
+        "W3": {
+          "conf_w": 0.083,
+          "achr_w": 0.002
+        },
+        "W1b": {
+          "conf_w": 0.413,
+          "achr_w": 0.066
+        }
+      },
+      "d": {
+        "W0": {
+          "conf_w": 0.421,
+          "achr_w": 0.072
+        },
+        "W1": {
+          "conf_w": 0.463,
+          "achr_w": 0.107
+        },
+        "W2": {
+          "conf_w": 0.049,
+          "achr_w": 0.001
+        },
+        "W3": {
+          "conf_w": 0.086,
+          "achr_w": 0.002
+        },
+        "W1b": {
+          "conf_w": 0.421,
+          "achr_w": 0.072
+        }
+      }
+    },
+    "tennis_proxy": {
+      "p": {
+        "W0": {
+          "conf_w": 0.987,
+          "achr_w": 0.43
+        },
+        "W1": {
+          "conf_w": 0.987,
+          "achr_w": 0.483
+        },
+        "W2": {
+          "conf_w": 0.378,
+          "achr_w": 0.097
+        },
+        "W3": {
+          "conf_w": 0.373,
+          "achr_w": 0.097
+        },
+        "W1b": {
+          "conf_w": 0.987,
+          "achr_w": 0.43
+        }
+      },
+      "d": {
+        "W0": {
+          "conf_w": 0.987,
+          "achr_w": 0.252
+        },
+        "W1": {
+          "conf_w": 0.987,
+          "achr_w": 0.498
+        },
+        "W2": {
+          "conf_w": 0.363,
+          "achr_w": 0.093
+        },
+        "W3": {
+          "conf_w": 0.381,
+          "achr_w": 0.112
+        },
+        "W1b": {
+          "conf_w": 0.987,
+          "achr_w": 0.252
+        }
+      }
+    }
+  },
+  "verdict": {
+    "adopted": "W1b",
+    "hypothesis": "H1 CONFIRMED (simulator). Machado-t under-moves real desaturated blue (pure blue dE=118 but sky/sea blue tiny), so W0 tritan w collapses on real blue. Brettel moves real blue properly (blue_sea conf_w 0.33\u21920.98). Fix = t-only Brettel sim + retuned thresholds (12.0, 30.0); p/d unchanged (Machado) \u2192 zero regression. Note: W2 (pure-color calibration) is counterproductive \u2014 pure \u0394E76 is huge (86-118) so it RAISES the threshold and kills w.",
+    "strict_pass_all_key": [],
+    "conf_w_improvement_vs_W0": {
+      "blue_sea": 0.633,
+      "traffic_street": 0.444
+    },
+    "traffic_caveat": "traffic_street (mostly-achromatic city, weak pale-blue signal) improves conf_w 0.571 vs W0 0.127 but achr sits ~0.13 (>0.1) \u2014 no single threshold satisfies both saturated sea-blue and pale sky-blue; blue_sea (diagnosed case) passes cleanly.",
+    "pd_damage": 0.0,
+    "t_retune_thresholds": [
+      12.0,
+      30.0
+    ],
+    "criteria": "conf_w>=0.5 & achr_w<=0.1 on ['blue_sea', 'traffic_street']"
+  }
+}
