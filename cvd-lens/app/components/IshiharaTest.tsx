@@ -5,43 +5,14 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useModel } from "../context/ModelContext";
 import { CVDType } from "../hooks/useCVDModel";
-
-// answer: 정상 색각자가 읽는 숫자
-// altAnswer: 색각이상자가 읽는 숫자 (null=읽지 못함)
-// type: demo=전원정답 / pd=적록(적색맹·녹색맹) 스크리닝 / t=청-노 계열
-//   표준 이시하라 도판은 적록 스크리닝용이며 청색(tritan) 감별력이 검증되지
-//   않았다. 그래서 'pd'만 실제 진단 풀로 쓰고, 't'로 표시된 도판(11)은 데이터로
-//   보존하되 스크리닝/판정에서 제외한다(검증된 tritan 도판 확보는 별도 과제).
-// ext: 파일 확장자 (기본 jpg)
-const ALL_PLATES = [
-  { id: "01", answer: "74",  altAnswer: "21",  type: "demo" as const, label: "모든 분이 읽을 수 있는 플레이트" },
-  { id: "03", answer: "16",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "04", answer: "2",   altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "05", answer: "29",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "06", answer: "7",   altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "07", answer: "45",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "08", answer: "5",   altAnswer: "2",    type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "09", answer: "97",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "10", answer: "8",   altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  // 11: 청-노 계열로 분류돼 있으나 표준 이시하라의 tritan 감별력 미검증 → 진단 풀 제외.
-  { id: "11", answer: "42",  altAnswer: null,   type: "t"    as const, label: "청색 계열 (참고용, 진단 제외)" },
-  { id: "12", answer: "3",   altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "13", answer: "42",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "14", answer: "27",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "15", answer: "12",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-];
-
-type Plate = (typeof ALL_PLATES)[number];
-
-const plateSrc = (p: Plate) => `/ishihara/Ishihara_${p.id}.${"ext" in p && p.ext ? p.ext : "jpg"}`;
-
-function pickPlates() {
-  const demo = ALL_PLATES.filter((p) => p.type === "demo");
-  // 적록(pd) 도판만 진단 풀로 사용 — 표준 이시하라의 검증된 축.
-  const diagnostic = ALL_PLATES.filter((p) => p.type === "pd");
-  const shuffled = [...diagnostic].sort(() => Math.random() - 0.5);
-  return [...demo, ...shuffled.slice(0, 4)]; // 1 demo + 4 랜덤 = 5장
-}
+import {
+  Plate,
+  plateSrc,
+  pickPlates,
+  categoryScores,
+  estimateType,
+  CategoryScore,
+} from "@/lib/ishiharaPlates";
 
 // AI 보정 미리보기 카드 — 결과 화면에서 "틀린 도판"을 보정 상태로 다시 보여줘
 // 보정의 가치를 데모한다. 진단 판정에는 절대 관여하지 않는다(판정은 보정 OFF 고정).
@@ -130,16 +101,42 @@ function PlateCorrectionCard({ plate }: { plate: Plate }) {
   );
 }
 
-const TYPE_LABEL: Record<string, { short: string; color: string }> = {
-  pd: { short: "적록색각이상 의심", color: "#f97316" },
-};
+// 색 계열별(=기능 카테고리) 정답 수 막대그래프 — 경량 CSS 바(새 라이브러리 없음).
+// 적록 원칙 준수: R/G/B 축으로 쪼개지 않고 실제 판별 가능한 도판 기능 범주로 집계.
+function ScoreBars({ scores }: { scores: CategoryScore[] }) {
+  return (
+    <div className="w-full rounded-xl border p-5 flex flex-col gap-3" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
+      <p className="text-sm font-medium" style={{ color: "var(--fg)" }}>도판 계열별 정답 수</p>
+      <div className="flex flex-col gap-3 mt-1">
+        {scores.map((s) => {
+          const pct = s.total > 0 ? (s.correct / s.total) * 100 : 0;
+          return (
+            <div key={s.key} className="flex items-center gap-3">
+              <span className="w-20 shrink-0 text-[13px]" style={{ color: "var(--fg-muted)" }}>{s.label}</span>
+              <div className="flex-1 rounded-full h-4 overflow-hidden" style={{ background: "var(--bg-muted)" }} role="img"
+                   aria-label={`${s.label} 정답 ${s.correct} / ${s.total}`}>
+                <div className="h-4 rounded-full transition-all" style={{ width: `${pct}%`, background: s.color }} />
+              </div>
+              <span className="w-12 shrink-0 text-right font-mono text-[12px]" style={{ color: "var(--fg)" }}>
+                {s.correct}/{s.total}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[11px] font-mono mt-1" style={{ color: "var(--fg-subtle)" }}>
+        ※ 적록 선별 도판의 정답 비율이 낮을수록 적록 계열 색각이상 가능성을 시사합니다. (선별용 지표)
+      </p>
+    </div>
+  );
+}
 
 export default function IshiharaTest() {
   const { data: session } = useSession();
 
   const [plates, setPlates] = useState(pickPlates);
   const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<(string | null)[]>(() => Array(5).fill(null));
+  const [answers, setAnswers] = useState<(string | null)[]>(() => Array(plates.length).fill(null));
   const [input, setInput] = useState("");
   const [done, setDone] = useState(false);
 
@@ -150,19 +147,6 @@ export default function IshiharaTest() {
     setInput("");
   }, [current]);
 
-  // 판정은 적록(pd) 도판만 사용. 진단 단계는 보정 OFF 고정이라 보정으로 읽은 답이
-  // 판정에 섞이지 않는다.
-  function getDiagnosis(ans: (string | null)[]) {
-    let pdWrong = 0;
-    ans.forEach((a, i) => {
-      if (plates[i].type !== "pd") return;
-      if (a !== plates[i].answer) pdWrong++;
-    });
-    const pdCount = plates.filter((p) => p.type === "pd").length;
-    const threshold = Math.max(1, Math.round(pdCount / 2));
-    return pdWrong >= threshold ? "d" : "normal";
-  }
-
   const submit = async () => {
     if (submittingRef.current) return;
     submittingRef.current = true;
@@ -172,7 +156,9 @@ export default function IshiharaTest() {
 
     if (current + 1 >= plates.length) {
       const correct = newAnswers.filter((ans, i) => ans === plates[i].answer).length;
-      const diagnosis = getDiagnosis(newAnswers);
+      // 적록 선별 결과. red-green → 대표 유형 'd'(녹색맹)로 저장·프리셋(P/D 확정 불가).
+      const isRG = estimateType(plates, newAnswers) === "red-green";
+      const diagnosis = isRG ? "d" : "normal";
 
       if (session?.user) {
         await fetch("/api/results", {
@@ -197,30 +183,33 @@ export default function IshiharaTest() {
   };
 
   if (done) {
-    const diagnosis = getDiagnosis(answers);
+    const isRG = estimateType(plates, answers) === "red-green";
     const correct = answers.filter((a, i) => a === plates[i].answer).length;
-    const diagnosisColor = diagnosis === "d" ? "#f97316" : "#22c55e";
-    const diagnosisLabel =
-      diagnosis === "d"
-        ? "적록색각이상 (적색맹/녹색맹) 가능성이 있습니다."
-        : "적록 계열 색각이상 징후는 보이지 않습니다.";
-    const wrongPlates = plates.filter((p, i) => p.type !== "demo" && answers[i] !== p.answer);
+    const scores = categoryScores(plates, answers);
+    const resultColor = isRG ? "#f97316" : "#22c55e";
+    const resultLabel = isRG
+      ? "적록 계열 색각이상 가능성이 있습니다."
+      : "적록 계열 색각이상 징후는 보이지 않습니다.";
+    const wrongPlates = plates.filter((p, i) => p.diagnostic && answers[i] !== p.answer);
 
     return (
       <div className="flex flex-col items-center gap-6 py-6 w-full">
         <div className="text-center">
-          <p className="font-serif text-[26px] tracking-[-0.02em] mb-2">진단 완료</p>
+          <p className="font-serif text-[26px] tracking-[-0.02em] mb-2">검사 완료</p>
           <p
             className="text-[15px] font-medium px-4 py-1.5 rounded-full inline-block"
-            style={{ background: diagnosisColor + "18", color: diagnosisColor }}
+            style={{ background: resultColor + "18", color: resultColor }}
           >
-            {diagnosisLabel}
+            {resultLabel}
           </p>
           <p className="text-xs mt-3 font-mono" style={{ color: "var(--fg-subtle)" }}>
             ※ 적록 계열 스크리닝 결과입니다. 청색 계열(청색맹)은 감별 범위 밖이며,
             정확한 진단은 안과 전문의에게 받으세요.
           </p>
         </div>
+
+        {/* 색 계열별 정답 수 막대그래프 */}
+        <ScoreBars scores={scores} />
 
         <div className="w-full rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
           <div
@@ -234,7 +223,6 @@ export default function IshiharaTest() {
           </div>
           {plates.map((p, i) => {
             const isCorrect = answers[i] === p.answer;
-            const typeInfo = p.type !== "demo" ? TYPE_LABEL[p.type] : null;
             return (
               <div
                 key={p.id}
@@ -244,7 +232,7 @@ export default function IshiharaTest() {
                 <span className="font-mono text-[12px]" style={{ color: "var(--fg-subtle)" }}>{i + 1}</span>
                 <div className="flex flex-col">
                   <span className="font-mono font-medium">{p.answer}</span>
-                  {p.type !== "demo" && p.altAnswer && (
+                  {p.diagnostic && p.altAnswer && (
                     <span className="font-mono text-[10px]" style={{ color: "var(--fg-subtle)" }}>
                       색각이상: {p.altAnswer}
                     </span>
@@ -258,12 +246,12 @@ export default function IshiharaTest() {
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#22c55e18", color: "#22c55e" }}>
                       ✓ 정상
                     </span>
-                  ) : p.type === "demo" || !typeInfo ? (
-                    <span className="text-xs font-mono" style={{ color: "var(--fg-subtle)" }}>-</span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: typeInfo.color + "18", color: typeInfo.color }}>
-                      ✗ {typeInfo.short}
+                  ) : p.diagnostic ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#f9731618", color: "#f97316" }}>
+                      ✗ 적록 계열 의심
                     </span>
+                  ) : (
+                    <span className="text-xs font-mono" style={{ color: "var(--fg-subtle)" }}>-</span>
                   )}
                 </div>
               </div>
@@ -275,9 +263,9 @@ export default function IshiharaTest() {
           <p className="text-sm font-mono mb-1" style={{ color: "var(--fg-subtle)" }}>
             정답 {correct} / {plates.length}
           </p>
-          {diagnosis === "d" && (
+          {isRG && (
             <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
-              적록 도판에서 절반 이상 오답입니다. 안과 정밀 검사를 권장합니다.
+              적록 선별 도판에서 절반 이상 오답입니다. 안과 정밀 검사를 권장합니다.
             </p>
           )}
         </div>
@@ -301,7 +289,7 @@ export default function IshiharaTest() {
         )}
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {diagnosis === "d" && (
+          {isRG && (
             <Link
               href="/correction?tab=image&type=d"
               className="px-6 py-2.5 rounded-full text-sm font-medium text-white inline-flex items-center gap-2"
@@ -314,15 +302,22 @@ export default function IshiharaTest() {
               </svg>
             </Link>
           )}
+          <Link
+            href="/education"
+            className="px-6 py-2.5 rounded-full text-sm font-medium inline-flex items-center gap-2"
+            style={{ background: "var(--bg-muted)", color: "var(--fg)", border: "1px solid var(--border-strong)" }}
+          >
+            색각이상 알아보기
+          </Link>
           <button
             onClick={restart}
             className="px-6 py-2.5 rounded-full text-sm font-medium transition-colors"
-            style={diagnosis === "d"
+            style={isRG
               ? { background: "var(--bg-muted)", color: "var(--fg)", border: "1px solid var(--border-strong)" }
               : { background: "var(--color-brand)", color: "#fff" }
             }
           >
-            다시 테스트 (새 문제)
+            다시 검사 (새 문제)
           </button>
         </div>
       </div>
