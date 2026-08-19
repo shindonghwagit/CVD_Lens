@@ -26,9 +26,9 @@ const ALL_PLATES = [
   // 11: 청-노 계열로 분류돼 있으나 표준 이시하라의 tritan 감별력 미검증 → 진단 풀 제외.
   { id: "11", answer: "42",  altAnswer: null,   type: "t"    as const, label: "청색 계열 (참고용, 진단 제외)" },
   { id: "12", answer: "3",   altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
-  { id: "13", answer: "42",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
-  { id: "14", answer: "27",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
-  { id: "15", answer: "12",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별", ext: "png" },
+  { id: "13", answer: "42",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "14", answer: "27",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
+  { id: "15", answer: "12",  altAnswer: null,   type: "pd"   as const, label: "적록색각이상 감별" },
 ];
 
 type Plate = (typeof ALL_PLATES)[number];
