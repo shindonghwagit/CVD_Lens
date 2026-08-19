@@ -1,0 +1,168 @@
+{
+  "checks": {
+    "1_blue_R_added": {
+      "dR": 0.4873,
+      "min": 0.05,
+      "pass_": true
+    },
+    "2_gray_unchanged": {
+      "maxAbs": 0.0,
+      "max": 0.01,
+      "pass_": true
+    },
+    "3_confusion_pair_sep_up": {
+      "confusion_pair": "cyan-green",
+      "de_orig": 9.27,
+      "de_target": 16.33,
+      "delta": 7.05,
+      "pass_": true,
+      "spec_blue_green": {
+        "de_orig": 46.59,
+        "de_target": 27.98,
+        "note": "lightness-dominated; not a tritan confusion pair"
+      }
+    },
+    "4_pd_bit_exact": {
+      "max_abs_diff": 0.0,
+      "matrix_equal": true,
+      "pass_": true
+    },
+    "P_blue_retention": {
+      "retention": 0.999,
+      "min": 0.7,
+      "warn": false,
+      "note": "visible-subspace retention; low \u21d2 shift wasted along confusion axis"
+    }
+  },
+  "patches": {
+    "blue": {
+      "orig": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "target": [
+        0.487,
+        0.34,
+        1.0
+      ],
+      "dRGB": [
+        0.4873,
+        0.3397,
+        0.0
+      ]
+    },
+    "yellow": {
+      "orig": [
+        1.0,
+        1.0,
+        0.0
+      ],
+      "target": [
+        0.513,
+        0.66,
+        0.0
+      ],
+      "dRGB": [
+        -0.4873,
+        -0.3397,
+        0.0
+      ]
+    },
+    "cyan": {
+      "orig": [
+        0.0,
+        1.0,
+        1.0
+      ],
+      "target": [
+        0.003,
+        1.0,
+        1.0
+      ],
+      "dRGB": [
+        0.0033,
+        0.0,
+        0.0
+      ]
+    },
+    "purple": {
+      "orig": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "target": [
+        1.0,
+        0.415,
+        1.0
+      ],
+      "dRGB": [
+        0.0,
+        0.4148,
+        0.0
+      ]
+    },
+    "red": {
+      "orig": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "target": [
+        0.997,
+        0.0,
+        0.0
+      ],
+      "dRGB": [
+        -0.0033,
+        0.0,
+        0.0
+      ]
+    },
+    "green": {
+      "orig": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "target": [
+        0.0,
+        0.585,
+        0.0
+      ],
+      "dRGB": [
+        0.0,
+        -0.4148,
+        0.0
+      ]
+    },
+    "gray": {
+      "orig": [
+        0.214,
+        0.214,
+        0.214
+      ],
+      "target": [
+        0.214,
+        0.214,
+        0.214
+      ],
+      "dRGB": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "retention": {
+    "blue": 0.999,
+    "yellow": 0.999,
+    "cyan": 0.986,
+    "purple": 0.987,
+    "red": 0.986,
+    "green": 0.987
+  },
+  "all_gates_pass": true,
+  "gain": 0.7
+}

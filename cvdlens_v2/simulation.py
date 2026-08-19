@@ -8,9 +8,13 @@ Two methods:
 At severity=1.0, Machado approximates Brettel (spot-checked in __main__).
 Both operate on *linear* RGB.
 
-`daltonize()` uses Brettel + error-shift and is the single warm-start target
-generator. External daltonize libraries must NOT be imported anywhere in
-this codebase.
+`daltonize()` uses Brettel + error-shift as the daltonize comparison baseline
+(Step 3 eval) and in diagnostics — NOT as a v2 training target (the loss is on
+the simulator, see losses.CVDLossV2). Its error-shift matrix is TYPE-SPECIFIC:
+p/d redistribute the red-green error (R) to G/B, while t redistributes the
+blue-yellow error (B) to R/G (blue→purple) — a single p/d matrix cannot shift
+blue toward purple (all-zero R row). External daltonize libraries must NOT be
+imported anywhere in this codebase.
 """
 
 import numpy as np
@@ -173,11 +177,41 @@ def simulate_batch_types(
 
 # ── Daltonize (Brettel + error-shift) ────────────────────────────────────
 
-_ERR2MOD = np.array([
-    [0,   0, 0],
-    [0.7, 1, 0],
-    [0.7, 0, 1],
-], dtype=np.float32)
+# Error-shift redistributes the lost signal (error) into channels the viewer CAN
+# see. The lost axis differs by type, so the matrix must be type-specific: for
+# protan/deutan the lost signal is red-green (mostly the R channel) and is fed to
+# G/B; for tritan it is blue-yellow (mostly the B channel) and must be fed to R/G
+# (blue→purple). A single p/d matrix applied to tritan cannot add anything to R
+# (its R row is all-zero), so blue can never shift toward purple — the tritan
+# error-shift target degenerates to a near no-op on blue. Hence per-type matrices.
+
+# Tritan gain: how much of the B-channel error is redistributed into R and G.
+# Tunable — raise/lower if the sanity projection (sanity_tritan_target.py) shows
+# the shift is too weak/strong relative to the tritan visible subspace.
+TRITAN_SHIFT_GAIN = 0.7
+
+_ERR2MOD = {
+    # protan / deutan — red-green error (R) → G, B.
+    # DO NOT CHANGE: bit-exact with the pre-split single matrix (reproducibility
+    # with the existing p/d models, evaluation, and diagnostics).
+    "p": np.array([
+        [0,   0, 0],
+        [0.7, 1, 0],
+        [0.7, 0, 1],
+    ], dtype=np.float32),
+    "d": np.array([
+        [0,   0, 0],
+        [0.7, 1, 0],
+        [0.7, 0, 1],
+    ], dtype=np.float32),
+    # tritan — blue-yellow error (B) → R, G (blue→purple). NEW: fixes the
+    # degenerate all-zero-R-row behaviour of the shared p/d matrix.
+    "t": np.array([
+        [1, 0, TRITAN_SHIFT_GAIN],
+        [0, 1, TRITAN_SHIFT_GAIN],
+        [0, 0, 0],
+    ], dtype=np.float32),
+}
 
 
 def daltonize(
@@ -188,12 +222,15 @@ def daltonize(
 ) -> torch.Tensor:
     """
     Daltonize: original + shift(error), where error = original - simulated.
-    Used as warm-start target only. Same simulator source.
+    Same simulator source. Used as the daltonize comparison baseline (Step 3
+    evaluation) and in diagnostics — NOT as a v2 training target (the loss is
+    defined directly on the simulator; see losses.CVDLossV2). The error-shift
+    matrix is selected per cvd_type (see _ERR2MOD).
     """
     sim = simulate(rgb_linear, cvd_type, severity, method)
     err = rgb_linear - sim
     device, dtype = rgb_linear.device, rgb_linear.dtype
-    shift_mat = torch.from_numpy(_ERR2MOD).to(device, dtype)
+    shift_mat = torch.from_numpy(_ERR2MOD[cvd_type]).to(device, dtype)
     err_shifted = torch.einsum('ij,bjhw->bihw', shift_mat, err)
     return (rgb_linear + err_shifted).clamp(0.0, 1.0)
 

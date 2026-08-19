@@ -62,7 +62,7 @@ def daltonize_soft(rgb_linear: torch.Tensor, cvd_type: str,
     """Same as daltonize() but soft-gamut-mapped instead of hard-clamped."""
     sim = simulate(rgb_linear, cvd_type, severity, method)
     err = rgb_linear - sim
-    shift_mat = torch.from_numpy(_ERR2MOD).to(rgb_linear.device, rgb_linear.dtype)
+    shift_mat = torch.from_numpy(_ERR2MOD[cvd_type]).to(rgb_linear.device, rgb_linear.dtype)
     err_shifted = torch.einsum('ij,bjhw->bihw', shift_mat, err)
     return _soft_clamp_gamut(rgb_linear + err_shifted)
 
@@ -75,16 +75,16 @@ def diagnose(cvd_type: str, orig_srgb: torch.Tensor):
     orig_lin = srgb_to_linear(orig_srgb)
     print(f"    Input to daltonize is LINEAR (max diff from sRGB: "
           f"{(orig_lin - orig_srgb).abs().max().item():.4f}, must be nonzero)")
-    print(f"    _ERR2MOD matrix:\n{_ERR2MOD}")
-    print(f"    Row sums (should be R:0, G:1.7, B:1.7 for red-error diffusion): "
-          f"{_ERR2MOD.sum(axis=1)}")
+    print(f"    _ERR2MOD[{cvd_type}] matrix:\n{_ERR2MOD[cvd_type]}")
+    print(f"    Row sums (p/d: R:0,G:1.7,B:1.7 red-error diffusion; "
+          f"t: R:1.7,G:1.7,B:0 blue-error diffusion): {_ERR2MOD[cvd_type].sum(axis=1)}")
 
     # --- 2. Clipping stats ---
     print("\n  Part 2 — Clipping stats (before clamp)")
     w = compute_confusion_weight(orig_lin, cvd_type, 1.0)
     sim = simulate(orig_lin, cvd_type, 1.0)
     err = orig_lin - sim
-    shift = torch.from_numpy(_ERR2MOD).to(orig_lin.dtype)
+    shift = torch.from_numpy(_ERR2MOD[cvd_type]).to(orig_lin.dtype)
     err_shifted = torch.einsum('ij,bjhw->bihw', shift, err)
     dalt_pre_clamp = orig_lin + err_shifted             # (B, 3, H, W), unclamped
 
