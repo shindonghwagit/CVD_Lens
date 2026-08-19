@@ -9,6 +9,7 @@ import Logo from "./Logo";
 
 const NAV_ITEMS = [
   { href: "/",                    label: "Home" },
+  { href: "/education",           label: "학습" },
   { href: "/ishihara",            label: "진단" },
   { href: "/history",             label: "진단 기록" },
   { href: "/corrections",         label: "보정 기록" },

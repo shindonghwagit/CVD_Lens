@@ -131,6 +131,13 @@ export default function Home() {
             </a>
           </div>
 
+          <Link href="/education" className="inline-flex items-center gap-1.5 text-[13px] mb-10 transition-colors hover:text-brand" style={{ color: "var(--fg-subtle)" }}>
+            처음이신가요? 색각이상 이해하기
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
+            </svg>
+          </Link>
+
           <div className="grid grid-cols-3 gap-2.5 max-w-[420px]">
             {CVD_TYPES.map((c) => (
               <div key={c.type} className="p-3 rounded-xl border bg-elevated" style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}>
