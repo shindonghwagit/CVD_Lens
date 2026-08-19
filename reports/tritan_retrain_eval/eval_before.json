@@ -1,0 +1,38 @@
+[
+  {
+    "name": "blue_sea",
+    "tag": "before",
+    "deE_mean": 0.89,
+    "blue_region_deE": 1.75,
+    "w_t_mean": 0.663,
+    "crr": 1.048,
+    "sat_delta": -0.0006
+  },
+  {
+    "name": "tennis_proxy",
+    "tag": "before",
+    "deE_mean": 8.95,
+    "blue_region_deE": 10.69,
+    "w_t_mean": 0.972,
+    "crr": 1.73,
+    "sat_delta": 0.0941
+  },
+  {
+    "name": "traffic_street",
+    "tag": "before",
+    "deE_mean": 0.49,
+    "blue_region_deE": 1.02,
+    "w_t_mean": 0.307,
+    "crr": 1.015,
+    "sat_delta": 0.0088
+  },
+  {
+    "name": "skin_portrait",
+    "tag": "before",
+    "deE_mean": 1.29,
+    "blue_region_deE": 1.74,
+    "w_t_mean": 0.447,
+    "crr": 1.041,
+    "sat_delta": 0.007
+  }
+]

@@ -165,3 +165,77 @@ gradient 유인이 실제로 생긴다는 정량 근거.
 
 > 미해결 리스크: traffic류 옅은 하늘 파랑은 (12,30)으로도 achr 경미 초과(0.134). 필요 시
 > t 임계값 미세조정 또는 무채색 억제(채도 게이트 추가)를 재학습 후 held-out 결과 보고 결정.
+
+---
+
+## 8. Kaggle 재학습 패키지 (작업 2) — 적용 완료, 학습은 사용자 실행
+
+### 8.0 코드 반영 상태 (커밋 b2e2c70, main push 완료)
+- `confusion.py` compute_confusion_weight: **명시적 `if cvd_type=="t"` 분기** → Brettel + (12,30).
+  p/d는 Machado+(2,12) 그대로. 검증: p/d w bit-exact(회귀 0), t w==실험 W1b(0.00e+00).
+- `model.py wrap_for_onnx._confusion_w`: t만 고정 Brettel+(12,30)로 미러 → **train forward w ==
+  ONNX export w (p/d/t 전부 0.00e+00)**. 이게 없으면 재export가 machado-w로 게이팅되어 재학습이
+  배포에 안 실림(이식 오류). t ONNX export OK(parity 1.55e-7), 단위테스트 전부 통과.
+
+### 8.1 경로 최종 점검
+- **새 confusion.py 반영: 자동.** `kaggle_train → train_main → train.py`의 `model(...)` forward가
+  `model.py:318 compute_confusion_weight`를 호출 → 새 t-분기가 학습 w-gating에 그대로 적용.
+  별도 조치 불필요.
+- **타입 필터: 없음**(train.py:435 `random.choice(CVD_TYPES)`로 3타입 동시 학습). **추가 권장 안 함**(§8.2).
+
+### 8.2 재학습 모드 — **전체 3타입 fresh 재학습 권장 (t 단독 필터 아님)**
+- 모델은 **단일 공유망**(FiLM 타입 조건화). t 배치만 학습(--types t)하면 공유 가중치가 흔들려
+  **p/d 망각(regression)** — "t 단독 학습이니 p/d 0"은 공유망에선 성립 안 함.
+- **올바른 방법:** 3타입 전체 fresh 재학습. **w 변경이 t 전용**이므로 p/d의 학습 신호(=p/d w)는
+  불변 → p/d 최적점 동일. 단 공유 가중치가 t의 새 gradient로 미세 이동하므로 **p/d는 gate
+  유지(≈불변)이나 bit-0은 아님**(정직히 명시). t만 파랑 보정을 새로 학습.
+
+### 8.3 Kaggle 업로드 체크리스트 (사용자가 올릴 것)
+1. **COCO 데이터셋** 첨부: 공개 `coco-2017-dataset`(train2017 + val2017).
+2. **레포 최신 main(b2e2c70)**: `!git clone` 또는 repo zip 업로드. **확인:**
+   `git -C graduation_project log -1 --oneline` → `b2e2c70`, 그리고
+   `grep _T_BRETTEL cvdlens_v2/confusion.py` 히트(= t-분기 반영 확인).
+3. **Fresh 보장**: 새 세션의 `/kaggle/working`은 비어 있어 resume가 옛 체크포인트를 안 잡음
+   (옛 체크포인트는 옛 w로 학습됨 → 반드시 fresh). 기존 `v2_phase1/`이 있으면 삭제.
+4. **실행**: `!cd .../graduation_project && python -m cvdlens_v2.kaggle_train`
+   (T4×2 DataParallel, batch 16, 20000 step, LPIPS off — 기존과 동일).
+5. **모니터**: gate T mean ratio_w, 그리고 저채도 파랑(하늘/바다) 보정이 살아나는지 로그/중간
+   val로 관찰. 완료 후 `model_best` .pt 다운로드.
+
+### 8.4 Predict-then-verify (재학습 후 확인할 기대치 — 미리 기록)
+기준선(재학습 전, 현행 배포 모델 + 신 w, `reports/tritan_retrain_eval/eval_before.json`):
+blue_sea blueΔE **1.75**, traffic 1.02, tennis 10.69(포화 파랑은 이미 보정됨), skin 1.74.
+
+| 항목 | 현행(before) | 재학습 후 예측 | 근거 |
+|---|---|---|---|
+| blue_sea t **w mean**(게이팅) | 0.117(구)→**0.663**(신, 이미 적용) | 0.663 유지 | confusion.py 확정 |
+| blue_sea **저채도 파랑 보정** ΔE00 | 1.75 (구 모델 no-op) | **↑ ~5–10** | 손실기여 ×4(작업3), p/d 포화보정 6–8 유추 |
+| traffic 하늘 파랑 ΔE00 | 1.02 | ↑ ~3–6 | w 0.06→0.31, 신호 ×2.8 |
+| tennis(포화 파랑) ΔE00 | 10.69 (이미 보정) | ≈ 유지~소폭↑ | 포화 파랑은 구 w도 w=1 |
+| gate **ratio_w T ≥ 1.27** | held-out 1.274(직전) | **PASS(유지~개선)** | 파랑 회복↑ → T 대비 개선 방향 |
+| p/d ratio_w (뱅크 1.39/1.36, gate 1.10/1.13) | — | **gate 유지**, |Δ|≲0.02 | p/d 신호 불변, 공유망 미세 이동 |
+
+> **판정:** 저채도 파랑 ΔE00가 유의 상승 + T gate 유지 + p/d gate 유지면 성공. p/d가 gate
+> 아래로 떨어지면(공유망 망각) 회귀 — 보고 후 재검토(예: p/d 보호용 fine-tune/replay).
+
+---
+
+## 9. 재학습 후 평가 원커맨드 (작업 3) — 스크립트 준비 완료
+
+새 `model_best.pt`를 받은 뒤 순서대로:
+
+1. **gate 재평가**: (train.py::validate 로직) 새 체크포인트로 10장 뱅크 + held-out 게이트.
+   `py -m cvdlens_v2.heldout_check`(경로/체크포인트 인자 확인) 또는 학습 로그의 마지막 val 블록.
+2. **신규 ONNX export**: `py -m cvdlens_v2.export_onnx`(새 .pt 지정) → `cvdlens_{p,d,t}.onnx` 3개.
+   **주의:** wrap_for_onnx가 t-분기를 포함하므로(§8.0) 새 t ONNX는 Brettel-w로 게이팅.
+3. **parity check**: `py -m cvdlens_v2.parity_check`(또는 test_model 스모크) — PyTorch↔ONNX <1e-3.
+4. **w맵+보정 몽타주 + 지표 (before/after 비교)**:
+   `py -m cvdlens_v2.post_retrain_eval --model-dir <새 onnx 폴더> --tag after`
+   → `reports/tritan_retrain_eval/` 에 blue_sea/tennis/traffic/skin 몽타주 + `eval_after.json`.
+   **before(현행)**: `eval_before.json` 이미 생성됨 — after와 직접 대조.
+5. **기존 daily_test 전체 지표**: 새 ONNX를 `cvd-lens/inference/model/`에 임시 배치 후
+   로컬 추론 기반 지표(reeval_guided 등) 또는 daily_test(배포 교체 후). **ONNX 교체·배포는
+   평가 결과 확인 후 별도 결정 — 이번엔 준비까지만.**
+
+> post_retrain_eval는 지금(before) 실행해 기준선을 남겼고, 동일 스크립트를 새 ONNX로 재실행하면
+> after가 나온다. ΔE00/w_t/CRR 정의는 기존 스크립트(daily_test, artifact_probe) 그대로.
