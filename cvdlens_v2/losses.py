@@ -112,6 +112,51 @@ def contrast_loss(
     return total / len(scales)
 
 
+# ── Chroma preservation (L_sat) ──────────────────────────────────────────
+
+def saturation_loss(
+    orig_srgb: torch.Tensor,
+    out_srgb: torch.Tensor,
+    w: torch.Tensor,
+) -> torch.Tensor:
+    """
+    One-sided, w-gated HSV-saturation-preservation penalty (displayed sRGB).
+
+        S(x)   = (max_c x − min_c x) / (max_c x + ε)     (HSV saturation)
+        L_sat  = mean( w · relu(S(orig) − S(out))² )
+
+    HSV, NOT Lab chroma — pre-check (2026-08-24, DECISION_TABLE.md) found the
+    tritan blue-shift PRESERVES Lab chroma (blue_sea conf-region +3%, 21.2→21.8)
+    while dropping HSV saturation (ΔS≈−0.24). The deployed acceptance metric
+    `daily_test.sat` is exactly HSV S=(max−min)/max, so the penalty must target
+    HSV: a Lab-chroma hinge produced L_sat≈0.53 on blue_sea (no pressure) vs 58
+    on tennis (wrong sign of emphasis). The HSV form flips this correctly:
+    blue_sea 62e-3 (target) ≫ tennis 17e-3.
+
+    Design:
+    - HINGE (relu on orig−out): only saturation *loss* is charged. Saturation
+      increases (tennis saturated-blue recovery, ΔS +0.05) are free → does not
+      fight legitimate recovery, only the "move blue by graying it" shortcut.
+    - w-GATED: confined to confusion regions; rides the same per-type w, so
+      p/d are only touched where their own w fires (and they saturate, not
+      desaturate, so relu≈0 there).
+    - DISPLAYED sRGB (out vs orig, normal view) — same space as the metric.
+
+    NOTE (coupling, see smoke): tritan blueΔE is produced by adding the opponent
+    channel, which itself lowers HSV S. L_sat and blueΔE are partly coupled; the
+    finetune smoke tests whether a saturation-preserving hue path exists (Lab
+    chroma already preserved suggests the drop is min-channel/lightness, not true
+    chroma — so there may be headroom).
+    """
+    def hsv_sat(t: torch.Tensor) -> torch.Tensor:
+        mx = t.max(dim=1, keepdim=True).values
+        mn = t.min(dim=1, keepdim=True).values
+        return (mx - mn) / (mx + 1e-6)                   # (B,1,H,W)
+
+    deficit = torch.relu(hsv_sat(orig_srgb) - hsv_sat(out_srgb))
+    return (w * deficit.pow(2)).mean()
+
+
 # ── Pairwise ΔE matching (L_global) ──────────────────────────────────────
 
 def pairwise_de_loss(
@@ -212,6 +257,7 @@ class CVDLossV2(nn.Module):
         lambda_g: float = 0.15,
         lambda_n: float = 0.15,
         lambda_excess: float = 0.0,
+        lambda_sat: float = 0.0,
         use_lpips: bool = True,
         k_pairs: int = 2048,
     ):
@@ -220,6 +266,7 @@ class CVDLossV2(nn.Module):
         self.lambda_g = lambda_g
         self.lambda_n = lambda_n
         self.lambda_excess = lambda_excess
+        self.lambda_sat = lambda_sat          # chroma-preservation (opt-in; 0 = off)
         self.k_pairs = k_pairs
         self.naturalness = NaturalnessLoss(use_lpips=use_lpips)
 
@@ -248,11 +295,21 @@ class CVDLossV2(nn.Module):
 
         total = self.lambda_c * L_c + self.lambda_g * L_g + self.lambda_n * L_n
 
-        return total, {
+        comps = {
             "L_contrast": L_c.item(),
             "L_global": L_g.item(),
             "L_natural": L_n.item(),
         }
+
+        # HSV-saturation preservation (opt-in). Displayed sRGB out vs orig;
+        # loss-only, so ONNX export path is unaffected (never referenced
+        # outside training).
+        if self.lambda_sat > 0.0:
+            L_sat = saturation_loss(orig_srgb, out_srgb, w)
+            total = total + self.lambda_sat * L_sat
+            comps["L_sat"] = L_sat.item()
+
+        return total, comps
 
 
 if __name__ == "__main__":

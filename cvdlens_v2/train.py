@@ -344,7 +344,7 @@ def main(args):
     print(f"Device: {device}")
     print(f"Config: lr={args.lr}  batch={args.batch_size}  "
           f"λ_c=1.0  λ_g=0.15  λ_n=0.15  λ_tv={args.lambda_tv}  "
-          f"iters={args.iters}  crop={args.crop}")
+          f"λ_sat={args.lambda_sat}  iters={args.iters}  crop={args.crop}")
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -372,6 +372,7 @@ def main(args):
         model = nn.DataParallel(model)
         print(f"[DataParallel] using {torch.cuda.device_count()} GPUs")
     loss_fn = CVDLossV2(lambda_c=1.0, lambda_g=0.15, lambda_n=0.15,
+                        lambda_sat=args.lambda_sat,
                         use_lpips=args.use_lpips).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=args.lr,
                               weight_decay=args.weight_decay)
@@ -456,8 +457,9 @@ def main(args):
                 print(f"[step {step:>6d}/{total_steps}]  type={cvd_type}  "
                       f"total={total.item():.4f}  L_c={comps['L_contrast']:.3f}  "
                       f"L_g={comps['L_global']:.3f}  L_n={comps['L_natural']:.3f}  "
-                      f"L_tv={L_tv.item():.4f}  lr={lr_now:.2e}  "
-                      f"[{elapsed:.0f}s]")
+                      f"L_tv={L_tv.item():.4f}  "
+                      f"{('L_sat=%.4f  ' % comps['L_sat']) if 'L_sat' in comps else ''}"
+                      f"lr={lr_now:.2e}  [{elapsed:.0f}s]")
                 history.append({
                     "step": step, "type": cvd_type,
                     "total": total.item(), **comps, "L_tv": L_tv.item(),
@@ -518,6 +520,8 @@ if __name__ == "__main__":
     p.add_argument("--val-every", type=int, default=1000)
     p.add_argument("--log-every", type=int, default=100)
     p.add_argument("--lambda-tv", type=float, default=0.03)
+    p.add_argument("--lambda-sat", type=float, default=0.0,
+                   help="chroma-preservation L_sat weight (0=off). v3 candidate {0.5,1.0,2.0}")
     p.add_argument("--pretrained", action="store_true",
                    help="Load ImageNet-pretrained mobilenet weights")
     p.add_argument("--use-lpips", action="store_true")

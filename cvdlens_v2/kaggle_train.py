@@ -107,6 +107,8 @@ def main():
                         help="Default ON for Kaggle: safe across 12h limit")
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--lambda-tv", type=float, default=0.03)
+    parser.add_argument("--lambda-sat", type=float, default=0.0,
+                        help="chroma-preservation L_sat (v3: >0). NO-GO if 0 by mistake.")
     args_kaggle = parser.parse_args()
 
     data_dir, val_dir = resolve_paths()
@@ -145,6 +147,7 @@ def main():
         val_every=args_kaggle.val_every,
         log_every=args_kaggle.log_every,
         lambda_tv=args_kaggle.lambda_tv,
+        lambda_sat=args_kaggle.lambda_sat,
         pretrained=args_kaggle.pretrained,
         use_lpips=False,       # heavy on CPU/small GPUs; enable later if needed
         seed=0,
