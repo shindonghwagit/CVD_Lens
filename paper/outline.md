@@ -74,6 +74,24 @@
 - **[재조립]** 시뮬레이터 기준 평가의 한계 (Brettel/Machado 기준, 실사용자 지각 미검증).
   - **[자료]** `outputs/v2_phase3/step3_report.md` §Limitations (이번에 추가한 문단)
 - **[신규]** T(트리타노피아) 마진, 단일 severity 조건.
+- **[신규] tritan 파랑 회복 ↔ 채도(HSV) 결합** — 두 갈래 준비(v3 결과 따라 택1):
+  - **(a) v3(L_sat) 성공 시 → ablation figure.** Pareto 2장(`reports/tritan_retrain_eval/pareto_*.png`)
+    을 **"채도 보존항 없는 학습의 실패 모드"** ablation으로 배치: L_sat 미적용 체크포인트(8k~20k)는
+    수용영역(blueΔE≥5 & satΔ≥−0.08)에 진입 불가(운영점 부재), L_sat 추가 시 진입(스모크
+    satΔ −0.165→+0.01@blueΔE 5.09). "결합은 손실 설계로 분리 가능"을 정량 기여로 서술.
+    - **[자료]** `reports/tritan_retrain_eval/DECISION_TABLE.md`(스캔·L_sat·스모크), `ckpt_scan.json`,
+      `losses.py::saturation_loss`, v3 `eval_after.json`(예정)
+  - **(b) v3 미달 시 → 한계.** "tritan 저채도 파랑 회복은 R-추가(→보라)로 달성되며 HSV 채도
+    저하와 단일 메커니즘으로 결합, 사후 조정(severity·체크포인트 선택)으로 분리 불가"를 정량
+    한계로 서술 + 채도 보존을 향후 과제로.
+    - **[자료]** `DECISION_TABLE.md` "운영점 부재" + Pareto(단조 오목 프론티어), `ckpt_scan.json`
+- **[신규] 피부 warm-shift = 선택성 원칙과의 트레이드오프(어느 갈래든 한계 서술).**
+  피부톤은 tritan 혼동축(파랑-노랑) 상 노란끼에 위치 → w 게이팅이 피부를 confusion으로 잡는 것은
+  **색채학적으로 올바르며**, 스킨톤 보호는 "혼동영역을 보정한다"는 선택성 원칙과 본질적으로
+  상충. 재학습 skinΔE~2.6–3.1(전 체크포인트 2.5 초과, blue 강도와 무관한 상존 밴드). 해결은
+  손실 게이팅이 아니라 **지각 민감 색역 보호항**(위 L_n 확장 항목과 연결) 방향.
+  - **[자료]** `reports/tritan_retrain_eval/ckpt_scan.json`(skinΔE), `sweep_skin_portrait_step20000.png`,
+    `outputs/v2_phase3/skin_analysis.json`
 - **[신규]** 실사용자 심리물리 검증 부재 → 향후.
 - **[신규]** 피부 인지 자연스러움 항: 피부 등 지각 민감 색역에 대한 민감도 가중을 L_n에
   반영하는 방향 (예: 얼굴/피부 마스크 기반 자연스러움 가중, 지각 민감도 가중 L_n 확장) —

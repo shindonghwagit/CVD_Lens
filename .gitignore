@@ -117,3 +117,9 @@ paper/draft/
 # 재생성 가능한 그림(PNG)·이미지(JPG)는 제외 — diag_*.py / reeval_guided.py로 재현.
 reports/**/*.png
 reports/**/*.jpg
+# Kaggle 노트북 출력 다운로드(재취득 가능: `kaggle kernels output shindonghwaa/cvdlens`) — git 밖 유지.
+kaggle_output/
+kaggle_output_v2/
+
+# tritan 재학습 검증 세션 산출물(리포트·스캔 json·임시 onnx·v3 노트북) — 로컬 유지, 스크립트로 재생성.
+reports/tritan_retrain_eval/
