@@ -72,20 +72,55 @@ def _letterbox(img_f32: np.ndarray, size: int = 256):
     return canvas, (left, top, left + nw, top + nh)
 
 
+def _band(x: np.ndarray, lo: float, hi: float, w: float = 12.0) -> np.ndarray:
+    """Soft in-range indicator on [lo,hi] with `w`-wide ramps at both ends."""
+    return np.clip((x - lo) / w, 0.0, 1.0) * np.clip((hi - x) / w, 0.0, 1.0)
+
+
+# Tritan hue-rotation base angle at severity 1.0 (OpenCV H units, 0..179 == 0..360°).
+_TRITAN_BASE_DEG = 30.0
+
+
+def _tritan_hue_shift(img_f32: np.ndarray, severity: float) -> np.ndarray:
+    """Analytic, saturation-preserving hue rotation for tritan (blue↔yellow axis).
+
+    Rotates blue (H~90–135) toward violet and yellow (H~18–40) toward yellow-green,
+    keeping S and V fixed — so blue/yellow move off the tritan confusion axis and
+    become distinguishable WITHOUT the desaturation ("물빠짐") the learned model
+    produced by adding the opponent channel. Red/green/gray are outside both hue
+    bands (and below the saturation floor for gray) → untouched (selectivity).
+    Validated on the tritan_blue test-set (cvdlens_v2/tritan_hue_method.py):
+    coverage/CRR/selectivity pass, |Δsat|≲0.03. Severity scales the angle.
+    """
+    deg = _TRITAN_BASE_DEG * float(np.clip(severity, 0.0, 1.0))
+    hsv = cv2.cvtColor(_to_u8(img_f32), cv2.COLOR_RGB2HSV).astype(np.float32)
+    H, S, V = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    sat_g = np.clip((S - 18.0) / 50.0, 0.0, 1.0)              # exclude near-gray
+    g_blue = sat_g * _band(H, 90.0, 135.0)                    # blue
+    g_yellow = sat_g * _band(H, 18.0, 40.0)                   # yellow
+    hsv[..., 0] = (H + (g_blue + g_yellow) * deg) % 180.0     # S,V untouched
+    return cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2RGB).astype(np.float32) / 255.0
+
+
 def _correct_image(img_f32: np.ndarray, cvd_type: str, severity: float) -> np.ndarray:
     """img_f32: (H,W,3) float32 [0,1] at native resolution → corrected, same shape.
 
-    Bilateral-grid delta-composite: infer the color correction at 256, take the
-    delta (out − in) over the content box only, bilinear-upsample it to native
-    resolution, and add it back to the *original* pixels. The correction is a
-    smooth low-frequency color shift, so upsampling it loses nothing while the
-    original's high-frequency detail (text edges etc.) is preserved.
+    Protan/deutan: bilateral-grid delta-composite — infer the color correction at
+    256, take the delta (out − in) over the content box, bilinear-upsample and add
+    it back to the *original* pixels (low-frequency shift, detail preserved).
+
+    Tritan: dedicated saturation-preserving hue rotation (see _tritan_hue_shift),
+    computed at native resolution. Both paths share the guided-filter smoothing +
+    composite below.
     """
     h, w = img_f32.shape[:2]
-    lb, (x0, y0, x1, y1) = _letterbox(img_f32, 256)
-    out = _run_float(lb, cvd_type, severity)
-    delta = (out - lb)[y0:y1, x0:x1]                      # content-box delta only
-    delta_full = cv2.resize(delta, (w, h), interpolation=cv2.INTER_LINEAR)
+    if cvd_type == "t":
+        delta_full = _tritan_hue_shift(img_f32, severity) - img_f32
+    else:
+        lb, (x0, y0, x1, y1) = _letterbox(img_f32, 256)
+        out = _run_float(lb, cvd_type, severity)
+        delta = (out - lb)[y0:y1, x0:x1]                  # content-box delta only
+        delta_full = cv2.resize(delta, (w, h), interpolation=cv2.INTER_LINEAR)
 
     # Guided-filter post-processing: snap the delta to the original's edges
     # (region boundaries sharpen) and flatten it inside uniform-guide regions
