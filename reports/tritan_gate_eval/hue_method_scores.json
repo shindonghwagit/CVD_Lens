@@ -1,0 +1,293 @@
+{
+  "deg": 26.0,
+  "per_img": [
+    {
+      "path": "outputs/artifact_analysis/blue_sea.jpg",
+      "cat": "teal",
+      "npx": 20925,
+      "dE_mask": 13.79,
+      "dE_full": 8.16,
+      "satD": 0.0021,
+      "crr": 0.988
+    },
+    {
+      "path": "coco:000000096960.jpg",
+      "cat": "teal",
+      "npx": 51419,
+      "dE_mask": 22.67,
+      "dE_full": 21.33,
+      "satD": -0.0054,
+      "crr": 1.105
+    },
+    {
+      "path": "coco:000000360137.jpg",
+      "cat": "navy",
+      "npx": 41756,
+      "dE_mask": 12.25,
+      "dE_full": 9.89,
+      "satD": 0.0269,
+      "crr": 1.052
+    },
+    {
+      "path": "coco:000000224119.jpg",
+      "cat": "navy",
+      "npx": 39665,
+      "dE_mask": 5.93,
+      "dE_full": 5.12,
+      "satD": 0.029,
+      "crr": 1.032
+    },
+    {
+      "path": "coco:000000379453.jpg",
+      "cat": "pure_blue",
+      "npx": 60206,
+      "dE_mask": 22.18,
+      "dE_full": 20.96,
+      "satD": 0.0042,
+      "crr": 2.055
+    },
+    {
+      "path": "coco:000000525322.jpg",
+      "cat": "pure_blue",
+      "npx": 59067,
+      "dE_mask": 21.53,
+      "dE_full": 20.72,
+      "satD": 0.007,
+      "crr": 1.473
+    },
+    {
+      "path": "coco:000000217060.jpg",
+      "cat": "clear_sky",
+      "npx": 64907,
+      "dE_mask": 18.48,
+      "dE_full": 18.41,
+      "satD": 0.004,
+      "crr": 0.954
+    },
+    {
+      "path": "coco:000000135673.jpg",
+      "cat": "clear_sky",
+      "npx": 64680,
+      "dE_mask": 14.88,
+      "dE_full": 14.82,
+      "satD": 0.0027,
+      "crr": 5.027
+    },
+    {
+      "path": "coco:000000076261.jpg",
+      "cat": "pale_sky",
+      "npx": 60855,
+      "dE_mask": 4.17,
+      "dE_full": 4.67,
+      "satD": 0.0028,
+      "crr": 1.173
+    },
+    {
+      "path": "coco:000000144114.jpg",
+      "cat": "pale_sky",
+      "npx": 56778,
+      "dE_mask": 2.35,
+      "dE_full": 2.3,
+      "satD": 0.0019,
+      "crr": 0.966
+    },
+    {
+      "path": "coco:000000522889.jpg",
+      "cat": "cyan",
+      "npx": 23222,
+      "dE_mask": 34.3,
+      "dE_full": 24.27,
+      "satD": 0.01,
+      "crr": 1.1
+    },
+    {
+      "path": "coco:000000488270.jpg",
+      "cat": "cyan",
+      "npx": 15576,
+      "dE_mask": 19.91,
+      "dE_full": 11.45,
+      "satD": 0.0027,
+      "crr": 1.05
+    },
+    {
+      "path": "coco:000000181859.jpg",
+      "cat": "yellow",
+      "npx": 43242,
+      "dE_mask": 7.52,
+      "dE_full": 6.02,
+      "satD": 0.0044,
+      "crr": 1.102
+    },
+    {
+      "path": "coco:000000201676.jpg",
+      "cat": "yellow",
+      "npx": 28769,
+      "dE_mask": 10.91,
+      "dE_full": 8.2,
+      "satD": -0.002,
+      "crr": 1.67
+    },
+    {
+      "path": "coco:000000000724.jpg",
+      "cat": "red_ctrl",
+      "npx": 1769,
+      "dE_mask": 0.37,
+      "dE_full": 6.07,
+      "satD": -0.0008,
+      "crr": 1.015
+    },
+    {
+      "path": "coco:000000256407.jpg",
+      "cat": "red_ctrl",
+      "npx": 48977,
+      "dE_mask": 0.19,
+      "dE_full": 0.34,
+      "satD": 0.0053,
+      "crr": 0.999
+    },
+    {
+      "path": "coco:000000515828.jpg",
+      "cat": "green_ctrl",
+      "npx": 50333,
+      "dE_mask": 0.33,
+      "dE_full": 0.68,
+      "satD": 0.0055,
+      "crr": 0.985
+    },
+    {
+      "path": "coco:000000179285.jpg",
+      "cat": "green_ctrl",
+      "npx": 49232,
+      "dE_mask": 0.46,
+      "dE_full": 2.19,
+      "satD": 0.0003,
+      "crr": 0.706
+    },
+    {
+      "path": "coco:000000496409.jpg",
+      "cat": "gray_ctrl",
+      "npx": 65536,
+      "dE_mask": 0.26,
+      "dE_full": 0.26,
+      "satD": 0.0013,
+      "crr": 1.007
+    },
+    {
+      "path": "coco:000000144932.jpg",
+      "cat": "gray_ctrl",
+      "npx": 65133,
+      "dE_mask": 0.39,
+      "dE_full": 0.4,
+      "satD": 0.0031,
+      "crr": 0.981
+    },
+    {
+      "path": "outputs/daily_test/skin_portrait.jpg",
+      "cat": "skin",
+      "npx": 13764,
+      "dE_mask": 0.74,
+      "dE_full": 2.18,
+      "satD": 0.014,
+      "crr": 1.013
+    }
+  ],
+  "agg": {
+    "teal": {
+      "n": 2,
+      "dE_mask_mean": 18.23,
+      "dE_mask_min": 13.79,
+      "dE_full_mean": 14.74,
+      "satD_mean": -0.0017,
+      "crr_mean": 1.046
+    },
+    "navy": {
+      "n": 2,
+      "dE_mask_mean": 9.09,
+      "dE_mask_min": 5.93,
+      "dE_full_mean": 7.51,
+      "satD_mean": 0.028,
+      "crr_mean": 1.042
+    },
+    "pure_blue": {
+      "n": 2,
+      "dE_mask_mean": 21.86,
+      "dE_mask_min": 21.53,
+      "dE_full_mean": 20.84,
+      "satD_mean": 0.0056,
+      "crr_mean": 1.764
+    },
+    "clear_sky": {
+      "n": 2,
+      "dE_mask_mean": 16.68,
+      "dE_mask_min": 14.88,
+      "dE_full_mean": 16.62,
+      "satD_mean": 0.0034,
+      "crr_mean": 2.99
+    },
+    "pale_sky": {
+      "n": 2,
+      "dE_mask_mean": 3.26,
+      "dE_mask_min": 2.35,
+      "dE_full_mean": 3.48,
+      "satD_mean": 0.0024,
+      "crr_mean": 1.07
+    },
+    "cyan": {
+      "n": 2,
+      "dE_mask_mean": 27.1,
+      "dE_mask_min": 19.91,
+      "dE_full_mean": 17.86,
+      "satD_mean": 0.0063,
+      "crr_mean": 1.075
+    },
+    "yellow": {
+      "n": 2,
+      "dE_mask_mean": 9.21,
+      "dE_mask_min": 7.52,
+      "dE_full_mean": 7.11,
+      "satD_mean": 0.0012,
+      "crr_mean": 1.386
+    },
+    "red_ctrl": {
+      "n": 2,
+      "dE_mask_mean": 0.28,
+      "dE_mask_min": 0.19,
+      "dE_full_mean": 3.21,
+      "satD_mean": 0.0022,
+      "crr_mean": 1.007
+    },
+    "green_ctrl": {
+      "n": 2,
+      "dE_mask_mean": 0.4,
+      "dE_mask_min": 0.33,
+      "dE_full_mean": 1.44,
+      "satD_mean": 0.0029,
+      "crr_mean": 0.845
+    },
+    "gray_ctrl": {
+      "n": 2,
+      "dE_mask_mean": 0.33,
+      "dE_mask_min": 0.26,
+      "dE_full_mean": 0.33,
+      "satD_mean": 0.0022,
+      "crr_mean": 0.994
+    },
+    "skin": {
+      "n": 1,
+      "dE_mask_mean": 0.74,
+      "dE_mask_min": 0.74,
+      "dE_full_mean": 2.18,
+      "satD_mean": 0.014,
+      "crr_mean": 1.013
+    }
+  },
+  "checks": {
+    "coverage_dE_mask>=4": false,
+    "coverage_dE_min>=2": true,
+    "distinguish_CRR>=1.0": true,
+    "nowashout_|satD|<=0.03": true,
+    "selectivity_offdE<=1.5": true
+  },
+  "blue_dE_std": 7.88,
+  "overall": false
+}

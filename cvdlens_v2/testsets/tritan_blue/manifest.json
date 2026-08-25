@@ -1,0 +1,43 @@
+{
+  "coco_val_dir": "C:/Users/SCH/coco/val2017",
+  "hsv_mask_rules": {
+    "navy": {"h": [100,130], "s": [110,255], "v": [15,85]},
+    "pure_blue": {"h": [102,128], "s": [140,255], "v": [90,210]},
+    "clear_sky": {"h": [100,125], "s": [45,165], "v": [175,255]},
+    "pale_sky": {"h": [95,125], "s": [12,55], "v": [175,255]},
+    "teal": {"h": [85,100], "s": [70,255], "v": [90,255]},
+    "cyan": {"h": [85,98], "s": [110,255], "v": [170,255]},
+    "yellow": {"h": [20,35], "s": [110,255], "v": [160,255]},
+    "red_ctrl": {"h": [0,8], "s": [125,255], "v": [90,255], "h2": [172,179]},
+    "green_ctrl": {"h": [40,75], "s": [95,255], "v": [70,255]},
+    "gray_ctrl": {"h": [0,179], "s": [0,32], "v": [45,220]},
+    "skin": {"h": [0,25], "s": [30,170], "v": [64,250], "h2": [160,179]}
+  },
+  "role": {
+    "blue_coverage": ["navy","pure_blue","clear_sky","pale_sky","teal","cyan"],
+    "selectivity_off": ["red_ctrl","green_ctrl","gray_ctrl"]
+  },
+  "images": [
+    {"path":"outputs/artifact_analysis/blue_sea.jpg","category":"teal"},
+    {"path":"coco:000000096960.jpg","category":"teal"},
+    {"path":"coco:000000360137.jpg","category":"navy"},
+    {"path":"coco:000000224119.jpg","category":"navy"},
+    {"path":"coco:000000379453.jpg","category":"pure_blue"},
+    {"path":"coco:000000525322.jpg","category":"pure_blue"},
+    {"path":"coco:000000217060.jpg","category":"clear_sky"},
+    {"path":"coco:000000135673.jpg","category":"clear_sky"},
+    {"path":"coco:000000076261.jpg","category":"pale_sky"},
+    {"path":"coco:000000144114.jpg","category":"pale_sky"},
+    {"path":"coco:000000522889.jpg","category":"cyan"},
+    {"path":"coco:000000488270.jpg","category":"cyan"},
+    {"path":"coco:000000181859.jpg","category":"yellow"},
+    {"path":"coco:000000201676.jpg","category":"yellow"},
+    {"path":"coco:000000000724.jpg","category":"red_ctrl"},
+    {"path":"coco:000000256407.jpg","category":"red_ctrl"},
+    {"path":"coco:000000515828.jpg","category":"green_ctrl"},
+    {"path":"coco:000000179285.jpg","category":"green_ctrl"},
+    {"path":"coco:000000496409.jpg","category":"gray_ctrl"},
+    {"path":"coco:000000144932.jpg","category":"gray_ctrl"},
+    {"path":"outputs/daily_test/skin_portrait.jpg","category":"skin"}
+  ]
+}
