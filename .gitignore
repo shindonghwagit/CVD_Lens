@@ -123,3 +123,4 @@ kaggle_output_v2/
 
 # tritan 재학습 검증 세션 산출물(리포트·스캔 json·임시 onnx·v3 노트북) — 로컬 유지, 스크립트로 재생성.
 reports/tritan_retrain_eval/
+kaggle_output_v3/

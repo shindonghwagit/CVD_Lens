@@ -74,17 +74,29 @@
 - **[재조립]** 시뮬레이터 기준 평가의 한계 (Brettel/Machado 기준, 실사용자 지각 미검증).
   - **[자료]** `outputs/v2_phase3/step3_report.md` §Limitations (이번에 추가한 문단)
 - **[신규]** T(트리타노피아) 마진, 단일 severity 조건.
-- **[신규] tritan 파랑 회복 ↔ 채도(HSV) 결합** — 두 갈래 준비(v3 결과 따라 택1):
-  - **(a) v3(L_sat) 성공 시 → ablation figure.** Pareto 2장(`reports/tritan_retrain_eval/pareto_*.png`)
-    을 **"채도 보존항 없는 학습의 실패 모드"** ablation으로 배치: L_sat 미적용 체크포인트(8k~20k)는
-    수용영역(blueΔE≥5 & satΔ≥−0.08)에 진입 불가(운영점 부재), L_sat 추가 시 진입(스모크
-    satΔ −0.165→+0.01@blueΔE 5.09). "결합은 손실 설계로 분리 가능"을 정량 기여로 서술.
-    - **[자료]** `reports/tritan_retrain_eval/DECISION_TABLE.md`(스캔·L_sat·스모크), `ckpt_scan.json`,
-      `losses.py::saturation_loss`, v3 `eval_after.json`(예정)
-  - **(b) v3 미달 시 → 한계.** "tritan 저채도 파랑 회복은 R-추가(→보라)로 달성되며 HSV 채도
-    저하와 단일 메커니즘으로 결합, 사후 조정(severity·체크포인트 선택)으로 분리 불가"를 정량
-    한계로 서술 + 채도 보존을 향후 과제로.
-    - **[자료]** `DECISION_TABLE.md` "운영점 부재" + Pareto(단조 오목 프론티어), `ckpt_scan.json`
+- **[신규] tritan 파랑 회복 ↔ HSV 채도 저하의 본질적 결합 — 3중 음성 실험(핵심 한계).**
+  저채도 파랑의 tritan 보정은 opponent 채널(R) 추가(→보라)로 달성되며, 이것이 곧 HSV 채도 저하다.
+  세 경로 모두 (blueΔE≥5 & satΔ≥−0.08 & gate 통과 & p/d 회귀 없음)를 **동시 충족 못 함**을 실험으로
+  확정 → 결합은 손실·학습 스케줄 수준에서 분리 불가.
+  - **(i) 사후조정 불가:** L_sat 없는 fresh 체크포인트(8k~20k)는 단조 오목 프론티어를 이루며
+    수용영역을 관통하지 않음(운영점 부재). *→ figure: Pareto 2장 `pareto_blueDE_vs_sat.png`·
+    `pareto_blueDE_vs_skin.png`; 표: DECISION_TABLE 스캔표.*
+  - **(ii) from-scratch 손실 제약 불가:** λ_sat=200 fresh 재학습은 satΔ는 개선(+0.004)하나
+    **blueΔE가 2.73으로 붕괴**(프론티어 최저-blue점) + p/d 회귀 + t-gate 미달. *→ figure:
+    오버레이 v3점; 표: DECISION_TABLE v3표.*
+  - **(iii) 커리큘럼(2단계) 불안정:** step20000→L_sat 파인튜닝은 blue+sat 수용영역에 **진입은
+    하나**(step2000 blueΔE 6.31·satΔ −0.011) **t-gate 1.26<1.27 고착 + p/d 회귀**로 4중 기준
+    미충족, 궤적 비단조(조기종료 취약). *→ figure: `pareto_2stage_overlay.png`(궤적 화살표);
+    표: DECISION_TABLE 궤적표.*
+  - **[자료]** `reports/tritan_retrain_eval/DECISION_TABLE.md`(스캔·v3·2단계·최종결론),
+    `ckpt_scan.json`, `stage2/stage2_trajectory.json`, `pareto_*.png`,
+    `cvdlens_v2/losses.py::saturation_loss`(음성 개입, Exp 1-D excess penalty와 동형).
+  - **[신규] 향후 과제 1문단:** 세 음성은 **문제가 손실 항이 아니라 보정 파라미터화에 있음**을
+    시사한다. tritan 보정을 sRGB/opponent 공간의 자유 delta로 두면 파랑 이동이 필연적으로 채도를
+    깎는다. 따라서 **지각균등 색공간(예: CAM02-UCS)에서 명도·채도를 고정하고 hue(또는 그에 준하는
+    지각 색상각)만 회전**시키는 **hue-preserving 재파라미터화**가 필요하다 — 즉 개선은 손실 수준이
+    아니라 **보정 파라미터화 수준의 재설계**가 요구됨을 본 실험들이 정량적으로 시사한다. (별도 연구
+    사이클: 색공간 변환의 미분가능 구현 + ONNX 이식 비용 검토.)
 - **[신규] 피부 warm-shift = 선택성 원칙과의 트레이드오프(어느 갈래든 한계 서술).**
   피부톤은 tritan 혼동축(파랑-노랑) 상 노란끼에 위치 → w 게이팅이 피부를 confusion으로 잡는 것은
   **색채학적으로 올바르며**, 스킨톤 보호는 "혼동영역을 보정한다"는 선택성 원칙과 본질적으로
