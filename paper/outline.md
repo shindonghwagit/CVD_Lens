@@ -17,10 +17,34 @@
   daltonize 대비 정량 우위(CRR ≥, NP ↓).
 
 ## 2. 관련 연구
-- **[신규]** 재색상화 기법 개괄 (rule-based daltonize, 최적화 기반, 학습 기반).
-- **[신규]** CVD 시뮬레이션 모델: Brettel(error-shift), Machado(matrix).
-  - **[자료]** 구현 근거: `cvdlens_v2/simulation.py` (machado_matrix_tensor, daltonize)
-- **[신규]** HDRNet / bilateral grid 계열 (저해상 계수 예측 → 고해상 적용) — 아키텍처 착안점.
+- **[신규]** CVD 시뮬레이션 모델(평가·게이팅의 기반): Brettel-1997(error-shift 투영),
+  Machado-2009(matrix). 본 연구는 이들을 **손실·혼동가중 w의 내부 모델**로 사용.
+  - **[자료]** 구현 근거: `cvdlens_v2/simulation.py`, `cvdlens_v2/confusion.py`
+- **[신규]** 재색상화 선행연구를 4계열로 정리하고 CVDLens의 좌표를 명시:
+  1. **고전 daltonize (규칙 기반).** *Rathee & Mann 2022* — RGB→LMS 변환 후 결손 원뿔 정보
+     삭제→역변환(Brettel) + 대비/블러/K-means 등 IPT. 논문 제목의 "CNN"은 **Ishihara 판 숫자
+     인식(MNIST) = 자가진단 모듈**일 뿐, 보정 엔진은 비학습 daltonize. → 선택성·자연스러움 부재.
+  2. **CNN이 손규칙을 모방 학습.** *Pendhari et al. 2024* — 타입별 CNN 오토인코더 3개가
+     "적색→갈색 / 청색→보라 / (deutan)대비감소" 손규칙 출력을 페어 학습으로 모방. 규칙 자체가
+     crude(지각·선택성 없음). Tkinter GUI + Ishihara. → 본 프로젝트 착안의 출발점이나 baseline.
+  3. **학습 변환 + 지각모델 임베드(직계 선행).** *Orii et al.* — 다층 신경망 3블록:
+     ①색변환 층(**학습**) + ②색맹 지각모델(고정) + ③색 구분모델(고정). sim·discrimination을
+     고정해두고 **변환규칙만 학습**. **CVDLens 접근의 원형**(학습 변환 + 고정 CVD-sim을 손실에).
+     CVDLens 확장: bilateral-grid 고해상, w-gating 선택성, daltonize 대비 CRR/NP, 웹 배포.
+  4. **선택적·최적 보정(선택성 직계).** *Choi et al. 2019 (IEEE Access, 세종대)* — 기존법이
+     **모든 색을 보정**해 정상시야 이질감을 유발한다고 비판하고, **혼동선(confusion-line) DB +
+     region growing + 최소영역 보정 + 재보정 방지(collision 회피)**로 **혼동영역만 최소 변환**.
+     **CVDLens의 w-gating이 이 선택성의 학습·미분가능 버전**(혼동가중 w=Brettel-sim ΔE 기반).
+     단 Choi의 **이미지-전역 재보정 방지**는 CVDLens에 없는 요소(§7 향후과제로 흡수).
+  5. **Ishihara 특화 IPT + 분류 평가.** *Akalın & Top 2025* — 3단계 IPT 필터를 Ishihara 판에
+     적용, 색맹 시뮬 후 **MobileNetv2**로 분류해 객관 평가. Ishihara 국한 + 분류기 평가.
+     CVDLens는 일반 이미지 + CRR/NP·daltonize 비교(더 일반적·지각적).
+- **[신규] CVDLens의 위치 = Orii(학습 변환) × Choi(선택성)의 교차점을 현대화·배포.** 결손 축의
+  성질에 맞춰 **축별 최적 방법**을 채택: **적록(p/d)=학습 지각 대비회복**(Orii 계열, 적록차를
+  가시 청황/명도 축으로 매핑), **청황(t)=채도보존 해석적 hue 회전**(Choi/daltonize 계열, off-axis
+  이동). analytic t는 최상위 저널(Choi)도 쓰는 정통 방식임을 근거로 정당화.
+- **[신규]** HDRNet / bilateral grid 계열(저해상 계수 예측 → 고해상 적용) — p/d 아키텍처 착안점.
+  - **[자료]** 논문 PDF: `논문 리뷰/` (Orii, Choi 2019, Akalın 2025, Pendhari 2024, Rathee 2022).
 
 ## 3. 방법
 - **[재조립]** v1 실패 분석 = identity collapse의 수학적 원인:
@@ -97,6 +121,29 @@
     지각 색상각)만 회전**시키는 **hue-preserving 재파라미터화**가 필요하다 — 즉 개선은 손실 수준이
     아니라 **보정 파라미터화 수준의 재설계**가 요구됨을 본 실험들이 정량적으로 시사한다. (별도 연구
     사이클: 색공간 변환의 미분가능 구현 + ONNX 이식 비용 검토.)
+  - **[신규] 채택된 해법(본 연구 결론):** 위 3중 음성을 근거로 **tritan을 학습모델에서 분리해
+    채도보존 해석적 hue 회전**(blue→violet / yellow→yellow-green, S·V 고정)으로 전환·배포.
+    실사 test-set(21장) 사전고정 지표에서 커버리지/구분(CRR)/선택성/무-물빠짐을 통과(§실험).
+    → tritan 한계는 "손실로 못 품(음성)" + "파라미터화 전환으로 해결(양성)"의 **쌍**으로 서술.
+    - **[자료]** `cvdlens_v2/tritan_hue_method.py`, `reports/tritan_gate_eval/`(manifest·scores·CRITERIA),
+      `cvd-lens/inference/main.py`(`_tritan_hue_shift`).
+- **[신규] 이미지-전역 관계적 보정(Choi 2019 흡수) — p/d·t 공통 향후과제.**
+  현행 CVDLens 보정은 **per-pixel/국소**(혼동가중 w = "이 색이 추상적으로 혼동색인가")라, 이미지
+  안의 **다른 영역과의 관계**(A를 옮기면 기존 B와 충돌하는가)는 안 본다. Choi의 **혼동선 DB +
+  최소영역 보정 + 재보정 방지**를 관계적 항으로 흡수하면 양 축을 보완:
+  - **p/d 보완 — #1 대면적 포화-빨강 과보정 완화.** 현행 w는 **모든 빨강에 w=1**(혼동 파트너 유무
+    무관)이라 홀로 있는 대면적 빨강(토마토)을 과보정(protan p99 41.55). Choi식 **관계적 게이팅**
+    (그 빨강이 이미지 내 **다른 영역과 실제로 혼동될 때만** 보정, 더 작은 영역 우선)을 도입하면
+    과보정·얼룩(#1)이 구조적으로 줄어든다. → w를 "절대 혼동색"에서 "이미지 내 상대 혼동쌍"으로 확장.
+    - **[자료]** `outputs/artifact_analysis/REPORT.md`(#1), `outputs/daily_test/daily_stats.json`.
+  - **t 보완 — 고정 회전의 collision 회피 + 이미지-적응 목표색.** 현행 hue 회전은 **고정각**이라
+    파랑을 옮긴 보라가 이미지에 **이미 있는 보라/자홍과 충돌**할 수 있다(Choi가 지적한 재보정 문제).
+    Choi의 **재보정 방지 + 최적색 선정**(정상시야 최소변화 & CVD 최대구분)을 적용하면, 이미지의
+    기존 색 분포를 보고 **충돌 없는 최적 회전량/목표색**을 정하는 이미지-적응 tritan으로 발전.
+    - **[자료]** `cvdlens_v2/tritan_hue_method.py`(현행 고정각), Choi 2019 §II(혼동선 DB·재보정 방지).
+  - **통합 난점(정직 서술):** Choi는 **region-growing + 이산 DB**(하드 경계·비미분)라 CVDLens의
+    soft/고해상/학습 프레임에 그대로 못 붙임. 관계적 혼동 항을 **미분가능·per-pixel 근사**로
+    재설계하거나(학습 손실에 상대-혼동 페널티), 추론단 후처리(영역분석)로 흡수하는 두 경로가 있음.
 - **[신규] 피부 warm-shift = 선택성 원칙과의 트레이드오프(어느 갈래든 한계 서술).**
   피부톤은 tritan 혼동축(파랑-노랑) 상 노란끼에 위치 → w 게이팅이 피부를 confusion으로 잡는 것은
   **색채학적으로 올바르며**, 스킨톤 보호는 "혼동영역을 보정한다"는 선택성 원칙과 본질적으로
