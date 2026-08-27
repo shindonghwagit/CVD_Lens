@@ -1,0 +1,128 @@
+[
+ {
+  "path": "outputs/artifact_analysis/blue_sea.jpg",
+  "cat": "teal",
+  "dE_mask": 15.777,
+  "satD": 0.0013
+ },
+ {
+  "path": "coco:000000096960.jpg",
+  "cat": "teal",
+  "dE_mask": 24.204,
+  "satD": -0.0131
+ },
+ {
+  "path": "coco:000000360137.jpg",
+  "cat": "navy",
+  "dE_mask": 13.733,
+  "satD": 0.0224
+ },
+ {
+  "path": "coco:000000224119.jpg",
+  "cat": "navy",
+  "dE_mask": 7.023,
+  "satD": 0.0204
+ },
+ {
+  "path": "coco:000000379453.jpg",
+  "cat": "pure_blue",
+  "dE_mask": 24.268,
+  "satD": 0.0031
+ },
+ {
+  "path": "coco:000000525322.jpg",
+  "cat": "pure_blue",
+  "dE_mask": 23.27,
+  "satD": 0.0044
+ },
+ {
+  "path": "coco:000000217060.jpg",
+  "cat": "clear_sky",
+  "dE_mask": 20.811,
+  "satD": 0.0026
+ },
+ {
+  "path": "coco:000000135673.jpg",
+  "cat": "clear_sky",
+  "dE_mask": 16.201,
+  "satD": 0.0022
+ },
+ {
+  "path": "coco:000000076261.jpg",
+  "cat": "pale_sky",
+  "dE_mask": 4.516,
+  "satD": 0.0027
+ },
+ {
+  "path": "coco:000000144114.jpg",
+  "cat": "pale_sky",
+  "dE_mask": 2.635,
+  "satD": 0.0013
+ },
+ {
+  "path": "coco:000000522889.jpg",
+  "cat": "cyan",
+  "dE_mask": 36.373,
+  "satD": 0.0022
+ },
+ {
+  "path": "coco:000000488270.jpg",
+  "cat": "cyan",
+  "dE_mask": 21.774,
+  "satD": 0.0019
+ },
+ {
+  "path": "coco:000000181859.jpg",
+  "cat": "yellow",
+  "dE_mask": 9.09,
+  "satD": 0.0021
+ },
+ {
+  "path": "coco:000000201676.jpg",
+  "cat": "yellow",
+  "dE_mask": 12.402,
+  "satD": -0.0042
+ },
+ {
+  "path": "coco:000000000724.jpg",
+  "cat": "red_ctrl",
+  "dE_mask": 0.261,
+  "satD": -0.003
+ },
+ {
+  "path": "coco:000000256407.jpg",
+  "cat": "red_ctrl",
+  "dE_mask": 0.081,
+  "satD": 0.003
+ },
+ {
+  "path": "coco:000000515828.jpg",
+  "cat": "green_ctrl",
+  "dE_mask": 0.231,
+  "satD": 0.0025
+ },
+ {
+  "path": "coco:000000179285.jpg",
+  "cat": "green_ctrl",
+  "dE_mask": 0.395,
+  "satD": -0.0025
+ },
+ {
+  "path": "coco:000000496409.jpg",
+  "cat": "gray_ctrl",
+  "dE_mask": 0.155,
+  "satD": 0.0012
+ },
+ {
+  "path": "coco:000000144932.jpg",
+  "cat": "gray_ctrl",
+  "dE_mask": 0.311,
+  "satD": 0.0029
+ },
+ {
+  "path": "outputs/daily_test/skin_portrait.jpg",
+  "cat": "skin",
+  "dE_mask": 0.744,
+  "satD": 0.0068
+ }
+]
