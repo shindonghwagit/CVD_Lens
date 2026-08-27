@@ -10,7 +10,7 @@ import numpy as np
 import onnxruntime as rt
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from PIL import Image
 
 import config
@@ -172,10 +172,9 @@ async def infer(
     return StreamingResponse(buf, media_type="image/jpeg")
 
 
-_FFMPEG = (
-    shutil.which("ffmpeg")
-    or r"C:\Users\SCH\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin\ffmpeg.exe"
-)
+# ffmpeg는 PATH에서만 찾는다. 컨테이너엔 Dockerfile이 설치. 없으면 /infer/video가 500 반환.
+# (예전엔 로컬 Windows 경로로 폴백해 배포 서버에서 FileNotFoundError → 검은 영상으로 실패했음.)
+_FFMPEG = shutil.which("ffmpeg")
 
 
 def _correct_frame(frame_bgr: np.ndarray, cvd_type: str, severity: float = 1.0) -> np.ndarray:
@@ -197,6 +196,10 @@ async def infer_video(
 ):
     import subprocess
     import threading
+
+    if _FFMPEG is None:
+        return JSONResponse(status_code=500,
+                            content={"error": "서버에 ffmpeg가 설치되어 있지 않아 영상 보정을 처리할 수 없습니다."})
 
     suffix  = Path(video.filename or "input.mp4").suffix or ".mp4"
     tmp_in  = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
@@ -276,4 +279,4 @@ async def infer_video(
         for p in [tmp_in.name, tmp_out.name]:
             try: os.unlink(p)
             except OSError: pass
-        return {"error": str(e)}
+        return JSONResponse(status_code=500, content={"error": str(e)})

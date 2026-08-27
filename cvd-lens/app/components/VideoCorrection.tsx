@@ -70,6 +70,13 @@ export default function VideoCorrection() {
         throw new Error(json.error ?? `서버 오류 ${res.status}`);
       }
 
+      // 서버가 200으로 에러 JSON을 줄 수도 있으니(과거 버그) 영상인지 확인 후 렌더.
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.startsWith("video/")) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error ?? "서버가 보정 영상을 반환하지 않았습니다.");
+      }
+
       const frames = Number(res.headers.get("X-Frame-Count") ?? 0);
       setFrameCount(frames || null);
       setElapsed(Math.round((Date.now() - t0) / 1000));
