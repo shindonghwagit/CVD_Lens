@@ -1,0 +1,128 @@
+[
+ {
+  "path": "outputs/artifact_analysis/blue_sea.jpg",
+  "cat": "teal",
+  "dE_mask": 29.417,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000096960.jpg",
+  "cat": "teal",
+  "dE_mask": 31.708,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000360137.jpg",
+  "cat": "navy",
+  "dE_mask": 10.809,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000224119.jpg",
+  "cat": "navy",
+  "dE_mask": 4.296,
+  "satD": -0.0
+ },
+ {
+  "path": "coco:000000379453.jpg",
+  "cat": "pure_blue",
+  "dE_mask": 19.437,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000525322.jpg",
+  "cat": "pure_blue",
+  "dE_mask": 19.512,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000217060.jpg",
+  "cat": "clear_sky",
+  "dE_mask": 15.047,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000135673.jpg",
+  "cat": "clear_sky",
+  "dE_mask": 4.427,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000076261.jpg",
+  "cat": "pale_sky",
+  "dE_mask": 0.054,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000144114.jpg",
+  "cat": "pale_sky",
+  "dE_mask": 0.061,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000522889.jpg",
+  "cat": "cyan",
+  "dE_mask": 36.647,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000488270.jpg",
+  "cat": "cyan",
+  "dE_mask": 24.683,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000181859.jpg",
+  "cat": "yellow",
+  "dE_mask": 0.131,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000201676.jpg",
+  "cat": "yellow",
+  "dE_mask": 0.28,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000000724.jpg",
+  "cat": "red_ctrl",
+  "dE_mask": 0.063,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000256407.jpg",
+  "cat": "red_ctrl",
+  "dE_mask": 0.082,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000515828.jpg",
+  "cat": "green_ctrl",
+  "dE_mask": 0.104,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000179285.jpg",
+  "cat": "green_ctrl",
+  "dE_mask": 0.205,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000496409.jpg",
+  "cat": "gray_ctrl",
+  "dE_mask": 0.006,
+  "satD": 0.0
+ },
+ {
+  "path": "coco:000000144932.jpg",
+  "cat": "gray_ctrl",
+  "dE_mask": 0.011,
+  "satD": 0.0
+ },
+ {
+  "path": "outputs/daily_test/skin_portrait.jpg",
+  "cat": "skin",
+  "dE_mask": 0.143,
+  "satD": -0.0
+ }
+]
