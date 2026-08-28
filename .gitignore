@@ -62,6 +62,9 @@ model-training/outputs/logs/
 # inference model 예외
 !cvd-lens/inference/model/
 !cvd-lens/inference/model/*.onnx
+# 브라우저(client-side ONNX Web) 모델 예외 — Vercel 정적 자산으로 서빙(없으면 p/d 영상 404)
+!cvd-lens/public/models/
+!cvd-lens/public/models/*.onnx
 
 # ───────────────────────────────────────────
 # 불필요한 압축/빌드 산출물
