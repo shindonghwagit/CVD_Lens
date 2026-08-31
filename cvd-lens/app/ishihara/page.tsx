@@ -26,8 +26,8 @@ export default function IshiharaPage() {
         </div>
         <p className="text-[15px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
           아래 플레이트에 숨어있는 숫자를 입력해주세요. 진단은 보정 없이 진행되며,
-          결과 화면에서 틀린 도판을 AI 보정으로 다시 볼 수 있습니다. 적록 계열(적색맹·녹색맹)
-          스크리닝이며 총 5장 · 약 2분이 소요됩니다.
+          결과 화면에서 틀린 도판을 AI 보정으로 다시 볼 수 있습니다. 적색맹·녹색맹
+          감별 검사이며 총 10장 · 약 3분이 소요됩니다.
         </p>
       </div>
 

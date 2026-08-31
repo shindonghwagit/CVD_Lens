@@ -9,14 +9,15 @@ import {
   Plate,
   plateSrc,
   pickPlates,
-  categoryScores,
-  estimateType,
-  CategoryScore,
+  diagnose,
+  diagnosisBars,
+  DIAGNOSIS_META,
+  Bar,
 } from "@/lib/ishiharaPlates";
 
 // AI 보정 미리보기 카드 — 결과 화면에서 "틀린 도판"을 보정 상태로 다시 보여줘
 // 보정의 가치를 데모한다. 진단 판정에는 절대 관여하지 않는다(판정은 보정 OFF 고정).
-function PlateCorrectionCard({ plate }: { plate: Plate }) {
+function PlateCorrectionCard({ plate, correctionType }: { plate: Plate; correctionType: CVDType }) {
   const { ready, infer } = useModel();
   const [on, setOn] = useState(false);
   const [correctedSrc, setCorrectedSrc] = useState<string | null>(null);
@@ -33,21 +34,19 @@ function PlateCorrectionCard({ plate }: { plate: Plate }) {
       canvas.height = SIZE;
       const ctx = canvas.getContext("2d")!;
       ctx.drawImage(imgRef.current, 0, 0, SIZE, SIZE);
-      // 적록 스크리닝이므로 녹색맹(d) 보정으로 데모.
-      const result = await infer(ctx.getImageData(0, 0, SIZE, SIZE), "d" as CVDType);
+      const result = await infer(ctx.getImageData(0, 0, SIZE, SIZE), correctionType);
       const out = document.createElement("canvas");
       out.width = SIZE;
       out.height = SIZE;
       out.getContext("2d")!.putImageData(result, 0, 0);
       setCorrectedSrc(out.toDataURL());
     } catch (e) {
-      // 서버 미가용 등 실패 시 원본 유지 + 토글 원복(스피너 고착 방지).
       console.error("보정 실패:", e);
       setOn(false);
     } finally {
       setBusy(false);
     }
-  }, [ready, infer]);
+  }, [ready, infer, correctionType]);
 
   useEffect(() => {
     if (on && !correctedSrc) apply();
@@ -101,31 +100,32 @@ function PlateCorrectionCard({ plate }: { plate: Plate }) {
   );
 }
 
-// 색 계열별(=기능 카테고리) 정답 수 막대그래프 — 경량 CSS 바(새 라이브러리 없음).
-// 적록 원칙 준수: R/G/B 축으로 쪼개지 않고 실제 판별 가능한 도판 기능 범주로 집계.
-function ScoreBars({ scores }: { scores: CategoryScore[] }) {
+// 유형별 색각이상 신호 막대그래프 — 경량 CSS 바(새 라이브러리 없음).
+function DiagnosisBars({ bars }: { bars: Bar[] }) {
   return (
     <div className="w-full rounded-xl border p-5 flex flex-col gap-3" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
-      <p className="text-sm font-medium" style={{ color: "var(--fg)" }}>도판 계열별 정답 수</p>
+      <p className="text-sm font-medium" style={{ color: "var(--fg)" }}>색각이상 유형별 신호</p>
       <div className="flex flex-col gap-3 mt-1">
-        {scores.map((s) => {
-          const pct = s.total > 0 ? (s.correct / s.total) * 100 : 0;
+        {bars.map((b) => {
+          const pct = b.max > 0 ? (b.value / b.max) * 100 : 0;
+          const disabled = b.note != null;
           return (
-            <div key={s.key} className="flex items-center gap-3">
-              <span className="w-20 shrink-0 text-[13px]" style={{ color: "var(--fg-muted)" }}>{s.label}</span>
+            <div key={b.key} className="flex items-center gap-3">
+              <span className="w-16 shrink-0 text-[13px]" style={{ color: "var(--fg-muted)" }}>{b.label}</span>
               <div className="flex-1 rounded-full h-4 overflow-hidden" style={{ background: "var(--bg-muted)" }} role="img"
-                   aria-label={`${s.label} 정답 ${s.correct} / ${s.total}`}>
-                <div className="h-4 rounded-full transition-all" style={{ width: `${pct}%`, background: s.color }} />
+                   aria-label={`${b.label} 신호 ${b.value} / ${b.max}`}>
+                <div className="h-4 rounded-full transition-all" style={{ width: `${pct}%`, background: b.color, opacity: disabled ? 0.3 : 1 }} />
               </div>
-              <span className="w-12 shrink-0 text-right font-mono text-[12px]" style={{ color: "var(--fg)" }}>
-                {s.correct}/{s.total}
+              <span className="w-20 shrink-0 text-right font-mono text-[12px]" style={{ color: "var(--fg-subtle)" }}>
+                {disabled ? b.note : `${b.value}/${b.max}`}
               </span>
             </div>
           );
         })}
       </div>
       <p className="text-[11px] font-mono mt-1" style={{ color: "var(--fg-subtle)" }}>
-        ※ 적록 선별 도판의 정답 비율이 낮을수록 적록 계열 색각이상 가능성을 시사합니다. (선별용 지표)
+        ※ 분류판(정상·적색맹·녹색맹이 다른 숫자를 읽는 판)의 응답을 유형별로 집계한 신호입니다.
+        막대가 높은 유형일수록 해당 색각이상 가능성을 시사합니다. (청색맹은 검사 판 준비 중)
       </p>
     </div>
   );
@@ -155,16 +155,14 @@ export default function IshiharaTest() {
     setAnswers(newAnswers);
 
     if (current + 1 >= plates.length) {
+      const result = diagnose(plates, newAnswers);
       const correct = newAnswers.filter((ans, i) => ans === plates[i].answer).length;
-      // 적록 선별 결과. red-green → 대표 유형 'd'(녹색맹)로 저장·프리셋(P/D 확정 불가).
-      const isRG = estimateType(plates, newAnswers) === "red-green";
-      const diagnosis = isRG ? "d" : "normal";
 
       if (session?.user) {
         await fetch("/api/results", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ correct, total: plates.length, diagnosis }),
+          body: JSON.stringify({ correct, total: plates.length, diagnosis: result.type }),
         }).catch(() => {});
       }
       setDone(true);
@@ -183,14 +181,13 @@ export default function IshiharaTest() {
   };
 
   if (done) {
-    const isRG = estimateType(plates, answers) === "red-green";
+    const result = diagnose(plates, answers);
+    const meta = DIAGNOSIS_META[result.type];
+    const bars = diagnosisBars(result);
     const correct = answers.filter((a, i) => a === plates[i].answer).length;
-    const scores = categoryScores(plates, answers);
-    const resultColor = isRG ? "#f97316" : "#22c55e";
-    const resultLabel = isRG
-      ? "적록 계열 색각이상 가능성이 있습니다."
-      : "적록 계열 색각이상 징후는 보이지 않습니다.";
-    const wrongPlates = plates.filter((p, i) => p.diagnostic && answers[i] !== p.answer);
+    const isDeficient = result.type !== "normal";
+    const correctionType = (meta.correctionType ?? "d") as CVDType;
+    const wrongPlates = plates.filter((p, i) => p.kind !== "demo" && answers[i] !== p.answer);
 
     return (
       <div className="flex flex-col items-center gap-6 py-6 w-full">
@@ -198,18 +195,18 @@ export default function IshiharaTest() {
           <p className="font-serif text-[26px] tracking-[-0.02em] mb-2">검사 완료</p>
           <p
             className="text-[15px] font-medium px-4 py-1.5 rounded-full inline-block"
-            style={{ background: resultColor + "18", color: resultColor }}
+            style={{ background: meta.color + "18", color: meta.color }}
           >
-            {resultLabel}
+            {meta.label}
           </p>
           <p className="text-xs mt-3 font-mono" style={{ color: "var(--fg-subtle)" }}>
-            ※ 적록 계열 스크리닝 결과입니다. 청색 계열(청색맹)은 감별 범위 밖이며,
+            ※ 적록 계열 선별·감별 결과입니다. 청색 계열(청색맹)은 감별 범위 밖이며,
             정확한 진단은 안과 전문의에게 받으세요.
           </p>
         </div>
 
-        {/* 색 계열별 정답 수 막대그래프 */}
-        <ScoreBars scores={scores} />
+        {/* 유형별 신호 막대그래프 */}
+        <DiagnosisBars bars={bars} />
 
         <div className="w-full rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
           <div
@@ -232,9 +229,9 @@ export default function IshiharaTest() {
                 <span className="font-mono text-[12px]" style={{ color: "var(--fg-subtle)" }}>{i + 1}</span>
                 <div className="flex flex-col">
                   <span className="font-mono font-medium">{p.answer}</span>
-                  {p.diagnostic && p.altAnswer && (
+                  {p.kind === "classification" && (
                     <span className="font-mono text-[10px]" style={{ color: "var(--fg-subtle)" }}>
-                      색각이상: {p.altAnswer}
+                      적{p.protan}·녹{p.deutan}
                     </span>
                   )}
                 </div>
@@ -246,12 +243,12 @@ export default function IshiharaTest() {
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#22c55e18", color: "#22c55e" }}>
                       ✓ 정상
                     </span>
-                  ) : p.diagnostic ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#f9731618", color: "#f97316" }}>
-                      ✗ 적록 계열 의심
-                    </span>
-                  ) : (
+                  ) : p.kind === "demo" ? (
                     <span className="text-xs font-mono" style={{ color: "var(--fg-subtle)" }}>-</span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#f9731618", color: "#f97316" }}>
+                      ✗ 오답
+                    </span>
                   )}
                 </div>
               </div>
@@ -261,11 +258,12 @@ export default function IshiharaTest() {
 
         <div className="w-full rounded-xl p-4" style={{ background: "var(--bg-muted)" }}>
           <p className="text-sm font-mono mb-1" style={{ color: "var(--fg-subtle)" }}>
-            정답 {correct} / {plates.length}
+            정답 {correct} / {plates.length} · 적록 선별 오답 {result.screeningErrors}/{result.screeningTotal}
+            {result.classTotal > 0 && ` · 분류판 적${result.protanVotes}·녹${result.deutanVotes}`}
           </p>
-          {isRG && (
+          {isDeficient && (
             <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
-              적록 선별 도판에서 절반 이상 오답입니다. 안과 정밀 검사를 권장합니다.
+              적록 선별·분류에서 색각이상 신호가 나타납니다. 안과 정밀 검사를 권장합니다.
             </p>
           )}
         </div>
@@ -282,16 +280,16 @@ export default function IshiharaTest() {
             </div>
             <div className="flex flex-wrap gap-6 justify-center">
               {wrongPlates.map((p) => (
-                <PlateCorrectionCard key={p.id} plate={p} />
+                <PlateCorrectionCard key={p.id} plate={p} correctionType={correctionType} />
               ))}
             </div>
           </div>
         )}
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {isRG && (
+          {isDeficient && (
             <Link
-              href="/correction?tab=image&type=d"
+              href={`/correction?tab=image&type=${correctionType}`}
               className="px-6 py-2.5 rounded-full text-sm font-medium text-white inline-flex items-center gap-2"
               style={{ background: "var(--color-brand)" }}
             >
@@ -312,7 +310,7 @@ export default function IshiharaTest() {
           <button
             onClick={restart}
             className="px-6 py-2.5 rounded-full text-sm font-medium transition-colors"
-            style={isRG
+            style={isDeficient
               ? { background: "var(--bg-muted)", color: "var(--fg)", border: "1px solid var(--border-strong)" }
               : { background: "var(--color-brand)", color: "#fff" }
             }
