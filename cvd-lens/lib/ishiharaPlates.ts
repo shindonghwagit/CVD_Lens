@@ -52,11 +52,12 @@ export const PLATES: Plate[] = [
   { id: "22", answer: "26", rgAnswer: null, protan: "6", deutan: "2", kind: "classification", label: "유형 감별 (정상 26)" },
   { id: "23", answer: "42", rgAnswer: null, protan: "2", deutan: "4", kind: "classification", label: "유형 감별 (정상 42)" },
   { id: "24", answer: "35", rgAnswer: null, protan: "5", deutan: "3", kind: "classification", label: "유형 감별 (정상 35)" },
+  { id: "25", answer: "96", rgAnswer: null, protan: "6", deutan: "9", kind: "classification", label: "유형 감별 (정상 96)" },
 ];
 
 export const plateSrc = (p: Plate) => `/ishihara/Ishihara_${p.id}.${p.ext ?? "jpg"}`;
 
-const SCREENING_PER_TEST = 6;
+const SCREENING_PER_TEST = 5;
 
 /**
  * 검사용 도판 뽑기: 대조 1 + 적록 선별 랜덤 N + 분류판 전체.
