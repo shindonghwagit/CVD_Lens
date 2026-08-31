@@ -104,7 +104,7 @@ function PlateCorrectionCard({ plate, correctionType }: { plate: Plate; correcti
 function DiagnosisBars({ bars }: { bars: Bar[] }) {
   return (
     <div className="w-full rounded-xl border p-5 flex flex-col gap-3" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
-      <p className="text-sm font-medium" style={{ color: "var(--fg)" }}>색각이상 유형별 신호</p>
+      <p className="text-sm font-medium" style={{ color: "var(--fg)" }}>분류판 응답 분포</p>
       <div className="flex flex-col gap-3 mt-1">
         {bars.map((b) => {
           const pct = b.max > 0 ? (b.value / b.max) * 100 : 0;
@@ -124,8 +124,9 @@ function DiagnosisBars({ bars }: { bars: Bar[] }) {
         })}
       </div>
       <p className="text-[11px] font-mono mt-1" style={{ color: "var(--fg-subtle)" }}>
-        ※ 분류판(정상·적색맹·녹색맹이 다른 숫자를 읽는 판)의 응답을 유형별로 집계한 신호입니다.
-        막대가 높은 유형일수록 해당 색각이상 가능성을 시사합니다. (청색맹은 검사 판 준비 중)
+        ※ 분류판(정상·적색맹·녹색맹이 다른 숫자를 읽는 판)에서 각 유형의 답을 읽은 수입니다.
+        정상 응답이 높으면 정상, 적색맹·녹색맹 막대가 높을수록 해당 유형 가능성을 시사합니다.
+        (청색맹은 검사 판 준비 중)
       </p>
     </div>
   );

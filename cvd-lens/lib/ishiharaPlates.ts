@@ -78,6 +78,7 @@ export interface DiagnosisResult {
   screeningErrors: number;
   screeningTotal: number;
   /** 분류판을 각 유형으로 읽은 수(진단 근거·막대그래프용). */
+  normalReads: number;
   protanVotes: number;
   deutanVotes: number;
   classTotal: number;
@@ -97,9 +98,11 @@ export function diagnose(plates: Plate[], answers: (string | null)[]): Diagnosis
   const classification = plates.map((p, i) => ({ p, i })).filter(({ p }) => p.kind === "classification");
   let protanVotes = 0;
   let deutanVotes = 0;
+  let normalReads = 0;
   for (const { p, i } of classification) {
     const a = norm(answers[i]);
-    if (p.protan && a === p.protan) protanVotes++;
+    if (a === p.answer) normalReads++;
+    else if (p.protan && a === p.protan) protanVotes++;
     else if (p.deutan && a === p.deutan) deutanVotes++;
   }
   const classTotal = classification.length;
@@ -113,7 +116,7 @@ export function diagnose(plates: Plate[], answers: (string | null)[]): Diagnosis
   else if (deutanVotes > protanVotes) type = "deutan";
   else type = "rg"; // 적록 이상은 있으나 P/D 미분류
 
-  return { type, screeningErrors, screeningTotal, protanVotes, deutanVotes, classTotal };
+  return { type, screeningErrors, screeningTotal, normalReads, protanVotes, deutanVotes, classTotal };
 }
 
 /** 진단 유형 → 화면 라벨/색. */
@@ -125,7 +128,7 @@ export const DIAGNOSIS_META: Record<Diagnosis, { label: string; color: string; c
 };
 
 export interface Bar {
-  key: "protan" | "deutan" | "tritan";
+  key: "normal" | "protan" | "deutan" | "tritan";
   label: string;
   color: string;
   value: number;
@@ -133,9 +136,13 @@ export interface Bar {
   note?: string;
 }
 
-/** 막대그래프 데이터: 유형별 색각이상 신호(분류판 반응 수). tritan은 판 미보유 → 준비 중. */
+/**
+ * 막대그래프 데이터: 분류판(정상·적색맹·녹색맹이 다른 숫자를 읽는 판) 응답 분포.
+ * 정상 응답 막대를 포함해 누구나 값이 채워진다. tritan은 판 미보유 → 준비 중.
+ */
 export function diagnosisBars(r: DiagnosisResult): Bar[] {
   return [
+    { key: "normal", label: "정상 응답", color: "#64748b", value: r.normalReads, max: r.classTotal },
     { key: "protan", label: "적색맹", color: "#ef4444", value: r.protanVotes, max: r.classTotal },
     { key: "deutan", label: "녹색맹", color: "#22c55e", value: r.deutanVotes, max: r.classTotal },
     { key: "tritan", label: "청색맹", color: "#3b82f6", value: 0, max: r.classTotal, note: "검사 판 준비 중" },
