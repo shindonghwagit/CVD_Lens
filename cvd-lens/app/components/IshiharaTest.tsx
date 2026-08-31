@@ -5,12 +5,18 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useModel } from "../context/ModelContext";
 import { CVDType } from "../hooks/useCVDModel";
-import { categoryScores, estimateType, CategoryScore } from "@/lib/ishiharaPlates";
-import { GenPlate, generatePlateSet } from "@/lib/ishiharaGen";
+import {
+  Plate,
+  plateSrc,
+  pickPlates,
+  categoryScores,
+  estimateType,
+  CategoryScore,
+} from "@/lib/ishiharaPlates";
 
 // AI 보정 미리보기 카드 — 결과 화면에서 "틀린 도판"을 보정 상태로 다시 보여줘
 // 보정의 가치를 데모한다. 진단 판정에는 절대 관여하지 않는다(판정은 보정 OFF 고정).
-function PlateCorrectionCard({ plate }: { plate: GenPlate }) {
+function PlateCorrectionCard({ plate }: { plate: Plate }) {
   const { ready, infer } = useModel();
   const [on, setOn] = useState(false);
   const [correctedSrc, setCorrectedSrc] = useState<string | null>(null);
@@ -53,12 +59,13 @@ function PlateCorrectionCard({ plate }: { plate: GenPlate }) {
         {!on || !correctedSrc ? (
           <img
             ref={imgRef}
-            src={plate.dataUrl}
+            src={plateSrc(plate)}
             alt={`이시하라 플레이트 ${plate.id}`}
             width={150}
             height={150}
             className="rounded-full border object-cover"
             style={{ borderColor: on ? "var(--color-brand)" : "var(--border)", width: 150, height: 150 }}
+            crossOrigin="anonymous"
           />
         ) : (
           <img
@@ -127,21 +134,14 @@ function ScoreBars({ scores }: { scores: CategoryScore[] }) {
 export default function IshiharaTest() {
   const { data: session } = useSession();
 
-  const [plates, setPlates] = useState<GenPlate[]>([]);
+  const [plates, setPlates] = useState(pickPlates);
   const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<(string | null)[]>([]);
+  const [answers, setAnswers] = useState<(string | null)[]>(() => Array(plates.length).fill(null));
   const [input, setInput] = useState("");
   const [done, setDone] = useState(false);
 
   const submittingRef = useRef(false);
   const plate = plates[current];
-
-  // 도판은 canvas로 절차 생성(클라이언트 전용) → 매 검사마다 랜덤 숫자.
-  useEffect(() => {
-    const p = generatePlateSet();
-    setPlates(p);
-    setAnswers(Array(p.length).fill(null));
-  }, []);
 
   useEffect(() => {
     setInput("");
@@ -175,23 +175,12 @@ export default function IshiharaTest() {
   };
 
   const restart = () => {
-    const next = generatePlateSet();
+    const next = pickPlates();
     setPlates(next);
     setAnswers(Array(next.length).fill(null));
     setCurrent(0);
     setDone(false);
   };
-
-  // 최초 생성 전(클라이언트 canvas 렌더 대기).
-  if (plates.length === 0 || !plate) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 py-16">
-        <div className="w-8 h-8 rounded-full border-2 animate-spin"
-             style={{ borderColor: "var(--border)", borderTopColor: "var(--color-brand)" }} />
-        <p className="text-sm" style={{ color: "var(--fg-subtle)" }}>도판 생성 중…</p>
-      </div>
-    );
-  }
 
   if (done) {
     const isRG = estimateType(plates, answers) === "red-green";
@@ -353,7 +342,7 @@ export default function IshiharaTest() {
       {/* 플레이트 이미지 — 진단 단계에서는 항상 원본(보정 OFF) */}
       <div className="relative w-[280px] h-[280px]">
         <img
-          src={plate.dataUrl}
+          src={plateSrc(plate)}
           alt={`이시하라 플레이트 ${plate.id}`}
           width={280}
           height={280}
