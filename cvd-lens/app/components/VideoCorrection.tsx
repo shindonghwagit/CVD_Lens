@@ -64,13 +64,14 @@ export default function VideoCorrection() {
   const [errorMsg, setErrorMsg] = useState("");
   const [recording, setRecording] = useState(false);
   const [modelStatus, setModelStatus] = useState<ModelStatus>("idle");
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
 
   const clearRaf = () => { if (rafRef.current != null) cancelAnimationFrame(rafRef.current); rafRef.current = null; };
 
   const reset = () => {
     clearRaf();
     if (videoUrl) URL.revokeObjectURL(videoUrl);
-    setVideoUrl(null); setErrorMsg(""); setRecording(false);
+    setVideoUrl(null); setErrorMsg(""); setRecording(false); setSaveState("idle");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -89,6 +90,8 @@ export default function VideoCorrection() {
     if (!video || !canvas) return;
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
+
+    setSaveState("idle");   // 타입/영상 바뀌면 저장 상태 초기화
 
     const in256 = document.createElement("canvas"); in256.width = ONNX_SIZE; in256.height = ONNX_SIZE;
     const in256ctx = in256.getContext("2d", { willReadFrequently: true })!;
@@ -200,6 +203,41 @@ export default function VideoCorrection() {
     } finally { setRecording(false); }
   }, [cvdType]);
 
+  // 목록에 저장 — 영상 전체 대신 현재 대표 프레임(원본/보정) 썸네일 쌍을 저장.
+  // /api/corrections 스키마(썸네일 base64)와 동일. source="video"로 구분.
+  const saveCorrection = useCallback(async () => {
+    const video = videoRef.current, canvas = canvasRef.current;
+    if (!video || !canvas || saveState === "saving" || saveState === "saved") return;
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (!vw || !vh || !canvas.width) return;
+    setSaveState("saving");
+
+    const square = (draw: (c: CanvasRenderingContext2D) => void): string => {
+      const c = document.createElement("canvas"); c.width = 256; c.height = 256;
+      const cx = c.getContext("2d")!;
+      draw(cx);
+      return c.toDataURL("image/jpeg", 0.75);
+    };
+    // 원본: 현재 영상 프레임 center-crop
+    const oSide = Math.min(vw, vh);
+    const originalImage = square((cx) => cx.drawImage(video, (vw - oSide) / 2, (vh - oSide) / 2, oSide, oSide, 0, 0, 256, 256));
+    // 보정: 현재 canvas(보정 출력) center-crop
+    const cw = canvas.width, ch = canvas.height, cSide = Math.min(cw, ch);
+    const correctedImage = square((cx) => cx.drawImage(canvas, (cw - cSide) / 2, (ch - cSide) / 2, cSide, cSide, 0, 0, 256, 256));
+
+    try {
+      const res = await fetch("/api/corrections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cvdType, source: "video", originalImage, correctedImage }),
+      });
+      if (res.ok) setSaveState("saved");
+      else { setSaveState("idle"); if (res.status === 401) setErrorMsg("목록 저장은 로그인이 필요합니다."); }
+    } catch {
+      setSaveState("idle");
+    }
+  }, [cvdType, saveState]);
+
   const canDownload = cvdType === "t" || modelStatus === "ready";
 
   return (
@@ -277,6 +315,14 @@ export default function VideoCorrection() {
               className="px-5 py-2.5 rounded-full text-sm font-medium text-white transition-colors disabled:opacity-50"
               style={{ background: "var(--color-brand)" }}>
               {recording ? "녹화 중..." : "보정 영상 다운로드"}
+            </button>
+            <button onClick={saveCorrection} disabled={!canDownload || saveState === "saving" || saveState === "saved"}
+              className="px-5 py-2.5 rounded-full text-sm font-medium transition-colors disabled:opacity-60"
+              style={saveState === "saved"
+                ? { background: "#22c55e18", color: "#22c55e", border: "1px solid #22c55e44" }
+                : { background: "var(--bg-muted)", color: "var(--fg)", border: "1px solid var(--border-strong)" }
+              }>
+              {saveState === "saving" ? "저장 중..." : saveState === "saved" ? "저장됨 ✓" : "목록에 저장"}
             </button>
             <button onClick={reset}
               className="px-5 py-2.5 rounded-full text-sm font-medium transition-colors"

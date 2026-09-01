@@ -24,6 +24,12 @@ function cvdInfo(type: string) {
   return CVD_LABEL[type?.toLowerCase()] ?? { label: type ?? "알 수 없음", color: "var(--fg-subtle)" };
 }
 
+const SOURCE_LABEL: Record<string, string> = {
+  image: "이미지",
+  camera: "카메라",
+  video: "영상",
+};
+
 function formatDate(iso: string) {
   const d = new Date(iso);
   return d.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })
@@ -69,14 +75,24 @@ function CorrectionCard({ record }: { record: CorrectionRecord }) {
       )}
 
       <div className="px-3 py-2.5 flex items-center justify-between gap-2">
-        <span
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono"
-          style={{ background: info.color + "18", color: info.color }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: info.color }} />
-          {info.label}
-        </span>
-        <span className="text-[11px] font-mono" style={{ color: "var(--fg-subtle)" }}>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono shrink-0"
+            style={{ background: info.color + "18", color: info.color }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: info.color }} />
+            {info.label}
+          </span>
+          {SOURCE_LABEL[record.source] && (
+            <span
+              className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-mono shrink-0"
+              style={{ background: "var(--bg-muted)", color: "var(--fg-subtle)" }}
+            >
+              {SOURCE_LABEL[record.source]}
+            </span>
+          )}
+        </div>
+        <span className="text-[11px] font-mono shrink-0" style={{ color: "var(--fg-subtle)" }}>
           {formatDate(record.created_at)}
         </span>
       </div>
@@ -118,7 +134,7 @@ export default function CorrectionsPage() {
           </h1>
         </div>
         <p className="text-[15px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
-          저장한 색각 보정 이미지 목록입니다. 카드를 탭하면 원본과 보정 이미지를 전환할 수 있습니다.
+          저장한 색각 보정 기록입니다(이미지·카메라·영상). 카드를 탭하면 원본과 보정 화면을 전환할 수 있습니다.
         </p>
       </div>
 
