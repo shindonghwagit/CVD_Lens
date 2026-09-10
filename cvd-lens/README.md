@@ -1,6 +1,6 @@
 # CVDLens Web App
 
-색각이상 보정 웹 애플리케이션입니다. 전체 연구 구조와 Phase 2 선택적 Daltonization 설명은 루트 [README](../README.md)를 참고하세요.
+색각이상 보정 웹 애플리케이션입니다. 전체 연구 구조와 선택적 색상 보정 방식 설명은 루트 [README](../README.md)를 참고하세요.
 
 ## 서비스 주소
 
