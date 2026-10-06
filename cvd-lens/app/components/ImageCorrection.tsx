@@ -45,9 +45,6 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
   const { ready, error, infer } = useModel();
   // 진단 결과에서 넘어온 타입(?type=)을 기본 선택으로. 없으면 녹색맹(d).
   const [cvdType, setCvdType] = useState<CVDType>(initialType ?? "d");
-  // P/D는 severity 1.0에서 추론한 델타를 이 값으로 혼합한다. T는 같은 값으로
-  // 규칙 기반 hue 회전각을 조절한다. 즉 진단 중증도가 아닌 표시용 보정 강도다.
-  const [severity, setSeverity] = useState(0.7);
   const [original, setOriginal] = useState<string | null>(null);
   const [corrected, setCorrected] = useState<string | null>(null);
   const [showSim, setShowSim] = useState(false);
@@ -66,7 +63,7 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
   const requestRef = useRef<{ id: number; controller: AbortController } | null>(null);
   const [imageAspect, setImageAspect] = useState(1);
 
-  // Kept ImageData for re-inference on severity/type change (no file re-read)
+  // Kept ImageData for re-inference on type change (no file re-read)
   // and for client-side sim (no extra server round-trip).
   const sourceIDRef = useRef<ImageData | null>(null);
   const correctedIDRef = useRef<ImageData | null>(null);
@@ -77,7 +74,7 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
     setSimOut(imageDataToURL(simulate(correctedIDRef.current, type)));
   }, []);
 
-  const runInference = useCallback(async (type: CVDType, sev: number) => {
+  const runInference = useCallback(async (type: CVDType) => {
     if (!ready || !sourceIDRef.current) return;
     requestRef.current?.controller.abort();
     const controller = new AbortController();
@@ -87,7 +84,7 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
     setReqError(false);
     setProcessing(true);
     try {
-      const result = await infer(sourceIDRef.current, type, sev, controller.signal);
+      const result = await infer(sourceIDRef.current, type, controller.signal);
       if (requestRef.current?.id !== id) return;
       correctedIDRef.current = result;
       setCorrected(imageDataToURL(result));
@@ -107,10 +104,10 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
   }, [ready, infer, showSim, computeSims]);
 
   const retry = useCallback(() => {
-    if (sourceIDRef.current) runInference(cvdType, severity);
-  }, [cvdType, severity, runInference]);
+    if (sourceIDRef.current) runInference(cvdType);
+  }, [cvdType, runInference]);
 
-  const processImage = useCallback(async (file: File, type: CVDType, sev: number) => {
+  const processImage = useCallback(async (file: File, type: CVDType) => {
     if (!ready) return;
     setProcessing(true);
     setCorrected(null);
@@ -130,7 +127,7 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
     setOriginal(canvas.toDataURL("image/jpeg", 0.95));   // JPEG (not PNG): a 2048² PNG dataURL is multi-MB
     setImageAspect(targetWidth / targetHeight);
     sourceIDRef.current = ctx.getImageData(0, 0, targetWidth, targetHeight);
-    await runInference(type, sev);
+    await runInference(type);
   }, [ready, runInference]);
 
   const saveCorrection = useCallback(async () => {
@@ -164,8 +161,8 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
 
   const onFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
-    processImage(file, cvdType, severity);
-  }, [processImage, cvdType, severity]);
+    processImage(file, cvdType);
+  }, [processImage, cvdType]);
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -177,17 +174,8 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
   useEffect(() => {
     if (prevCvdType.current === cvdType) return;
     prevCvdType.current = cvdType;
-    if (sourceIDRef.current && ready) runInference(cvdType, severity);
-  }, [cvdType, ready, severity, runInference]);
-
-  // Debounced re-infer on severity change (~300ms — server round-trip).
-  const sevTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onSeverity = useCallback((v: number) => {
-    setSeverity(v);
-    if (!sourceIDRef.current) return;
-    if (sevTimer.current) clearTimeout(sevTimer.current);
-    sevTimer.current = setTimeout(() => runInference(cvdType, v), 300);
-  }, [cvdType, runInference]);
+    if (sourceIDRef.current && ready) runInference(cvdType);
+  }, [cvdType, ready, runInference]);
 
   const onSimulationToggle = useCallback((checked: boolean) => {
     setShowSim(checked);
@@ -351,25 +339,6 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
               {processing && processingOverlay}
             </div>
           )}
-
-          {/* 보정 강도 슬라이더 */}
-          <div className="w-full flex flex-col gap-1.5">
-            <div className="flex items-center gap-3">
-              <span className="text-xs whitespace-nowrap" style={{ color: "var(--fg-muted)" }}>보정 강도</span>
-              <input
-                type="range" min={0} max={1} step={0.05} value={severity}
-                onChange={(e) => onSeverity(parseFloat(e.target.value))}
-                className="flex-1 accent-[var(--color-brand)]"
-                aria-label="보정 강도"
-              />
-              <span className="text-xs font-mono w-9 text-right" style={{ color: "var(--fg)" }}>
-                {severity.toFixed(2)}
-              </span>
-            </div>
-            <p className="text-[11px] leading-snug" style={{ color: "var(--fg-subtle)" }}>
-              0 = 원본 · 1 = 전체 보정 · 진단 중증도가 아닌 화면 보정량입니다
-            </p>
-          </div>
 
           {/* CVD 시뮬레이션 보기 토글 */}
           <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: "var(--fg-muted)" }}>

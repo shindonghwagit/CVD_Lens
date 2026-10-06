@@ -1,7 +1,6 @@
 from pathlib import Path
 import io
 import logging
-import math
 import os
 import shutil
 import tempfile
@@ -69,11 +68,9 @@ async def _read_limited(upload: UploadFile, limit: int) -> bytes:
     return b"".join(chunks)
 
 
-def _validate_params(cvd_type: str, severity: float) -> None:
+def _validate_cvd_type(cvd_type: str) -> None:
     if cvd_type not in VALID_CVD_TYPES:
         raise HTTPException(status_code=422, detail="지원하지 않는 색각 유형입니다.")
-    if not math.isfinite(severity) or not 0.0 <= severity <= 1.0:
-        raise HTTPException(status_code=422, detail="severity는 0과 1 사이여야 합니다.")
 
 
 def _run_float(rgb256: np.ndarray, cvd_type: str, severity: float) -> np.ndarray:
@@ -195,9 +192,8 @@ def health():
 async def infer(
     image: UploadFile = File(...),
     cvd_type: str = Form(...),
-    severity: float = Form(1.0),   # optional; older frontend omits → 1.0
 ):
-    _validate_params(cvd_type, severity)
+    _validate_cvd_type(cvd_type)
     if image.content_type and not image.content_type.startswith("image/"):
         raise HTTPException(status_code=415, detail="이미지 파일만 업로드할 수 있습니다.")
     data = await _read_limited(image, MAX_IMAGE_BYTES)
@@ -212,7 +208,7 @@ async def infer(
         raise HTTPException(status_code=400, detail="이미지를 읽을 수 없습니다.") from exc
 
     arr = _cap_long_side(np.asarray(img, dtype=np.float32) / 255.0)
-    out = _to_u8(_correct_image(arr, cvd_type, severity))
+    out = _to_u8(_correct_image(arr, cvd_type, 1.0))
 
     buf = io.BytesIO()
     Image.fromarray(out).save(buf, format="JPEG", quality=config.RESPONSE_JPEG_QUALITY)
@@ -240,12 +236,11 @@ def _correct_frame(frame_bgr: np.ndarray, cvd_type: str, severity: float = 1.0) 
 async def infer_video(
     video: UploadFile = File(...),
     cvd_type: str = Form(...),
-    severity: float = Form(1.0),
 ):
     import subprocess
     import threading
 
-    _validate_params(cvd_type, severity)
+    _validate_cvd_type(cvd_type)
     if video.content_type and not video.content_type.startswith("video/"):
         raise HTTPException(status_code=415, detail="영상 파일만 업로드할 수 있습니다.")
     if _FFMPEG is None:
@@ -303,7 +298,7 @@ async def infer_video(
             ret, frame = cap.read()
             if not ret:
                 break
-            corrected = _correct_frame(frame, cvd_type, severity)
+            corrected = _correct_frame(frame, cvd_type, 1.0)
             if enc_w != w or enc_h != h:
                 corrected = cv2.copyMakeBorder(corrected, 0, enc_h - h, 0, enc_w - w, cv2.BORDER_REPLICATE)
             proc.stdin.write(corrected.tobytes())

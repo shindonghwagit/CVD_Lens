@@ -38,9 +38,6 @@ function resizeDataURL(src: string, size: number): Promise<string> {
   });
 }
 
-// 카메라 탭의 표시용 보정 강도. P/D 모델은 1.0에서 추론한 뒤 델타만 혼합한다.
-const CAMERA_SEVERITY = 0.7;
-
 export default function CameraView() {
   const videoRef    = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -138,7 +135,7 @@ export default function CameraView() {
     try {
       const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
       sourceIDRef.current = imageData;
-      const result = await infer(imageData, cvdType, CAMERA_SEVERITY, controller.signal);
+      const result = await infer(imageData, cvdType, controller.signal);
       if (requestRef.current?.id !== id) return;
       correctedIDRef.current = result;
       ctx.putImageData(result, 0, 0);
@@ -167,7 +164,7 @@ export default function CameraView() {
     requestRef.current = { id, controller };
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
     try {
-      const result = await infer(sourceIDRef.current, type, CAMERA_SEVERITY, controller.signal);
+      const result = await infer(sourceIDRef.current, type, controller.signal);
       if (requestRef.current?.id !== id) return;
       correctedIDRef.current = result;
       setCorrected(imageDataToURL(result));

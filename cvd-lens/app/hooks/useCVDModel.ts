@@ -42,7 +42,6 @@ export function useCVDModel() {
   const infer = useCallback(async (
     imageData: ImageData,
     cvdType: CVDType,
-    strength = 1.0,
     signal?: AbortSignal,
   ): Promise<ImageData> => {
     // ImageData → JPEG Blob
@@ -58,10 +57,6 @@ export function useCVDModel() {
     const form = new FormData();
     form.append("image", blob, "frame.jpg");
     form.append("cvd_type", cvdType);
-    // P/D models were trained at severity=1.0.  Keep inference on the
-    // distribution seen during training and expose a separate display
-    // strength by blending the learned correction delta below.
-    form.append("severity", String(cvdType === "t" ? strength : 1.0));
 
     const res = await fetch(`${API_URL}/infer`, { method: "POST", body: form, signal });
     if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
@@ -77,14 +72,6 @@ export function useCVDModel() {
     const output = outCtx.getImageData(0, 0, imageData.width, imageData.height);
     bitmap.close();
 
-    if (cvdType !== "t" && strength < 1) {
-      const amount = Math.max(0, strength);
-      for (let i = 0; i < output.data.length; i += 4) {
-        output.data[i] = imageData.data[i] + amount * (output.data[i] - imageData.data[i]);
-        output.data[i + 1] = imageData.data[i + 1] + amount * (output.data[i + 1] - imageData.data[i + 1]);
-        output.data[i + 2] = imageData.data[i + 2] + amount * (output.data[i + 2] - imageData.data[i + 2]);
-      }
-    }
     return output;
   }, []);
 

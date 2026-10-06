@@ -12,7 +12,6 @@ const CVD_LABELS: Record<CVDType, string> = {
 
 const MAX_DIM = 512;          // 실시간 캔버스 최대 변
 const TRITAN_DEG = 30;        // 청색맹 hue 회전각 (배포 _tritan_hue_shift와 동일, severity 1.0)
-const PD_CORRECTION_STRENGTH = 0.7;
 
 /** 청색맹(t) 채도보존 hue 회전 — 순수 canvas 픽셀 연산(모델 불필요). */
 function correctTritan(data: Uint8ClampedArray) {
@@ -146,9 +145,9 @@ export default function VideoCorrection() {
         const frame = ctx.getImageData(0, 0, w, h);
         const fd = frame.data, ud = dUpImg.data;
         for (let i = 0; i < fd.length; i += 4) {            // 합성: orig + delta
-          fd[i] = fd[i] + PD_CORRECTION_STRENGTH * (ud[i] / 127.5 - 1) * 255;
-          fd[i + 1] = fd[i + 1] + PD_CORRECTION_STRENGTH * (ud[i + 1] / 127.5 - 1) * 255;
-          fd[i + 2] = fd[i + 2] + PD_CORRECTION_STRENGTH * (ud[i + 2] / 127.5 - 1) * 255;
+          fd[i] = fd[i] + (ud[i] / 127.5 - 1) * 255;
+          fd[i + 1] = fd[i + 1] + (ud[i + 1] / 127.5 - 1) * 255;
+          fd[i + 2] = fd[i + 2] + (ud[i + 2] / 127.5 - 1) * 255;
         }
         ctx.putImageData(frame, 0, 0);
         busy = false;
