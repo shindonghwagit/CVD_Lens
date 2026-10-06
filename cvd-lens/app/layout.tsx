@@ -1,23 +1,19 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import NavBar from "./components/NavBar";
 import { ModelProvider } from "./context/ModelContext";
 import SessionWrapper from "./components/SessionWrapper";
 
-// 본문 sans = Pretendard (globals.css CDN + --f-sans). 코드/수치는 JetBrains Mono 유지.
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--f-mono", display: "swap" });
-
 const SITE_URL = "https://cvd-lens.vercel.app";
-const OG_TITLE = "CVDLens | 색각이상 AI 보정";
+const OG_TITLE = "CVDLens | 색각이상 맞춤 보정";
 const OG_DESC =
-  "색각이상(적색맹·녹색맹·청색맹) 사용자를 위한 AI 색 보정 도구. 이시하라 자가 진단부터 사진·카메라 실시간 보정까지 한 곳에서.";
+  "색각이상(적색맹·녹색맹·청색맹) 사용자를 위한 학습·규칙 기반 색 보정 도구. 이시하라 참고 검사부터 사진·카메라 보정까지 한 곳에서.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "CVDLens | 색각이상 보정 시스템",
-  description: "AI 기반 색각이상 보정 웹 애플리케이션",
+  description: "학습 모델과 규칙 기반 알고리즘을 결합한 색각이상 보정 웹 애플리케이션",
   openGraph: {
     type: "website",
     locale: "ko_KR",
@@ -44,7 +40,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" data-theme="light" className={`h-full antialiased ${jetbrainsMono.variable}`}>
+    <html lang="ko" data-theme="light" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <SessionWrapper>
           <ModelProvider>

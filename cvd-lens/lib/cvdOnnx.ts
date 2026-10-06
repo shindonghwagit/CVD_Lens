@@ -6,8 +6,8 @@
 import * as ort from "onnxruntime-web";
 import type { CVDType } from "./cvdSim";
 
-// wasm 바이너리는 CDN에서 (번들러 wasm 처리 회피). 스레드 off = SharedArrayBuffer/교차출처격리 불필요.
-ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/";
+// WASM은 public/ort에서 자체 호스팅한다. 스레드 off = SharedArrayBuffer/교차출처격리 불필요.
+ort.env.wasm.wasmPaths = "/ort/";
 ort.env.wasm.numThreads = 1;
 
 export const ONNX_SIZE = 256;
@@ -15,10 +15,13 @@ export const ONNX_SIZE = 256;
 const sessions: Partial<Record<CVDType, Promise<ort.InferenceSession>>> = {};
 
 function getSession(type: CVDType): Promise<ort.InferenceSession> {
-  return (sessions[type] ??= ort.InferenceSession.create(`/models/cvdlens_${type}.onnx`, {
+  const pending = sessions[type] ?? ort.InferenceSession.create(`/models/cvdlens_${type}.onnx`, {
     executionProviders: ["wasm"],
     graphOptimizationLevel: "all",
-  }));
+  });
+  sessions[type] = pending;
+  pending.catch(() => { if (sessions[type] === pending) delete sessions[type]; });
+  return pending;
 }
 
 /** 세션 미리 로드(첫 프레임 지연 감소). */
