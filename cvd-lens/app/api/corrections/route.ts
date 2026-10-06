@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import pool from "@/lib/db";
 import { randomUUID } from "crypto";
+import { isDataImage, readJsonObject } from "@/lib/requestValidation";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -9,12 +10,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
   }
 
-  const { cvdType, source, originalImage, correctedImage } = await req.json();
+  const body = await readJsonObject(req);
+  const cvdType = body?.cvdType;
+  const source = body?.source ?? "image";
+  const originalImage = body?.originalImage;
+  const correctedImage = body?.correctedImage;
+  if (!(["p", "d", "t"] as unknown[]).includes(cvdType)
+    || !(["image", "camera", "video"] as unknown[]).includes(source)
+    || !isDataImage(originalImage) || !isDataImage(correctedImage)) {
+    return NextResponse.json({ error: "잘못된 보정 결과입니다." }, { status: 400 });
+  }
 
   const { rows } = await pool.query(
     `INSERT INTO correction_results (id, user_id, cvd_type, source, original_image, corrected_image)
      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [randomUUID(), session.user.id, cvdType, source ?? "image", originalImage ?? null, correctedImage ?? null]
+    [randomUUID(), session.user.id, cvdType, source, originalImage, correctedImage]
   );
 
   return NextResponse.json(rows[0]);

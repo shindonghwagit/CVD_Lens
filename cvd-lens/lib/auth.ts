@@ -3,9 +3,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import pool from "./db";
 
+const authSecret = process.env.NEXTAUTH_SECRET;
+if (process.env.NODE_ENV === "production" && !authSecret) {
+  throw new Error("NEXTAUTH_SECRET must be set in production");
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
-  secret: process.env.NEXTAUTH_SECRET ?? "cvdlens-secret-key-2026",
+  secret: authSecret ?? "development-only-secret",
   pages: {
     signIn: "/login",
   },
@@ -17,7 +22,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "비밀번호", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) return null;
+        if (typeof credentials?.username !== "string" || typeof credentials?.password !== "string"
+          || credentials.username.length > 30 || credentials.password.length > 128) return null;
 
         const { rows } = await pool.query(
           "SELECT id, email, name, password, preferred_cvd_type FROM users WHERE name = $1",
