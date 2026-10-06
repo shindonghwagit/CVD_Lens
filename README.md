@@ -1,6 +1,6 @@
 # CVDLens
 
-AI 기반 색각이상(Color Vision Deficiency, CVD) 보정 웹 애플리케이션 및 선택적 색상 보정 연구 프로젝트입니다.
+학습 모델(P/D)과 규칙 기반 보정(T)을 결합한 색각이상(Color Vision Deficiency, CVD) 보정 웹 애플리케이션 및 선택적 색상 보정 연구 프로젝트입니다.
 
 - 색각이상을 가진 사용자가 이미지, 카메라 사진, 영상을 입력하면 색상 혼동이 발생하기 쉬운 영역을 중심으로 보정한 결과를 제공합니다.
 - 이미지 전체를 일괄 변환하는 기존 Daltonization과 달리, **혼동 가능성이 높은 색만 골라서 그 색이 원래 갖는 밝기·질감은 유지한 채 구분 가능하게** 만드는 것을 목표로 합니다.
@@ -44,6 +44,7 @@ DATABASE_URL=
 NEXTAUTH_SECRET=
 NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
+CVDLENS_ALLOWED_ORIGINS=http://localhost:3000
 ```
 
 ## 프로젝트 목적
@@ -80,7 +81,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ### `이시하라 검사`
 
-- 공식 이시하라 38판 도판을 기반으로 색각 검사를 제공합니다.
+- 이시하라 38판 자료 중 10개 도판(시범 1, 선별 5, 분류 4)을 사용한 참고용 검사를 제공합니다.
 - 정상판/분류판 응답 분포로 적색맹·녹색맹을 감별하고, 유형별 막대그래프로 결과를 시각화합니다.
 - 검사 결과는 참고용이며, 정확한 진단은 안과 전문의 상담이 필요합니다.
 
@@ -128,10 +129,15 @@ w  : 혼동 가중치 (색각 시뮬레이션 기반, 혼동되기 쉬운 픽셀
 - **손실 `CVDLossV2`** (`cvdlens_v2/losses.py`)
   - `L_contrast` — 색각 시뮬레이션을 통과한 결과에서 혼동 색쌍의 대비 부족분만 벌하는 one-sided·혼동 가중 대비 손실
   - `L_global` — 전역 색상 구분성(ΔE) 손실
-  - `L_naturalness` — 원본 색감 보존 (LPIPS + 시뮬-L1)
+  - `L_naturalness` — 원본 색감 보존 (배포 체크포인트 학습에서는 시뮬-L1 사용, LPIPS 비활성)
   - `TV` — 델타 필드 평활 정규화
-- **학습 환경**: Kaggle GPU, COCO 2017 이미지, 유형·severity 랜덤 배치, 20,000 step
+- **학습 환경**: Kaggle GPU, COCO 2017 이미지, P/D 유형 랜덤 배치, severity 1.0 고정
 - **체크포인트 선정**: 타입별 평균 혼동가중 대비비(ratio_w)와 do-nothing 보존성 게이트를 통과하는 체크포인트 중 최적점을 선정
+
+> 현재 배포 P/D 체크포인트는 severity 1.0으로만 학습되었습니다. 따라서 UI의
+> `보정 강도`는 severity 조건 입력으로 해석하지 않고, severity 1.0 모델 출력의
+> 델타를 `원본 + 강도 × (모델 출력 − 원본)`으로 혼합합니다. T는 학습 모델이
+> 아니라 채도 보존 hue 회전 규칙을 사용합니다.
 
 ```bash
 py -m cvdlens_v2.train        # 학습
@@ -141,7 +147,7 @@ py -m cvdlens_v2.export_onnx  # ONNX 변환 (타입별 self-contained 그래프)
 
 ## 추론 파이프라인 (`/infer`, `/infer/video`)
 
-- **타입별 ONNX 모델** — 적색맹/녹색맹(p/d)은 학습된 `cvdlens_{p,d}.onnx`로 보정합니다. 입력은 `srgb(1,3,256,256)` + `severity(1,1)`.
+- **타입별 ONNX 모델** — 적색맹/녹색맹(p/d)은 학습된 `cvdlens_{p,d}.onnx`로 보정합니다. 입력은 `srgb(1,3,256,256)` + 호환용 `severity(1,1)`이며, 모델에는 학습 조건인 1.0을 넣고 사용자가 고른 강도는 출력 델타에 적용합니다.
 - **델타 합성 · 원본 해상도 반환** — 모델은 256×256에서 보정하지만 서버는 보정 델타(`out − in`)만 뽑아 원본 해상도로 bilinear 업샘플한 뒤 원본 픽셀에 더합니다. 색보정은 저주파라 손실이 없고, 글자·경계 같은 고주파 디테일은 원본 그대로 유지됩니다.
 - **letterbox 전처리** — center-crop 대신 aspect를 보존하는 letterbox로 256에 맞춰 화각이 잘리지 않습니다.
 - **청색맹 hue 회전** — 청색맹(t)은 학습 모델이 파랑을 탈채도시키는 문제(물빠짐)가 있어, 채도·명도는 고정한 채 파랑·노랑 hue만 회전시키는 **채도보존 hue 회전**으로 보정합니다. 빨강·초록·회색은 hue 밴드·채도 하한 밖이라 건드리지 않아 선택성이 유지됩니다.
@@ -166,7 +172,7 @@ graduation_project/
 │   │   ├── correction/           # 카메라 / 이미지 / 영상 보정
 │   │   ├── corrections/          # 보정 기록
 │   │   ├── history/              # 진단 기록
-│   │   ├── ishihara/             # 이시하라 검사 (38판)
+│   │   ├── ishihara/             # 이시하라 참고 검사 (10개 도판)
 │   │   ├── education/            # 색각 교육 + 유형 시뮬레이터
 │   │   ├── components/
 │   │   └── api/
@@ -174,7 +180,7 @@ graduation_project/
 │   │   ├── main.py               # FastAPI 추론 서버 (델타 합성 · guided filter)
 │   │   ├── guided.py             # guided filter 후처리
 │   │   ├── config.py             # 추론 설정 (guided filter · JPEG 품질 등)
-│   │   └── model/                # cvdlens_{p,d,t}.onnx
+│   │   └── model/                # 배포 추론은 cvdlens_{p,d}.onnx 사용
 │   └── public/
 │       └── ishihara/             # 이시하라 도판 이미지
 └── cvdlens_v2/                   # 모델 · 손실 · 학습 · 평가 (연구 코드)
@@ -211,7 +217,7 @@ graduation_project/
 
 ### 5. 웹앱 기능 확장
 
-- 이미지·카메라·영상 보정, 실시간 브라우저 보정, 보정 기록 저장, 색각 교육, 이시하라 38판 검사를 구현했습니다.
+- 이미지·카메라·영상 보정, 실시간 브라우저 보정, 보정 기록 저장, 색각 교육, 이시하라 10개 도판 참고 검사를 구현했습니다.
 
 ## 트러블슈팅
 

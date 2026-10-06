@@ -38,6 +38,7 @@ DATABASE_URL=
 NEXTAUTH_SECRET=
 NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
+CVDLENS_ALLOWED_ORIGINS=http://localhost:3000
 ```
 
 ## 추론 동작 (`/infer`, `/infer/video`)
