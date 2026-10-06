@@ -12,7 +12,7 @@ const CVD_LABELS: Record<CVDType, string> = {
 
 const MAX_DIM = 512;          // 실시간 캔버스 최대 변
 const TRITAN_DEG = 30;        // 청색맹 hue 회전각 (배포 _tritan_hue_shift와 동일, severity 1.0)
-const PD_SEVERITY = 0.7;      // 적/녹색맹 기본 강도 (이미지 경로 기본값과 동일)
+const PD_CORRECTION_STRENGTH = 0.7;
 
 /** 청색맹(t) 채도보존 hue 회전 — 순수 canvas 픽셀 연산(모델 불필요). */
 function correctTritan(data: Uint8ClampedArray) {
@@ -79,7 +79,13 @@ export default function VideoCorrection() {
     if (!file.type.startsWith("video/")) { setErrorMsg("영상 파일(mp4, mov, webm)을 선택해주세요."); return; }
     if (videoUrl) URL.revokeObjectURL(videoUrl);
     setErrorMsg("");
+    setSaveState("idle");
     setVideoUrl(URL.createObjectURL(file));
+  };
+  const selectType = (type: CVDType) => {
+    setCvdType(type);
+    setSaveState("idle");
+    setModelStatus(type === "t" ? "idle" : "loading");
   };
   const onDrop = (e: React.DragEvent) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) onFile(f); };
 
@@ -90,8 +96,6 @@ export default function VideoCorrection() {
     if (!video || !canvas) return;
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
-
-    setSaveState("idle");   // 타입/영상 바뀌면 저장 상태 초기화
 
     const in256 = document.createElement("canvas"); in256.width = ONNX_SIZE; in256.height = ONNX_SIZE;
     const in256ctx = in256.getContext("2d", { willReadFrequently: true })!;
@@ -105,12 +109,9 @@ export default function VideoCorrection() {
 
     modelReadyRef.current = false;
     if (cvdType !== "t") {
-      setModelStatus("loading");
       preloadSession(cvdType)
         .then(() => { if (!cancelled) { modelReadyRef.current = true; setModelStatus("ready"); } })
         .catch(() => { if (!cancelled) setModelStatus("error"); });
-    } else {
-      setModelStatus("idle");
     }
 
     const sizeTo = () => {
@@ -126,7 +127,7 @@ export default function VideoCorrection() {
       busy = true;
       in256ctx.drawImage(video, 0, 0, ONNX_SIZE, ONNX_SIZE);
       const src = in256ctx.getImageData(0, 0, ONNX_SIZE, ONNX_SIZE);
-      runOnnxCorrection(cvdType, src, PD_SEVERITY).then((out) => {
+      runOnnxCorrection(cvdType, src, 1.0).then((out) => {
         if (cancelled) { busy = false; return; }
         const N = ONNX_SIZE * ONNX_SIZE;
         const de = dEncCtx.createImageData(ONNX_SIZE, ONNX_SIZE);
@@ -145,9 +146,9 @@ export default function VideoCorrection() {
         const frame = ctx.getImageData(0, 0, w, h);
         const fd = frame.data, ud = dUpImg.data;
         for (let i = 0; i < fd.length; i += 4) {            // 합성: orig + delta
-          fd[i] = fd[i] + (ud[i] / 127.5 - 1) * 255;
-          fd[i + 1] = fd[i + 1] + (ud[i + 1] / 127.5 - 1) * 255;
-          fd[i + 2] = fd[i + 2] + (ud[i + 2] / 127.5 - 1) * 255;
+          fd[i] = fd[i] + PD_CORRECTION_STRENGTH * (ud[i] / 127.5 - 1) * 255;
+          fd[i + 1] = fd[i + 1] + PD_CORRECTION_STRENGTH * (ud[i + 1] / 127.5 - 1) * 255;
+          fd[i + 2] = fd[i + 2] + PD_CORRECTION_STRENGTH * (ud[i + 2] / 127.5 - 1) * 255;
         }
         ctx.putImageData(frame, 0, 0);
         busy = false;
@@ -244,7 +245,7 @@ export default function VideoCorrection() {
     <div className="flex flex-col items-center gap-6">
       <div className="flex gap-2 flex-wrap justify-center">
         {(Object.keys(CVD_LABELS) as CVDType[]).map((type) => (
-          <button key={type} onClick={() => setCvdType(type)}
+          <button key={type} onClick={() => selectType(type)}
             className="px-4 py-2 rounded-full text-sm font-medium transition-colors"
             style={{
               background: cvdType === type ? "var(--color-brand)" : "var(--bg-muted)",

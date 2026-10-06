@@ -39,22 +39,14 @@ function imageDataToURL(id: ImageData): string {
 
 // Reject if the inference request hasn't resolved within `ms`. Client-side
 // guard for a surfaced error state; the request contract itself is unchanged.
-function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    p,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
-  ]);
-}
 const REQUEST_TIMEOUT = 30000;
 
 export default function ImageCorrection({ initialType }: { initialType?: CVDType } = {}) {
   const { ready, error, infer } = useModel();
   // 진단 결과에서 넘어온 타입(?type=)을 기본 선택으로. 없으면 녹색맹(d).
   const [cvdType, setCvdType] = useState<CVDType>(initialType ?? "d");
-  // 기본 0.7: 실사용자 다수인 이상삼색형(anomalous trichromat) 권장값. severity 1.0은
-  // 완전 색각이상 기준 최대 보정으로 실사진에서 과격하게 보인다 — deutan 잔디 형광화,
-  // protan 빨강 과채도/균일영역 얼룩(artifact_analysis 조사 참조). 논문/평가 조건은
-  // severity 1.0 유지 — 이 기본값은 UI 수용성용이며 평가와 분리된다.
+  // P/D는 severity 1.0에서 추론한 델타를 이 값으로 혼합한다. T는 같은 값으로
+  // 규칙 기반 hue 회전각을 조절한다. 즉 진단 중증도가 아닌 표시용 보정 강도다.
   const [severity, setSeverity] = useState(0.7);
   const [original, setOriginal] = useState<string | null>(null);
   const [corrected, setCorrected] = useState<string | null>(null);
@@ -70,6 +62,9 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
   const [dragging, setDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pendingFileRef = useRef<File | null>(null);
+  const requestRef = useRef<{ id: number; controller: AbortController } | null>(null);
+  const [imageAspect, setImageAspect] = useState(1);
 
   // Kept ImageData for re-inference on severity/type change (no file re-read)
   // and for client-side sim (no extra server round-trip).
@@ -84,19 +79,30 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
 
   const runInference = useCallback(async (type: CVDType, sev: number) => {
     if (!ready || !sourceIDRef.current) return;
+    requestRef.current?.controller.abort();
+    const controller = new AbortController();
+    const id = (requestRef.current?.id ?? 0) + 1;
+    requestRef.current = { id, controller };
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
     setReqError(false);
     setProcessing(true);
     try {
-      const result = await withTimeout(infer(sourceIDRef.current, type, sev), REQUEST_TIMEOUT);
+      const result = await infer(sourceIDRef.current, type, sev, controller.signal);
+      if (requestRef.current?.id !== id) return;
       correctedIDRef.current = result;
       setCorrected(imageDataToURL(result));
       if (showSim) computeSims(type);
     } catch (e) {
-      console.error("보정 요청 실패:", e);
-      setReqError(true);
+      if (requestRef.current?.id === id) {
+        console.error("보정 요청 실패:", e);
+        setReqError(true);
+      }
     } finally {
-      setProcessing(false);
-      setSaveState("idle");
+      clearTimeout(timeout);
+      if (requestRef.current?.id === id) {
+        setProcessing(false);
+        setSaveState("idle");
+      }
     }
   }, [ready, infer, showSim, computeSims]);
 
@@ -111,19 +117,19 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
     setSimOrig(null); setSimOut(null);
 
     const bitmap = await createImageBitmap(file);
-    const side = Math.min(bitmap.width, bitmap.height);
-    const target = Math.min(side, MAX_UPLOAD);   // cap the long side; never upscale a small image
+    const scale = Math.min(1, MAX_UPLOAD / Math.max(bitmap.width, bitmap.height));
+    const targetWidth = Math.max(1, Math.round(bitmap.width * scale));
+    const targetHeight = Math.max(1, Math.round(bitmap.height * scale));
     const canvas = document.createElement("canvas");
-    canvas.width = target;
-    canvas.height = target;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
     const ctx = canvas.getContext("2d")!;
-
-    const sx = (bitmap.width - side) / 2;
-    const sy = (bitmap.height - side) / 2;
-    ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, target, target);
+    ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+    bitmap.close();
 
     setOriginal(canvas.toDataURL("image/jpeg", 0.95));   // JPEG (not PNG): a 2048² PNG dataURL is multi-MB
-    sourceIDRef.current = ctx.getImageData(0, 0, target, target);
+    setImageAspect(targetWidth / targetHeight);
+    sourceIDRef.current = ctx.getImageData(0, 0, targetWidth, targetHeight);
     await runInference(type, sev);
   }, [ready, runInference]);
 
@@ -161,7 +167,6 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
     processImage(file, cvdType, severity);
   }, [processImage, cvdType, severity]);
 
-  const pendingFileRef = useRef<File | null>(null);
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) { pendingFileRef.current = file; onFile(file); }
@@ -184,11 +189,11 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
     sevTimer.current = setTimeout(() => runInference(cvdType, v), 300);
   }, [cvdType, runInference]);
 
-  // Recompute sim views when toggled on (or when corrected changes while on).
-  useEffect(() => {
-    if (showSim) computeSims(cvdType);
+  const onSimulationToggle = useCallback((checked: boolean) => {
+    setShowSim(checked);
+    if (checked) computeSims(cvdType);
     else { setSimOrig(null); setSimOut(null); }
-  }, [showSim, corrected, cvdType, computeSims]);
+  }, [computeSims, cvdType]);
 
   // Cold-start hint: after 5s of processing, swap the overlay copy so the user
   // knows a sleeping Render instance may take up to ~1min on the first request.
@@ -306,12 +311,12 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
           {compareMode === "side" ? (
             /* 나란히: 왼쪽=원본, 오른쪽=보정 (모바일 폭에서는 세로 스택) */
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="relative aspect-square rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
-                {original && <img src={original} alt="original" className="absolute inset-0 w-full h-full object-cover" draggable={false} />}
+              <div className="relative rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)", aspectRatio: imageAspect }}>
+                {original && <img src={original} alt="original" className="absolute inset-0 w-full h-full object-contain" draggable={false} />}
                 <span className="absolute top-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">원본</span>
               </div>
-              <div className="relative aspect-square rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
-                {corrected && <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />}
+              <div className="relative rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)", aspectRatio: imageAspect }}>
+                {corrected && <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-contain" draggable={false} />}
                 <span className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full text-white" style={{ background: "var(--color-brand)" }}>보정</span>
                 {processing && processingOverlay}
               </div>
@@ -320,17 +325,17 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
             /* 겹쳐 보기: wipe 슬라이더 (세밀 비교용) */
             <div
               ref={containerRef}
-              className="relative w-full max-w-lg aspect-square rounded-xl overflow-hidden cursor-ew-resize select-none border"
-              style={{ borderColor: "var(--border)" }}
+              className="relative w-full max-w-lg rounded-xl overflow-hidden cursor-ew-resize select-none border"
+              style={{ borderColor: "var(--border)", aspectRatio: imageAspect }}
               onMouseDown={() => setDragging(true)}
               onTouchStart={() => setDragging(true)}
             >
               {corrected && (
-                <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+                <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-contain" draggable={false} />
               )}
               {original && (
                 <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderX}%` }}>
-                  <img src={original} alt="original" className="absolute inset-0 w-full h-full max-w-none object-cover" draggable={false} />
+                  <img src={original} alt="original" className="absolute inset-0 w-full h-full max-w-none object-contain" draggable={false} />
                 </div>
               )}
               <div className="absolute top-0 bottom-0 w-0.5 shadow-lg" style={{ left: `${sliderX}%`, background: "var(--bg-elevated)" }}>
@@ -347,7 +352,7 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
             </div>
           )}
 
-          {/* severity 슬라이더 */}
+          {/* 보정 강도 슬라이더 */}
           <div className="w-full flex flex-col gap-1.5">
             <div className="flex items-center gap-3">
               <span className="text-xs whitespace-nowrap" style={{ color: "var(--fg-muted)" }}>보정 강도</span>
@@ -362,13 +367,13 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
               </span>
             </div>
             <p className="text-[11px] leading-snug" style={{ color: "var(--fg-subtle)" }}>
-              1.0 = 완전 색각이상 기준 최대 보정 · 경도 색약은 0.4–0.7 권장
+              0 = 원본 · 1 = 전체 보정 · 진단 중증도가 아닌 화면 보정량입니다
             </p>
           </div>
 
           {/* CVD 시뮬레이션 보기 토글 */}
           <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: "var(--fg-muted)" }}>
-            <input type="checkbox" checked={showSim} onChange={(e) => setShowSim(e.target.checked)} className="accent-[var(--color-brand)]" />
+            <input type="checkbox" checked={showSim} onChange={(e) => onSimulationToggle(e.target.checked)} className="accent-[var(--color-brand)]" />
             CVD 시뮬레이션 보기
           </label>
 
@@ -434,7 +439,7 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
               </button>
             )}
             <button
-              onClick={() => { setOriginal(null); setCorrected(null); setSaveState("idle"); setShowSim(false); setReqError(false); sourceIDRef.current = null; correctedIDRef.current = null; pendingFileRef.current = null; fileInputRef.current && (fileInputRef.current.value = ""); }}
+              onClick={() => { requestRef.current?.controller.abort(); setOriginal(null); setCorrected(null); setSaveState("idle"); setShowSim(false); setReqError(false); sourceIDRef.current = null; correctedIDRef.current = null; pendingFileRef.current = null; if (fileInputRef.current) fileInputRef.current.value = ""; }}
               className="text-sm transition-colors"
               style={{ color: "var(--fg-subtle)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}

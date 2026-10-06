@@ -1,5 +1,7 @@
 from pathlib import Path
 import io
+import logging
+import math
 import os
 import shutil
 import tempfile
@@ -8,7 +10,7 @@ import uuid
 import cv2
 import numpy as np
 import onnxruntime as rt
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 from PIL import Image
@@ -17,28 +19,61 @@ import config
 from guided import guided_filter
 
 app = FastAPI()
+logger = logging.getLogger("cvdlens.inference")
+
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CVDLENS_ALLOWED_ORIGINS",
+        "http://localhost:3000,https://cvd-lens.vercel.app",
+    ).split(",")
+    if origin.strip()
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
-# ── Phase 1 model_best (step 9000): one self-contained graph per CVD type. ──
+# ── Phase 1 model_best (step 9000): P/D self-contained graphs. ──
 # Inputs: srgb (1,3,256,256) float32, severity (1,1) float32.  Output: out_srgb.
 # Replaces the pre-pivot 4-channel cvdlens_fp32.onnx.
 MODEL_DIR = Path(__file__).parent / "model"
 _PROVIDERS = ["CUDAExecutionProvider", "CPUExecutionProvider"]
 SESSIONS = {
     t: rt.InferenceSession(str(MODEL_DIR / f"cvdlens_{t}.onnx"), providers=_PROVIDERS)
-    for t in ("p", "d", "t")
+    for t in ("p", "d")
 }
-DEFAULT_TYPE = "d"
 
 # Longest edge of the returned image. The delta-composite path below returns at
 # native resolution, so this caps response size for very large uploads (4K etc.).
 MAX_SIDE = 2048
+MAX_IMAGE_BYTES = 15 * 1024 * 1024
+MAX_VIDEO_BYTES = 250 * 1024 * 1024
+MAX_IMAGE_PIXELS = 24_000_000
+MAX_VIDEO_PIXELS = 1920 * 1080
+MAX_VIDEO_SECONDS = 5 * 60
+VALID_CVD_TYPES = {"p", "d", "t"}
+
+
+async def _read_limited(upload: UploadFile, limit: int) -> bytes:
+    chunks = []
+    total = 0
+    while chunk := await upload.read(1024 * 1024):
+        total += len(chunk)
+        if total > limit:
+            raise HTTPException(status_code=413, detail="업로드 파일이 너무 큽니다.")
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
+def _validate_params(cvd_type: str, severity: float) -> None:
+    if cvd_type not in VALID_CVD_TYPES:
+        raise HTTPException(status_code=422, detail="지원하지 않는 색각 유형입니다.")
+    if not math.isfinite(severity) or not 0.0 <= severity <= 1.0:
+        raise HTTPException(status_code=422, detail="severity는 0과 1 사이여야 합니다.")
 
 
 def _run_float(rgb256: np.ndarray, cvd_type: str, severity: float) -> np.ndarray:
@@ -47,7 +82,7 @@ def _run_float(rgb256: np.ndarray, cvd_type: str, severity: float) -> np.ndarray
     No clipping — the caller needs the raw correction so `out - in` recovers the
     true delta before compositing.
     """
-    sess = SESSIONS.get(cvd_type, SESSIONS[DEFAULT_TYPE])
+    sess = SESSIONS[cvd_type]
     chw = rgb256.transpose(2, 0, 1)[np.newaxis].astype(np.float32)   # (1,3,256,256)
     sev = np.array([[severity]], dtype=np.float32)                   # (1,1)
     out = sess.run(["out_srgb"], {"srgb": chw, "severity": sev})[0]
@@ -118,8 +153,10 @@ def _correct_image(img_f32: np.ndarray, cvd_type: str, severity: float) -> np.nd
         delta_full = _tritan_hue_shift(img_f32, severity) - img_f32
     else:
         lb, (x0, y0, x1, y1) = _letterbox(img_f32, 256)
-        out = _run_float(lb, cvd_type, severity)
-        delta = (out - lb)[y0:y1, x0:x1]                  # content-box delta only
+        # P/D checkpoints were trained only at severity=1.0. Keep the network
+        # on-distribution and treat severity as an output-delta strength.
+        out = _run_float(lb, cvd_type, 1.0)
+        delta = ((out - lb) * severity)[y0:y1, x0:x1]     # content-box delta only
         delta_full = cv2.resize(delta, (w, h), interpolation=cv2.INTER_LINEAR)
 
     # Guided-filter post-processing: snap the delta to the original's edges
@@ -160,8 +197,19 @@ async def infer(
     cvd_type: str = Form(...),
     severity: float = Form(1.0),   # optional; older frontend omits → 1.0
 ):
-    data = await image.read()
-    img = Image.open(io.BytesIO(data)).convert("RGB")
+    _validate_params(cvd_type, severity)
+    if image.content_type and not image.content_type.startswith("image/"):
+        raise HTTPException(status_code=415, detail="이미지 파일만 업로드할 수 있습니다.")
+    data = await _read_limited(image, MAX_IMAGE_BYTES)
+    try:
+        with Image.open(io.BytesIO(data)) as opened:
+            if opened.width * opened.height > MAX_IMAGE_PIXELS:
+                raise HTTPException(status_code=413, detail="이미지 해상도가 너무 큽니다.")
+            img = opened.convert("RGB")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="이미지를 읽을 수 없습니다.") from exc
 
     arr = _cap_long_side(np.asarray(img, dtype=np.float32) / 255.0)
     out = _to_u8(_correct_image(arr, cvd_type, severity))
@@ -197,6 +245,9 @@ async def infer_video(
     import subprocess
     import threading
 
+    _validate_params(cvd_type, severity)
+    if video.content_type and not video.content_type.startswith("video/"):
+        raise HTTPException(status_code=415, detail="영상 파일만 업로드할 수 있습니다.")
     if _FFMPEG is None:
         return JSONResponse(status_code=500,
                             content={"error": "서버에 ffmpeg가 설치되어 있지 않아 영상 보정을 처리할 수 없습니다."})
@@ -208,7 +259,7 @@ async def infer_video(
 
     try:
         with open(tmp_in.name, "wb") as f:
-            f.write(await video.read())
+            f.write(await _read_limited(video, MAX_VIDEO_BYTES))
 
         cap = cv2.VideoCapture(tmp_in.name)
         if not cap.isOpened():
@@ -217,6 +268,13 @@ async def infer_video(
         fps   = cap.get(cv2.CAP_PROP_FPS) or 30.0
         w     = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h     = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        if w <= 0 or h <= 0 or w * h > MAX_VIDEO_PIXELS:
+            cap.release()
+            raise HTTPException(status_code=413, detail="영상 해상도는 최대 1920×1080입니다.")
+        if frame_count > 0 and frame_count / fps > MAX_VIDEO_SECONDS:
+            cap.release()
+            raise HTTPException(status_code=413, detail="영상 길이는 최대 5분입니다.")
         enc_w = w + (w % 2)
         enc_h = h + (h % 2)
 
@@ -275,8 +333,14 @@ async def infer_video(
                      "X-Frame-Count": str(frame_idx)},
         )
 
-    except Exception as e:
+    except HTTPException:
         for p in [tmp_in.name, tmp_out.name]:
             try: os.unlink(p)
             except OSError: pass
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        raise
+    except Exception:
+        logger.exception("Video inference failed")
+        for p in [tmp_in.name, tmp_out.name]:
+            try: os.unlink(p)
+            except OSError: pass
+        return JSONResponse(status_code=500, content={"error": "영상 보정 처리에 실패했습니다."})

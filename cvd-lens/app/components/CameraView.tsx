@@ -13,12 +13,6 @@ function imageDataToURL(id: ImageData): string {
 
 // Reject if the inference request hasn't resolved within `ms`. Client-side
 // guard for a surfaced error state; the request contract itself is unchanged.
-function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    p,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
-  ]);
-}
 const REQUEST_TIMEOUT = 30000;
 
 // Cap on the captured square side. Kept equal to the backend's MAX_SIDE
@@ -44,9 +38,7 @@ function resizeDataURL(src: string, size: number): Promise<string> {
   });
 }
 
-// 카메라 탭은 severity 슬라이더가 없어 hook 기본(1.0) 대신 이 값을 명시적으로 넘긴다.
-// 0.7 = 이상삼색형 다수인 실사용자 권장값(ImageCorrection 슬라이더 기본과 일치).
-// 논문/평가 조건(severity 1.0)과 분리된다.
+// 카메라 탭의 표시용 보정 강도. P/D 모델은 1.0에서 추론한 뒤 델타만 혼합한다.
 const CAMERA_SEVERITY = 0.7;
 
 export default function CameraView() {
@@ -67,12 +59,14 @@ export default function CameraView() {
   const [showSim, setShowSim]     = useState(false);
   const [simOrig, setSimOrig]     = useState<string | null>(null);
   const [simOut, setSimOut]       = useState<string | null>(null);
+  const [imageAspect, setImageAspect] = useState(1);
 
   const { ready, error, infer } = useCVDModel();
 
   // Kept ImageData for client-side sim (no extra server round-trip).
   const sourceIDRef = useRef<ImageData | null>(null);
   const correctedIDRef = useRef<ImageData | null>(null);
+  const requestRef = useRef<{ id: number; controller: AbortController } | null>(null);
 
   const computeSims = useCallback((type: CVDType) => {
     if (!sourceIDRef.current || !correctedIDRef.current) return;
@@ -80,10 +74,11 @@ export default function CameraView() {
     setSimOut(imageDataToURL(simulate(correctedIDRef.current, type)));
   }, []);
 
-  useEffect(() => {
-    if (showSim) computeSims(cvdType);
+  const onSimulationToggle = useCallback((checked: boolean) => {
+    setShowSim(checked);
+    if (checked) computeSims(cvdType);
     else { setSimOrig(null); setSimOut(null); }
-  }, [showSim, corrected, cvdType, computeSims]);
+  }, [computeSims, cvdType]);
 
   // Cold-start hint: after 5s of processing, swap the overlay copy so the user
   // knows a sleeping Render instance may take up to ~1min on the first request.
@@ -123,49 +118,76 @@ export default function CameraView() {
     setCorrected(null);
 
     const vw = video.videoWidth, vh = video.videoHeight;
-    const side = Math.min(vw, vh);
-    const target = Math.min(side, MAX_UPLOAD);   // cap; camera frames are usually well under this
+    const scale = Math.min(1, MAX_UPLOAD / Math.max(vw, vh));
+    const targetWidth = Math.max(1, Math.round(vw * scale));
+    const targetHeight = Math.max(1, Math.round(vh * scale));
     const canvas = document.createElement("canvas");
-    canvas.width = target; canvas.height = target;
+    canvas.width = targetWidth; canvas.height = targetHeight;
     const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(video, (vw - side) / 2, (vh - side) / 2, side, side, 0, 0, target, target);
+    ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
 
     setOriginal(canvas.toDataURL("image/jpeg", 0.92));
+    setImageAspect(targetWidth / targetHeight);
     stopCamera();
 
+    requestRef.current?.controller.abort();
+    const controller = new AbortController();
+    const id = (requestRef.current?.id ?? 0) + 1;
+    requestRef.current = { id, controller };
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
     try {
-      const imageData = ctx.getImageData(0, 0, target, target);
+      const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
       sourceIDRef.current = imageData;
-      const result = await withTimeout(infer(imageData, cvdType, CAMERA_SEVERITY), REQUEST_TIMEOUT);
+      const result = await infer(imageData, cvdType, CAMERA_SEVERITY, controller.signal);
+      if (requestRef.current?.id !== id) return;
       correctedIDRef.current = result;
       ctx.putImageData(result, 0, 0);
       setCorrected(canvas.toDataURL("image/jpeg", 0.92));
       if (showSim) computeSims(cvdType);
       setSaveState("idle");
     } catch (e) {
-      console.error("보정 오류:", e);
-      setReqError(true);
+      if (requestRef.current?.id === id) {
+        console.error("보정 오류:", e);
+        setReqError(true);
+      }
+    } finally {
+      clearTimeout(timeout);
+      if (requestRef.current?.id === id) setProcessing(false);
     }
-    setProcessing(false);
   }, [ready, cvdType, infer, showSim, computeSims]);
 
   // Re-run inference on the last captured frame (no re-capture needed).
-  const retry = useCallback(async () => {
+  const retry = useCallback(async (type: CVDType = cvdType) => {
     if (!sourceIDRef.current || !ready) return;
     setReqError(false);
     setProcessing(true);
+    requestRef.current?.controller.abort();
+    const controller = new AbortController();
+    const id = (requestRef.current?.id ?? 0) + 1;
+    requestRef.current = { id, controller };
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
     try {
-      const result = await withTimeout(infer(sourceIDRef.current, cvdType, CAMERA_SEVERITY), REQUEST_TIMEOUT);
+      const result = await infer(sourceIDRef.current, type, CAMERA_SEVERITY, controller.signal);
+      if (requestRef.current?.id !== id) return;
       correctedIDRef.current = result;
       setCorrected(imageDataToURL(result));
-      if (showSim) computeSims(cvdType);
+      if (showSim) computeSims(type);
       setSaveState("idle");
     } catch (e) {
-      console.error("보정 요청 실패:", e);
-      setReqError(true);
+      if (requestRef.current?.id === id) {
+        console.error("보정 요청 실패:", e);
+        setReqError(true);
+      }
+    } finally {
+      clearTimeout(timeout);
+      if (requestRef.current?.id === id) setProcessing(false);
     }
-    setProcessing(false);
   }, [ready, cvdType, infer, showSim, computeSims]);
+
+  const selectType = (type: CVDType) => {
+    setCvdType(type);
+    if (sourceIDRef.current && ready) void retry(type);
+  };
 
   // Download the corrected JPEG. Camera captures have no source filename,
   // so the base is a fixed "capture" — capture_corrected_{type}.jpg.
@@ -234,7 +256,7 @@ export default function CameraView() {
         {(Object.keys(CVD_LABELS) as CVDType[]).map((type) => (
           <button
             key={type}
-            onClick={() => setCvdType(type)}
+            onClick={() => selectType(type)}
             className="px-4 py-2 rounded-full text-sm font-medium transition-colors"
             style={{
               background: cvdType === type ? "var(--color-brand)" : "var(--bg-muted)",
@@ -311,12 +333,12 @@ export default function CameraView() {
           {compareMode === "side" ? (
             /* 나란히: 왼쪽=원본, 오른쪽=보정 (모바일 폭에서는 세로 스택) */
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="relative aspect-square rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
-                {original && <img src={original} alt="original" className="absolute inset-0 w-full h-full object-cover" draggable={false} />}
+              <div className="relative rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)", aspectRatio: imageAspect }}>
+                {original && <img src={original} alt="original" className="absolute inset-0 w-full h-full object-contain" draggable={false} />}
                 <span className="absolute top-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">원본</span>
               </div>
-              <div className="relative aspect-square rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
-                {corrected && <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />}
+              <div className="relative rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)", aspectRatio: imageAspect }}>
+                {corrected && <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-contain" draggable={false} />}
                 <span className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full text-white" style={{ background: "var(--color-brand)" }}>보정</span>
                 {processing && processingOverlay}
               </div>
@@ -325,14 +347,14 @@ export default function CameraView() {
             /* 겹쳐 보기: wipe 슬라이더 (세밀 비교용) */
             <div
               ref={containerRef}
-              className="relative w-full max-w-lg aspect-square rounded-xl overflow-hidden cursor-ew-resize select-none border"
-              style={{ borderColor: "var(--border)" }}
+              className="relative w-full max-w-lg rounded-xl overflow-hidden cursor-ew-resize select-none border"
+              style={{ borderColor: "var(--border)", aspectRatio: imageAspect }}
               onMouseDown={() => setDragging(true)}
               onTouchStart={() => setDragging(true)}
             >
-              {corrected && <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-cover" draggable={false} />}
+              {corrected && <img src={corrected} alt="corrected" className="absolute inset-0 w-full h-full object-contain" draggable={false} />}
               <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderX}%` }}>
-                <img src={original!} alt="original" className="absolute inset-0 w-full h-full max-w-none object-cover" draggable={false} />
+                <img src={original!} alt="original" className="absolute inset-0 w-full h-full max-w-none object-contain" draggable={false} />
               </div>
               <div className="absolute top-0 bottom-0 w-0.5 shadow-lg" style={{ left: `${sliderX}%`, background: "var(--bg-elevated)" }}>
                 <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full shadow-lg flex items-center justify-center" style={{ background: "var(--bg-elevated)" }}>
@@ -349,7 +371,7 @@ export default function CameraView() {
 
           {/* CVD 시뮬레이션 보기 토글 */}
           <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: "var(--fg-muted)" }}>
-            <input type="checkbox" checked={showSim} onChange={(e) => setShowSim(e.target.checked)} className="accent-[var(--color-brand)]" />
+            <input type="checkbox" checked={showSim} onChange={(e) => onSimulationToggle(e.target.checked)} className="accent-[var(--color-brand)]" />
             CVD 시뮬레이션 보기
           </label>
           {showSim && (
@@ -376,7 +398,7 @@ export default function CameraView() {
             >
               <p className="text-sm" style={{ color: "#d5383a" }}>서버 연결에 실패했어요. 잠시 후 다시 시도해주세요</p>
               <button
-                onClick={retry}
+                onClick={() => void retry()}
                 className="px-4 py-1.5 rounded-full text-sm font-medium text-white transition-colors"
                 style={{ background: "var(--color-brand)" }}
               >
@@ -409,7 +431,7 @@ export default function CameraView() {
               </button>
             )}
             <button
-              onClick={() => { setOriginal(null); setCorrected(null); setSaveState("idle"); setShowSim(false); setReqError(false); sourceIDRef.current = null; correctedIDRef.current = null; }}
+              onClick={() => { requestRef.current?.controller.abort(); setOriginal(null); setCorrected(null); setSaveState("idle"); setShowSim(false); setReqError(false); sourceIDRef.current = null; correctedIDRef.current = null; }}
               className="text-sm transition-colors"
               style={{ color: "var(--fg-subtle)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}

@@ -42,7 +42,8 @@ export function useCVDModel() {
   const infer = useCallback(async (
     imageData: ImageData,
     cvdType: CVDType,
-    severity = 1.0
+    strength = 1.0,
+    signal?: AbortSignal,
   ): Promise<ImageData> => {
     // ImageData → JPEG Blob
     const canvas = document.createElement("canvas");
@@ -57,9 +58,12 @@ export function useCVDModel() {
     const form = new FormData();
     form.append("image", blob, "frame.jpg");
     form.append("cvd_type", cvdType);
-    form.append("severity", String(severity));
+    // P/D models were trained at severity=1.0.  Keep inference on the
+    // distribution seen during training and expose a separate display
+    // strength by blending the learned correction delta below.
+    form.append("severity", String(cvdType === "t" ? strength : 1.0));
 
-    const res = await fetch(`${API_URL}/infer`, { method: "POST", body: form });
+    const res = await fetch(`${API_URL}/infer`, { method: "POST", body: form, signal });
     if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
 
     // JPEG 응답 → ImageData
@@ -68,8 +72,20 @@ export function useCVDModel() {
     const outCanvas = document.createElement("canvas");
     outCanvas.width = imageData.width;
     outCanvas.height = imageData.height;
-    outCanvas.getContext("2d")!.drawImage(bitmap, 0, 0, imageData.width, imageData.height);
-    return outCanvas.getContext("2d")!.getImageData(0, 0, imageData.width, imageData.height);
+    const outCtx = outCanvas.getContext("2d")!;
+    outCtx.drawImage(bitmap, 0, 0, imageData.width, imageData.height);
+    const output = outCtx.getImageData(0, 0, imageData.width, imageData.height);
+    bitmap.close();
+
+    if (cvdType !== "t" && strength < 1) {
+      const amount = Math.max(0, strength);
+      for (let i = 0; i < output.data.length; i += 4) {
+        output.data[i] = imageData.data[i] + amount * (output.data[i] - imageData.data[i]);
+        output.data[i + 1] = imageData.data[i + 1] + amount * (output.data[i + 1] - imageData.data[i + 1]);
+        output.data[i + 2] = imageData.data[i + 2] + amount * (output.data[i + 2] - imageData.data[i + 2]);
+      }
+    }
+    return output;
   }, []);
 
   return { ready, error, infer };
