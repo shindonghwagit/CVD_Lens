@@ -15,6 +15,9 @@ interface Result {
 
 const DIAGNOSIS_LABEL: Record<string, { label: string; color: string }> = {
   normal:       { label: "정상",       color: "#22c55e" },
+  protan:       { label: "적색맹 의심", color: "#ef4444" },
+  deutan:       { label: "녹색맹 의심", color: "#f97316" },
+  rg:           { label: "적록색각이상 의심", color: "#d97706" },
   p:            { label: "적색맹",     color: "#ef4444" },
   d:            { label: "녹색맹",     color: "#f97316" },
   t:            { label: "청색맹",     color: "#3b82f6" },

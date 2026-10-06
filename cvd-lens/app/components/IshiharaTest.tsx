@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useModel } from "../context/ModelContext";
@@ -48,9 +48,11 @@ function PlateCorrectionCard({ plate, correctionType }: { plate: Plate; correcti
     }
   }, [ready, infer, correctionType]);
 
-  useEffect(() => {
-    if (on && !correctedSrc) apply();
-  }, [on, correctedSrc, apply]);
+  const toggleCorrection = () => {
+    const next = !on;
+    setOn(next);
+    if (next && !correctedSrc) void apply();
+  };
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -86,7 +88,7 @@ function PlateCorrectionCard({ plate, correctionType }: { plate: Plate; correcti
         정답 <span style={{ color: "var(--fg)" }}>{plate.answer}</span>
       </p>
       <button
-        onClick={() => setOn(!on)}
+        onClick={toggleCorrection}
         disabled={!ready || busy}
         className="px-3 py-1 rounded-full text-[12px] font-medium transition-colors disabled:opacity-40"
         style={on
@@ -143,15 +145,11 @@ export default function IshiharaTest() {
   const submittingRef = useRef(false);
   const plate = plates[current];
 
-  useEffect(() => {
-    setInput("");
-  }, [current]);
-
-  const submit = async () => {
+  const submit = async (answer?: string) => {
     if (submittingRef.current) return;
     submittingRef.current = true;
     const newAnswers = [...answers];
-    newAnswers[current] = input.trim() || "모름";
+    newAnswers[current] = answer?.trim() || input.trim() || "모름";
     setAnswers(newAnswers);
 
     if (current + 1 >= plates.length) {
@@ -167,6 +165,7 @@ export default function IshiharaTest() {
       }
       setDone(true);
     } else {
+      setInput("");
       setCurrent(current + 1);
     }
     submittingRef.current = false;
@@ -177,6 +176,7 @@ export default function IshiharaTest() {
     setPlates(next);
     setAnswers(Array(next.length).fill(null));
     setCurrent(0);
+    setInput("");
     setDone(false);
   };
 
@@ -358,13 +358,13 @@ export default function IshiharaTest() {
             inputMode="numeric"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && submit()}
+            onKeyDown={(e) => { if (e.key === "Enter") void submit(); }}
             placeholder="숫자 입력"
             className="flex-1 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 border"
             style={{ background: "var(--bg-muted)", borderColor: "var(--border-strong)", color: "var(--fg)" }}
           />
           <button
-            onClick={submit}
+            onClick={() => void submit()}
             className="px-4 py-2.5 rounded-lg text-sm font-medium text-white"
             style={{ background: "var(--color-brand)" }}
           >
@@ -372,7 +372,7 @@ export default function IshiharaTest() {
           </button>
         </div>
         <button
-          onClick={() => { setInput("모름"); setTimeout(submit, 0); }}
+          onClick={() => void submit("모름")}
           className="text-xs transition-colors"
           style={{ color: "var(--fg-subtle)" }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}

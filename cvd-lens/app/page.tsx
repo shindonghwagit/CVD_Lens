@@ -68,9 +68,9 @@ const FEATURES = [
     num: "01 / ASSESSMENT",
     href: "/ishihara",
     title: "이시하라 색각 진단",
-    subtitle: "5장의 이시하라 도판으로 적록 계열 색각이상 여부를 스스로 확인합니다.",
+    subtitle: "10장의 이시하라 도판으로 적록 계열 색각이상 여부를 스스로 확인합니다.",
     detail: "적록 계열(적색맹·녹색맹) 스크리닝 · 청색 계열은 참고용 · 결과는 참고이며 정확한 진단은 안과 전문의와 상담하세요.",
-    tags: ["5 plates", "~2 min", "결과서 AI 보정"],
+    tags: ["10 plates", "~2 min", "결과서 보정 미리보기"],
   },
   {
     num: "02 / IMAGE",
@@ -107,7 +107,7 @@ export default function Home() {
             AI가 다시 <em className="not-italic text-brand italic" style={{ fontStyle: "italic" }}>또렷하게</em>.
           </h1>
           <p className="text-[17px] leading-relaxed mb-8 max-w-[480px]" style={{ color: "var(--fg-muted)" }}>
-            색각이상(Color Vision Deficiency)을 가진 사용자를 위한 AI 보정 도구.
+            색각이상(Color Vision Deficiency)을 가진 사용자를 위한 맞춤 보정 도구.
             자가 진단부터 사진·카메라 촬영 보정까지, 한 곳에서 해결하세요.
           </p>
           <div className="flex gap-3 mb-10">
@@ -170,7 +170,7 @@ export default function Home() {
             </h2>
           </div>
           <p className="text-sm max-w-[320px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
-            아래 세 기능은 동일한 AI 보정 엔진을 공유합니다. 어디서 시작해도 같은 품질의 색 보정을 경험할 수 있어요.
+            적·녹색맹은 학습 모델, 청색맹은 채도 보존 규칙을 사용합니다. 사진과 카메라에서도 같은 보정 원칙을 적용합니다.
           </p>
         </div>
 
