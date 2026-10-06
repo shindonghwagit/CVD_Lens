@@ -38,6 +38,10 @@ cvdlens_v2/_tmp_test_artifacts/
 # ───────────────────────────────────────────
 # 대용량 모델 / 데이터
 # ───────────────────────────────────────────
+external_eval/images/
+external_eval/contact_sheets/
+.eval-env/
+external_eval/results/previews/
 *.onnx
 *.ckpt
 *.pt
