@@ -125,6 +125,13 @@ external_eval_v2/images/
 external_eval_v2/contact_sheets/
 external_eval_v2/results/previews/
 
+# Local-only settings and superseded exploratory validation artifacts.
+.claude/settings.local.json
+external_eval_v2/results/DEPLOYED_API_E2E.md
+external_eval_v2/results/deployed_api_e2e.json
+external_eval_v2/results/tritan_adaptive.json
+external_eval_v2/tritan_adaptive_experiment.py
+
 # 파이프라인 개선/진단 리포트(reports/): 리포트(.md)·수치(.json)만 트래킹,
 # 재생성 가능한 그림(PNG)·이미지(JPG)는 제외 — diag_*.py / reeval_guided.py로 재현.
 reports/**/*.png
