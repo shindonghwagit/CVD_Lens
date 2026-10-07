@@ -1,0 +1,156 @@
+{
+  "dataset": {
+    "images": 220,
+    "categories": 20
+  },
+  "types": {
+    "p": {
+      "machado": {
+        "meaningful_n": 110,
+        "w_median_cutoff": 0.30997781455516815,
+        "crr_mean": 1.2042662864149636,
+        "crr_median": 1.1664975650911842,
+        "crr_mean_95ci": [
+          1.1738749231036798,
+          1.2388710667810665
+        ],
+        "failures_below_1": 0,
+        "success_rate": 1.0,
+        "np_mae_mean": 0.013656192694208391,
+        "large_change_ratio_mean": 0.06332682027358197,
+        "category_crr_mean": {
+          "animals_pets": 1.1079569559668876,
+          "charts_maps": 1.0637144085467625,
+          "clothing_fashion": 1.2891212894998563,
+          "food_drink": 1.2616325060561815,
+          "garden_plants": 1.1893574212276286,
+          "grocery_retail": 1.348606843741056,
+          "home_living": 1.1208573809419413,
+          "kitchen_dining": 1.155028346227253,
+          "landscape_water": 1.1314416798821003,
+          "night_lowlight": 1.2048375055256062,
+          "office_school": 1.1039165525762415,
+          "people_social": 1.2311783420937334,
+          "road_transit": 1.091545262501766,
+          "screens_controls": 1.1170097140413788,
+          "signs_wayfinding": 1.1623441345903047,
+          "small_color_items": 1.5889329774924663,
+          "sports_play": 1.1813845479378533,
+          "tools_workshop": 1.1213829286603532,
+          "urban_architecture": 1.6004318522361438,
+          "weather_seasons": 1.0917464586000178
+        }
+      },
+      "brettel": {
+        "meaningful_n": 110,
+        "w_median_cutoff": 0.3542409688234329,
+        "crr_mean": 1.1973409584996266,
+        "crr_median": 1.1556617987699085,
+        "crr_mean_95ci": [
+          1.1657640281066155,
+          1.2334159054153102
+        ],
+        "failures_below_1": 0,
+        "success_rate": 1.0,
+        "np_mae_mean": 0.013656192694208391,
+        "large_change_ratio_mean": 0.06332682027358197,
+        "category_crr_mean": {
+          "animals_pets": 1.111904598157738,
+          "charts_maps": 1.0497110214539798,
+          "clothing_fashion": 1.2775254567961558,
+          "food_drink": 1.252622399331782,
+          "garden_plants": 1.182458700129997,
+          "grocery_retail": 1.3379345963841502,
+          "home_living": 1.1185393609139243,
+          "kitchen_dining": 1.1394643929805328,
+          "landscape_water": 1.098139373819727,
+          "night_lowlight": 1.2243951968327949,
+          "office_school": 1.1098303798989164,
+          "people_social": 1.2323363229507787,
+          "road_transit": 1.088220059599428,
+          "screens_controls": 1.1065085227596032,
+          "signs_wayfinding": 1.1563290680650795,
+          "small_color_items": 1.5942736672230549,
+          "sports_play": 1.1947480228721248,
+          "tools_workshop": 1.1225080404178494,
+          "urban_architecture": 1.228350610187771,
+          "weather_seasons": 1.1008409276204758
+        }
+      }
+    },
+    "d": {
+      "machado": {
+        "meaningful_n": 110,
+        "w_median_cutoff": 0.30634479224681854,
+        "crr_mean": 1.1666535804295994,
+        "crr_median": 1.139523282356862,
+        "crr_mean_95ci": [
+          1.1426421212865336,
+          1.192671622397972
+        ],
+        "failures_below_1": 2,
+        "success_rate": 0.9818181818181818,
+        "np_mae_mean": 0.015900627893390896,
+        "large_change_ratio_mean": 0.06912049546839555,
+        "category_crr_mean": {
+          "animals_pets": 1.0972512369755658,
+          "charts_maps": 1.0400318806413635,
+          "clothing_fashion": 1.235870781619155,
+          "food_drink": 1.2169782687582078,
+          "garden_plants": 1.1665439491754732,
+          "grocery_retail": 1.2592159811286505,
+          "home_living": 1.138648542268122,
+          "kitchen_dining": 1.1105437863373933,
+          "landscape_water": 1.1342942528442643,
+          "night_lowlight": 1.1659047662668198,
+          "office_school": 1.0794833969508772,
+          "people_social": 1.1980714969961639,
+          "road_transit": 1.0901760878972349,
+          "screens_controls": 1.1068785093755489,
+          "signs_wayfinding": 1.157600864022136,
+          "small_color_items": 1.4484834978859873,
+          "sports_play": 1.154615410037599,
+          "tools_workshop": 1.0874145770698016,
+          "urban_architecture": 1.425955424987523,
+          "weather_seasons": 1.074816728758755
+        }
+      },
+      "brettel": {
+        "meaningful_n": 110,
+        "w_median_cutoff": 0.380361407995224,
+        "crr_mean": 1.154992545247567,
+        "crr_median": 1.1194015649779716,
+        "crr_mean_95ci": [
+          1.1303636169956506,
+          1.1816053805440931
+        ],
+        "failures_below_1": 1,
+        "success_rate": 0.990909090909091,
+        "np_mae_mean": 0.015900627893390896,
+        "large_change_ratio_mean": 0.06912049546839555,
+        "category_crr_mean": {
+          "animals_pets": 1.1024711543340349,
+          "charts_maps": 1.0228329757546242,
+          "clothing_fashion": 1.2201838699574616,
+          "food_drink": 1.209237985651893,
+          "garden_plants": 1.151911713773964,
+          "grocery_retail": 1.2715728960124897,
+          "home_living": 1.128056137902263,
+          "kitchen_dining": 1.098582094848458,
+          "landscape_water": 1.093216805561408,
+          "night_lowlight": 1.176232453535207,
+          "office_school": 1.0793208797981877,
+          "people_social": 1.193457540009849,
+          "road_transit": 1.0733307588069647,
+          "screens_controls": 1.0833070476265505,
+          "signs_wayfinding": 1.1351758421421088,
+          "small_color_items": 1.4097630421065874,
+          "sports_play": 1.1522614975346266,
+          "tools_workshop": 1.0871531486938566,
+          "urban_architecture": 1.1716961003248623,
+          "weather_seasons": 1.0705472112670495
+        }
+      }
+    }
+  }
+}
