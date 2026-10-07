@@ -1,0 +1,4448 @@
+{
+  "pass_threshold": "test success >=95% on both simulators",
+  "passed": true,
+  "summary": {
+    "dev": {
+      "brettel": {
+        "n": 58,
+        "crr_mean": 1.0948986224213288,
+        "crr_median": 1.0686065160695293,
+        "failures_below_0.9995": 0,
+        "success_rate": 1.0,
+        "np_mae": 0.010269317601847908,
+        "large_change_ratio": 0.07587237285999522
+      },
+      "machado": {
+        "n": 58,
+        "crr_mean": 1.0647886403279476,
+        "crr_median": 1.0366090825847458,
+        "failures_below_0.9995": 0,
+        "success_rate": 1.0,
+        "np_mae": 0.010269317601847908,
+        "large_change_ratio": 0.07587237285999522
+      }
+    },
+    "test": {
+      "brettel": {
+        "n": 53,
+        "crr_mean": 1.094453031704321,
+        "crr_median": 1.0583157024335113,
+        "failures_below_0.9995": 0,
+        "success_rate": 1.0,
+        "np_mae": 0.01184276649894725,
+        "large_change_ratio": 0.07620700613677656
+      },
+      "machado": {
+        "n": 53,
+        "crr_mean": 1.072673705537969,
+        "crr_median": 1.047468298268869,
+        "failures_below_0.9995": 0,
+        "success_rate": 1.0,
+        "np_mae": 0.01184276649894725,
+        "large_change_ratio": 0.07620700613677656
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "road_transit_01",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.2666809558868408,
+      "crr": 1.0523009661570606,
+      "np_mae": 0.006896007340401411,
+      "large_change_ratio": 0.020621644938650308
+    },
+    {
+      "id": "road_transit_01",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.07600002735853195,
+      "crr": 1.0132473198435525,
+      "np_mae": 0.006896007340401411,
+      "large_change_ratio": 0.020621644938650308
+    },
+    {
+      "id": "road_transit_02",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.40823128819465637,
+      "crr": 1.0533002076696014,
+      "np_mae": 0.01613485999405384,
+      "large_change_ratio": 0.20139848066298344
+    },
+    {
+      "id": "road_transit_02",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.2565497159957886,
+      "crr": 1.1527660862937765,
+      "np_mae": 0.01613485999405384,
+      "large_change_ratio": 0.20139848066298344
+    },
+    {
+      "id": "road_transit_04",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.46586957573890686,
+      "crr": 1.0418410047436686,
+      "np_mae": 0.010394442826509476,
+      "large_change_ratio": 0.057596842447916664
+    },
+    {
+      "id": "road_transit_04",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.4108569622039795,
+      "crr": 1.0271632141843494,
+      "np_mae": 0.010394442826509476,
+      "large_change_ratio": 0.057596842447916664
+    },
+    {
+      "id": "road_transit_05",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.10511550307273865,
+      "crr": 1.0878645090825543,
+      "np_mae": 0.002566907089203596,
+      "large_change_ratio": 0.0026295979817708335
+    },
+    {
+      "id": "road_transit_05",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.0562155656516552,
+      "crr": 1.0578534519468559,
+      "np_mae": 0.002566907089203596,
+      "large_change_ratio": 0.0026295979817708335
+    },
+    {
+      "id": "road_transit_06",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.22895942628383636,
+      "crr": 1.0114632545968285,
+      "np_mae": 0.005173973273485899,
+      "large_change_ratio": 0.034093221028645836
+    },
+    {
+      "id": "road_transit_06",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.057760801166296005,
+      "crr": 1.0468471288471164,
+      "np_mae": 0.005173973273485899,
+      "large_change_ratio": 0.034093221028645836
+    },
+    {
+      "id": "road_transit_07",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.6172106266021729,
+      "crr": 1.0285969332413667,
+      "np_mae": 0.005030404776334763,
+      "large_change_ratio": 0.021009657118055556
+    },
+    {
+      "id": "road_transit_07",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.44453251361846924,
+      "crr": 1.0262830233318099,
+      "np_mae": 0.005030404776334763,
+      "large_change_ratio": 0.021009657118055556
+    },
+    {
+      "id": "road_transit_08",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6862099766731262,
+      "crr": 1.0043618239264611,
+      "np_mae": 0.0015713295433670282,
+      "large_change_ratio": 0.00037977430555555556
+    },
+    {
+      "id": "road_transit_08",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.1946297287940979,
+      "crr": 1.0023253070604108,
+      "np_mae": 0.0015713295433670282,
+      "large_change_ratio": 0.00037977430555555556
+    },
+    {
+      "id": "road_transit_09",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7070927619934082,
+      "crr": 1.0106810946041058,
+      "np_mae": 0.0023057193029671907,
+      "large_change_ratio": 0.004014756944444444
+    },
+    {
+      "id": "road_transit_09",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.31526362895965576,
+      "crr": 1.0034239729784702,
+      "np_mae": 0.0023057193029671907,
+      "large_change_ratio": 0.004014756944444444
+    },
+    {
+      "id": "road_transit_10",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.05800160765647888,
+      "crr": 1.0412700895563967,
+      "np_mae": 0.0021101811435073614,
+      "large_change_ratio": 0.005528767903645833
+    },
+    {
+      "id": "road_transit_10",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.04955841228365898,
+      "crr": 1.064823712394658,
+      "np_mae": 0.0021101811435073614,
+      "large_change_ratio": 0.005528767903645833
+    },
+    {
+      "id": "road_transit_11",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.47413671016693115,
+      "crr": 1.105934339252123,
+      "np_mae": 0.03716587647795677,
+      "large_change_ratio": 0.1570749840966921
+    },
+    {
+      "id": "road_transit_11",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.3063127100467682,
+      "crr": 1.0463839712308318,
+      "np_mae": 0.03716587647795677,
+      "large_change_ratio": 0.1570749840966921
+    },
+    {
+      "id": "road_transit_12",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.4034362733364105,
+      "crr": 1.3190557978512931,
+      "np_mae": 0.015364464372396469,
+      "large_change_ratio": 0.11958821614583333
+    },
+    {
+      "id": "road_transit_12",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.29378268122673035,
+      "crr": 1.0668191987272675,
+      "np_mae": 0.015364464372396469,
+      "large_change_ratio": 0.11958821614583333
+    },
+    {
+      "id": "road_transit_13",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.5005134344100952,
+      "crr": 1.0534202544884264,
+      "np_mae": 0.046456605195999146,
+      "large_change_ratio": 0.34772498167155425
+    },
+    {
+      "id": "road_transit_13",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.4975127577781677,
+      "crr": 1.1780412566100487,
+      "np_mae": 0.046456605195999146,
+      "large_change_ratio": 0.34772498167155425
+    },
+    {
+      "id": "road_transit_14",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6571152806282043,
+      "crr": 1.0179248124714233,
+      "np_mae": 0.03996323049068451,
+      "large_change_ratio": 0.3722049120234604
+    },
+    {
+      "id": "road_transit_14",
+      "category": "road_transit",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.5216569900512695,
+      "crr": 1.023033656202343,
+      "np_mae": 0.03996323049068451,
+      "large_change_ratio": 0.3722049120234604
+    },
+    {
+      "id": "road_transit_15",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.20995260775089264,
+      "crr": 0.999999763540512,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "road_transit_15",
+      "category": "road_transit",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.15572313964366913,
+      "crr": 0.9999997561728271,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_01",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.36093783378601074,
+      "crr": 0.9999998619946229,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_01",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.3290434777736664,
+      "crr": 0.999999825726618,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_02",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.21214531362056732,
+      "crr": 0.9999996805453206,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_02",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.01023812685161829,
+      "crr": 0.9999997999173016,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_03",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5013781189918518,
+      "crr": 1.064143725699408,
+      "np_mae": 0.0076555898413062096,
+      "large_change_ratio": 0.058319091796875
+    },
+    {
+      "id": "signs_wayfinding_03",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.1602952927350998,
+      "crr": 1.0409881018238116,
+      "np_mae": 0.0076555898413062096,
+      "large_change_ratio": 0.058319091796875
+    },
+    {
+      "id": "signs_wayfinding_04",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.6583518981933594,
+      "crr": 1.306525826945944,
+      "np_mae": 0.034623678773641586,
+      "large_change_ratio": 0.43667819330601093
+    },
+    {
+      "id": "signs_wayfinding_04",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.7583399415016174,
+      "crr": 1.1371036204403422,
+      "np_mae": 0.034623678773641586,
+      "large_change_ratio": 0.43667819330601093
+    },
+    {
+      "id": "signs_wayfinding_05",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.33515000343322754,
+      "crr": 1.007805840630013,
+      "np_mae": 0.008133495226502419,
+      "large_change_ratio": 0.005252245234604105
+    },
+    {
+      "id": "signs_wayfinding_05",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.33432909846305847,
+      "crr": 1.0230240420575898,
+      "np_mae": 0.008133495226502419,
+      "large_change_ratio": 0.005252245234604105
+    },
+    {
+      "id": "signs_wayfinding_06",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.6126402020454407,
+      "crr": 0.9999996776463889,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_06",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.6289460062980652,
+      "crr": 0.9999996474120939,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_07",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6022903323173523,
+      "crr": 0.9999996309375462,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_07",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.4847457706928253,
+      "crr": 0.9999996800011516,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_08",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.3543664515018463,
+      "crr": 1.00422202198106,
+      "np_mae": 0.0051145125180482864,
+      "large_change_ratio": 0.030843098958333332
+    },
+    {
+      "id": "signs_wayfinding_08",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.10060151666402817,
+      "crr": 1.0195496191927853,
+      "np_mae": 0.0051145125180482864,
+      "large_change_ratio": 0.030843098958333332
+    },
+    {
+      "id": "signs_wayfinding_09",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.44331714510917664,
+      "crr": 1.022661068503582,
+      "np_mae": 0.002129229484125972,
+      "large_change_ratio": 0.002154181985294118
+    },
+    {
+      "id": "signs_wayfinding_09",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.14242029190063477,
+      "crr": 1.0194619374766345,
+      "np_mae": 0.002129229484125972,
+      "large_change_ratio": 0.002154181985294118
+    },
+    {
+      "id": "signs_wayfinding_10",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7923624515533447,
+      "crr": 1.0352157709494834,
+      "np_mae": 0.002905298722907901,
+      "large_change_ratio": 0.01108551025390625
+    },
+    {
+      "id": "signs_wayfinding_10",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.42603179812431335,
+      "crr": 1.036990877848984,
+      "np_mae": 0.002905298722907901,
+      "large_change_ratio": 0.01108551025390625
+    },
+    {
+      "id": "signs_wayfinding_11",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.25900837779045105,
+      "crr": 1.0484325350711357,
+      "np_mae": 0.0156242735683918,
+      "large_change_ratio": 0.047292073567708336
+    },
+    {
+      "id": "signs_wayfinding_11",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.28282421827316284,
+      "crr": 1.0212672887272596,
+      "np_mae": 0.0156242735683918,
+      "large_change_ratio": 0.047292073567708336
+    },
+    {
+      "id": "signs_wayfinding_12",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.2634003758430481,
+      "crr": 1.067531483204145,
+      "np_mae": 0.008985777385532856,
+      "large_change_ratio": 0.048121134440104164
+    },
+    {
+      "id": "signs_wayfinding_12",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.11584446579217911,
+      "crr": 1.0448104936471747,
+      "np_mae": 0.008985777385532856,
+      "large_change_ratio": 0.048121134440104164
+    },
+    {
+      "id": "signs_wayfinding_13",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.46021154522895813,
+      "crr": 1.1234290769370574,
+      "np_mae": 0.03445778787136078,
+      "large_change_ratio": 0.4737040201822917
+    },
+    {
+      "id": "signs_wayfinding_13",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.5947831273078918,
+      "crr": 1.335435212970062,
+      "np_mae": 0.03445778787136078,
+      "large_change_ratio": 0.4737040201822917
+    },
+    {
+      "id": "signs_wayfinding_14",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.19053800404071808,
+      "crr": 0.9999998627007284,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_14",
+      "category": "signs_wayfinding",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.1524433195590973,
+      "crr": 0.9999999069396375,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "signs_wayfinding_15",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.12865497171878815,
+      "crr": 1.0450017789949155,
+      "np_mae": 0.012621138244867325,
+      "large_change_ratio": 0.035700480143229164
+    },
+    {
+      "id": "signs_wayfinding_15",
+      "category": "signs_wayfinding",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.34896576404571533,
+      "crr": 1.066400783040895,
+      "np_mae": 0.012621138244867325,
+      "large_change_ratio": 0.035700480143229164
+    },
+    {
+      "id": "home_living_01",
+      "category": "home_living",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.3156731426715851,
+      "crr": 1.0657497088732655,
+      "np_mae": 0.02605198696255684,
+      "large_change_ratio": 0.19623589720630372
+    },
+    {
+      "id": "home_living_01",
+      "category": "home_living",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.2961421012878418,
+      "crr": 1.1917487912659457,
+      "np_mae": 0.02605198696255684,
+      "large_change_ratio": 0.19623589720630372
+    },
+    {
+      "id": "home_living_03",
+      "category": "home_living",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "home_living_03",
+      "category": "home_living",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "home_living_12",
+      "category": "home_living",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.2870092988014221,
+      "crr": 1.059766692364954,
+      "np_mae": 0.006884110625833273,
+      "large_change_ratio": 0.026766949926900586
+    },
+    {
+      "id": "home_living_12",
+      "category": "home_living",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.1274525225162506,
+      "crr": 1.0116978116082076,
+      "np_mae": 0.006884110625833273,
+      "large_change_ratio": 0.026766949926900586
+    },
+    {
+      "id": "home_living_13",
+      "category": "home_living",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7136170268058777,
+      "crr": 0.9999995203842164,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "home_living_13",
+      "category": "home_living",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.12005337327718735,
+      "crr": 0.9999994553109529,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_01",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5681222081184387,
+      "crr": 1.2119294079689482,
+      "np_mae": 0.004742664285004139,
+      "large_change_ratio": 0.011922200520833334
+    },
+    {
+      "id": "kitchen_dining_01",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.23199182748794556,
+      "crr": 1.0487754456565208,
+      "np_mae": 0.004742664285004139,
+      "large_change_ratio": 0.011922200520833334
+    },
+    {
+      "id": "kitchen_dining_02",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.4581166207790375,
+      "crr": 1.1332862721009949,
+      "np_mae": 0.003056590911000967,
+      "large_change_ratio": 0.0019989013671875
+    },
+    {
+      "id": "kitchen_dining_02",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.23115722835063934,
+      "crr": 1.0252970052377581,
+      "np_mae": 0.003056590911000967,
+      "large_change_ratio": 0.0019989013671875
+    },
+    {
+      "id": "kitchen_dining_03",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_03",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_05",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.26053476333618164,
+      "crr": 0.9999996877776246,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_05",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.06655731797218323,
+      "crr": 0.9999997212694276,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_06",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_06",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_07",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.4179997742176056,
+      "crr": 1.0453700769327905,
+      "np_mae": 0.01110751461237669,
+      "large_change_ratio": 0.07001290560471976
+    },
+    {
+      "id": "kitchen_dining_07",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.24633102118968964,
+      "crr": 1.0170838204644688,
+      "np_mae": 0.01110751461237669,
+      "large_change_ratio": 0.07001290560471976
+    },
+    {
+      "id": "kitchen_dining_08",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.47223028540611267,
+      "crr": 0.9999996352358744,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_08",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.1177881583571434,
+      "crr": 0.999999741699633,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_09",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.6358398795127869,
+      "crr": 1.1121089687040644,
+      "np_mae": 0.014112012460827827,
+      "large_change_ratio": 0.11155192057291667
+    },
+    {
+      "id": "kitchen_dining_09",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.3825576603412628,
+      "crr": 1.073028732345337,
+      "np_mae": 0.014112012460827827,
+      "large_change_ratio": 0.11155192057291667
+    },
+    {
+      "id": "kitchen_dining_10",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6119536757469177,
+      "crr": 1.076124096086551,
+      "np_mae": 0.0053154705092310905,
+      "large_change_ratio": 0.03485107421875
+    },
+    {
+      "id": "kitchen_dining_10",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.4053225815296173,
+      "crr": 1.073931928940561,
+      "np_mae": 0.0053154705092310905,
+      "large_change_ratio": 0.03485107421875
+    },
+    {
+      "id": "kitchen_dining_11",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.05532887578010559,
+      "crr": 0.9999997773861318,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_11",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.017016734927892685,
+      "crr": 0.9999997743448955,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_12",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6854197978973389,
+      "crr": 1.0079421937737936,
+      "np_mae": 0.005360879469662905,
+      "large_change_ratio": 0.0099029541015625
+    },
+    {
+      "id": "kitchen_dining_12",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.45600977540016174,
+      "crr": 1.0231832553480293,
+      "np_mae": 0.005360879469662905,
+      "large_change_ratio": 0.0099029541015625
+    },
+    {
+      "id": "kitchen_dining_14",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.4054829180240631,
+      "crr": 1.0907050984406512,
+      "np_mae": 0.0034648485016077757,
+      "large_change_ratio": 0.007817586263020834
+    },
+    {
+      "id": "kitchen_dining_14",
+      "category": "kitchen_dining",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.3336431086063385,
+      "crr": 1.03484527331575,
+      "np_mae": 0.0034648485016077757,
+      "large_change_ratio": 0.007817586263020834
+    },
+    {
+      "id": "kitchen_dining_15",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.3811095058917999,
+      "crr": 0.9999996894596066,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "kitchen_dining_15",
+      "category": "kitchen_dining",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.1913977712392807,
+      "crr": 0.9999996874032651,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_01",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.37488219141960144,
+      "crr": 0.9999998539841453,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_01",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.49669960141181946,
+      "crr": 0.999999796055047,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_04",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.5898520946502686,
+      "crr": 0.999999795770267,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_04",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.2986999452114105,
+      "crr": 0.9999998396567173,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_05",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.4273533523082733,
+      "crr": 0.9999997745820868,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_05",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.2432016283273697,
+      "crr": 0.9999997681157827,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_06",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7302244305610657,
+      "crr": 1.0475345214209493,
+      "np_mae": 0.00875387154519558,
+      "large_change_ratio": 0.05425023320895522
+    },
+    {
+      "id": "grocery_retail_06",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.3590337634086609,
+      "crr": 1.0472495912164375,
+      "np_mae": 0.00875387154519558,
+      "large_change_ratio": 0.05425023320895522
+    },
+    {
+      "id": "grocery_retail_07",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5240947604179382,
+      "crr": 1.193529562801609,
+      "np_mae": 0.019774291664361954,
+      "large_change_ratio": 0.16228642882436262
+    },
+    {
+      "id": "grocery_retail_07",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.43788251280784607,
+      "crr": 1.1242096877478294,
+      "np_mae": 0.019774291664361954,
+      "large_change_ratio": 0.16228642882436262
+    },
+    {
+      "id": "grocery_retail_08",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.8350744247436523,
+      "crr": 1.1177109822080684,
+      "np_mae": 0.008030942641198635,
+      "large_change_ratio": 0.04258499816715543
+    },
+    {
+      "id": "grocery_retail_08",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.5023687481880188,
+      "crr": 1.1355021431083319,
+      "np_mae": 0.008030942641198635,
+      "large_change_ratio": 0.04258499816715543
+    },
+    {
+      "id": "grocery_retail_09",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7270265817642212,
+      "crr": 1.0575019786580593,
+      "np_mae": 0.005028097424656153,
+      "large_change_ratio": 0.029256781524926685
+    },
+    {
+      "id": "grocery_retail_09",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.4326457679271698,
+      "crr": 1.0374019941471408,
+      "np_mae": 0.005028097424656153,
+      "large_change_ratio": 0.029256781524926685
+    },
+    {
+      "id": "grocery_retail_10",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.18021750450134277,
+      "crr": 0.9999998018715813,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_10",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.12419085949659348,
+      "crr": 0.9999997605731974,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_13",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.13989397883415222,
+      "crr": 0.9999997091238942,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_13",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.08274336159229279,
+      "crr": 0.999999734815789,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "grocery_retail_14",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.44824275374412537,
+      "crr": 1.0026910767047834,
+      "np_mae": 0.0025268751196563244,
+      "large_change_ratio": 0.006281534830729167
+    },
+    {
+      "id": "grocery_retail_14",
+      "category": "grocery_retail",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.13232825696468353,
+      "crr": 1.0037761143073667,
+      "np_mae": 0.0025268751196563244,
+      "large_change_ratio": 0.006281534830729167
+    },
+    {
+      "id": "grocery_retail_15",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5093773007392883,
+      "crr": 1.1503294986649748,
+      "np_mae": 0.015119929797947407,
+      "large_change_ratio": 0.09508768717447917
+    },
+    {
+      "id": "grocery_retail_15",
+      "category": "grocery_retail",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.21120411157608032,
+      "crr": 1.3741322475187825,
+      "np_mae": 0.015119929797947407,
+      "large_change_ratio": 0.09508768717447917
+    },
+    {
+      "id": "food_drink_01",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.54274582862854,
+      "crr": 1.0141293334224322,
+      "np_mae": 0.005044629797339439,
+      "large_change_ratio": 0.01064401455026455
+    },
+    {
+      "id": "food_drink_01",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.2717062532901764,
+      "crr": 1.000006766941663,
+      "np_mae": 0.005044629797339439,
+      "large_change_ratio": 0.01064401455026455
+    },
+    {
+      "id": "food_drink_02",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7368393540382385,
+      "crr": 0.999999470479237,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "food_drink_02",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.24068279564380646,
+      "crr": 0.999999628516033,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "food_drink_03",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.42474743723869324,
+      "crr": 1.2737778746557817,
+      "np_mae": 0.010538115166127682,
+      "large_change_ratio": 0.0626171875
+    },
+    {
+      "id": "food_drink_03",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.34440016746520996,
+      "crr": 1.0963431904701468,
+      "np_mae": 0.010538115166127682,
+      "large_change_ratio": 0.0626171875
+    },
+    {
+      "id": "food_drink_07",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.34809330105781555,
+      "crr": 1.0154773898305813,
+      "np_mae": 0.0018340128008276224,
+      "large_change_ratio": 0.0011627107771260998
+    },
+    {
+      "id": "food_drink_07",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.2728281319141388,
+      "crr": 1.0148804306393078,
+      "np_mae": 0.0018340128008276224,
+      "large_change_ratio": 0.0011627107771260998
+    },
+    {
+      "id": "food_drink_09",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.4900255501270294,
+      "crr": 1.1433136087284783,
+      "np_mae": 0.0046311323530972,
+      "large_change_ratio": 0.017827351888020832
+    },
+    {
+      "id": "food_drink_09",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.19812633097171783,
+      "crr": 1.0451816595193824,
+      "np_mae": 0.0046311323530972,
+      "large_change_ratio": 0.017827351888020832
+    },
+    {
+      "id": "food_drink_10",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7044216990470886,
+      "crr": 1.0477599952218055,
+      "np_mae": 0.01357013639062643,
+      "large_change_ratio": 0.13683573404947916
+    },
+    {
+      "id": "food_drink_10",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.618181049823761,
+      "crr": 1.0162718577150276,
+      "np_mae": 0.01357013639062643,
+      "large_change_ratio": 0.13683573404947916
+    },
+    {
+      "id": "food_drink_11",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.8587934970855713,
+      "crr": 1.0929040550013147,
+      "np_mae": 0.07436271011829376,
+      "large_change_ratio": 0.4789225260416667
+    },
+    {
+      "id": "food_drink_11",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.8550499677658081,
+      "crr": 1.1573849812280357,
+      "np_mae": 0.07436271011829376,
+      "large_change_ratio": 0.4789225260416667
+    },
+    {
+      "id": "food_drink_12",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.5876781940460205,
+      "crr": 1.0117297181346965,
+      "np_mae": 0.0036403541453182697,
+      "large_change_ratio": 0.0019276936848958333
+    },
+    {
+      "id": "food_drink_12",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.1087898388504982,
+      "crr": 1.0209851696189292,
+      "np_mae": 0.0036403541453182697,
+      "large_change_ratio": 0.0019276936848958333
+    },
+    {
+      "id": "food_drink_13",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.24254027009010315,
+      "crr": 1.0227725977487496,
+      "np_mae": 0.002721397439017892,
+      "large_change_ratio": 0.006152849740932643
+    },
+    {
+      "id": "food_drink_13",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.08673147857189178,
+      "crr": 1.0069006961196252,
+      "np_mae": 0.002721397439017892,
+      "large_change_ratio": 0.006152849740932643
+    },
+    {
+      "id": "food_drink_14",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.9065935015678406,
+      "crr": 0.9999995147654062,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "food_drink_14",
+      "category": "food_drink",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.4373945891857147,
+      "crr": 0.9999996927114454,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "food_drink_15",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6018625497817993,
+      "crr": 1.2485248644892646,
+      "np_mae": 0.017713552340865135,
+      "large_change_ratio": 0.09758751832844574
+    },
+    {
+      "id": "food_drink_15",
+      "category": "food_drink",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.5606061816215515,
+      "crr": 1.0869101515563289,
+      "np_mae": 0.017713552340865135,
+      "large_change_ratio": 0.09758751832844574
+    },
+    {
+      "id": "office_school_01",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.3087984323501587,
+      "crr": 0.9999996928385109,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "office_school_01",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.06025906652212143,
+      "crr": 0.9999998110035214,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "office_school_02",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.519405722618103,
+      "crr": 1.1299593250481927,
+      "np_mae": 0.00860015768557787,
+      "large_change_ratio": 0.023678060850439882
+    },
+    {
+      "id": "office_school_02",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.43664419651031494,
+      "crr": 1.0223247899086911,
+      "np_mae": 0.00860015768557787,
+      "large_change_ratio": 0.023678060850439882
+    },
+    {
+      "id": "office_school_03",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "office_school_03",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "office_school_04",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7145485877990723,
+      "crr": 1.0136083528168587,
+      "np_mae": 0.0030342722311615944,
+      "large_change_ratio": 0.0007781982421875
+    },
+    {
+      "id": "office_school_04",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.0663323774933815,
+      "crr": 1.0361593740077035,
+      "np_mae": 0.0030342722311615944,
+      "large_change_ratio": 0.0007781982421875
+    },
+    {
+      "id": "office_school_05",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.3572966456413269,
+      "crr": 1.0038475216753626,
+      "np_mae": 0.0035961351823061705,
+      "large_change_ratio": 9.527439024390244e-06
+    },
+    {
+      "id": "office_school_05",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.05415066331624985,
+      "crr": 1.0015675064600678,
+      "np_mae": 0.0035961351823061705,
+      "large_change_ratio": 9.527439024390244e-06
+    },
+    {
+      "id": "office_school_06",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.4620378315448761,
+      "crr": 1.0729532583809942,
+      "np_mae": 0.023329589515924454,
+      "large_change_ratio": 0.3011259191176471
+    },
+    {
+      "id": "office_school_06",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.6481676697731018,
+      "crr": 1.0755294747361357,
+      "np_mae": 0.023329589515924454,
+      "large_change_ratio": 0.3011259191176471
+    },
+    {
+      "id": "office_school_07",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5674270391464233,
+      "crr": 0.9999997374073633,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "office_school_07",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.23476161062717438,
+      "crr": 0.9999997689921469,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "office_school_08",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.646436870098114,
+      "crr": 1.0325185059150346,
+      "np_mae": 0.011711614206433296,
+      "large_change_ratio": 0.0793793530058651
+    },
+    {
+      "id": "office_school_08",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.363014817237854,
+      "crr": 1.016670035721275,
+      "np_mae": 0.011711614206433296,
+      "large_change_ratio": 0.0793793530058651
+    },
+    {
+      "id": "office_school_09",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.44427645206451416,
+      "crr": 0.9999993238107486,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "office_school_09",
+      "category": "office_school",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.1858282834291458,
+      "crr": 0.9999995604693483,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "office_school_10",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "office_school_10",
+      "category": "office_school",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "screens_controls_01",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6237246990203857,
+      "crr": 0.9999996256163586,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "screens_controls_01",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.1465611606836319,
+      "crr": 0.9999997175801965,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "screens_controls_02",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.3600020706653595,
+      "crr": 1.0277888257429129,
+      "np_mae": 0.016541926190257072,
+      "large_change_ratio": 0.09935768363402062
+    },
+    {
+      "id": "screens_controls_02",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.19615408778190613,
+      "crr": 1.0152133584894494,
+      "np_mae": 0.016541926190257072,
+      "large_change_ratio": 0.09935768363402062
+    },
+    {
+      "id": "screens_controls_03",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "screens_controls_03",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "screens_controls_04",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.10977210849523544,
+      "crr": 1.0367945619726338,
+      "np_mae": 0.0008050323813222349,
+      "large_change_ratio": 0.005650838216145833
+    },
+    {
+      "id": "screens_controls_04",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.082697294652462,
+      "crr": 1.019444574232854,
+      "np_mae": 0.0008050323813222349,
+      "large_change_ratio": 0.005650838216145833
+    },
+    {
+      "id": "screens_controls_07",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.35467174649238586,
+      "crr": 0.999999661935182,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "screens_controls_07",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.01448157150298357,
+      "crr": 0.9999997949876973,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "screens_controls_08",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.8049011826515198,
+      "crr": 1.0128139518419508,
+      "np_mae": 0.002115417504683137,
+      "large_change_ratio": 0.00019888218015665795
+    },
+    {
+      "id": "screens_controls_08",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.2775149345397949,
+      "crr": 1.0108007056029686,
+      "np_mae": 0.002115417504683137,
+      "large_change_ratio": 0.00019888218015665795
+    },
+    {
+      "id": "screens_controls_09",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.21530811488628387,
+      "crr": 1.0618001412598785,
+      "np_mae": 0.002995528280735016,
+      "large_change_ratio": 7.416930379746836e-05
+    },
+    {
+      "id": "screens_controls_09",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.06744226813316345,
+      "crr": 1.022027170490464,
+      "np_mae": 0.002995528280735016,
+      "large_change_ratio": 7.416930379746836e-05
+    },
+    {
+      "id": "screens_controls_10",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.6851266026496887,
+      "crr": 1.1288974234593587,
+      "np_mae": 0.012264939956367016,
+      "large_change_ratio": 0.087615966796875
+    },
+    {
+      "id": "screens_controls_10",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.31556394696235657,
+      "crr": 1.0790492145182111,
+      "np_mae": 0.012264939956367016,
+      "large_change_ratio": 0.087615966796875
+    },
+    {
+      "id": "screens_controls_11",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6262014508247375,
+      "crr": 1.0604285360963717,
+      "np_mae": 0.006249353755265474,
+      "large_change_ratio": 0.04441047179665738
+    },
+    {
+      "id": "screens_controls_11",
+      "category": "screens_controls",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.20475348830223083,
+      "crr": 1.0310204468945623,
+      "np_mae": 0.006249353755265474,
+      "large_change_ratio": 0.04441047179665738
+    },
+    {
+      "id": "screens_controls_13",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.5245415568351746,
+      "crr": 1.0210022323265109,
+      "np_mae": 0.004478235729038715,
+      "large_change_ratio": 0.020148026315789474
+    },
+    {
+      "id": "screens_controls_13",
+      "category": "screens_controls",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.18787765502929688,
+      "crr": 1.012620770866334,
+      "np_mae": 0.004478235729038715,
+      "large_change_ratio": 0.020148026315789474
+    },
+    {
+      "id": "charts_maps_01",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.1359071284532547,
+      "crr": 1.084217903483685,
+      "np_mae": 0.016400611028075218,
+      "large_change_ratio": 0.08949110243055555
+    },
+    {
+      "id": "charts_maps_01",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.09995675086975098,
+      "crr": 1.1404395855289124,
+      "np_mae": 0.016400611028075218,
+      "large_change_ratio": 0.08949110243055555
+    },
+    {
+      "id": "charts_maps_02",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.11949394643306732,
+      "crr": 1.07495552801463,
+      "np_mae": 0.012374622747302055,
+      "large_change_ratio": 0.06673177083333333
+    },
+    {
+      "id": "charts_maps_02",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.08438894897699356,
+      "crr": 1.1422868681112772,
+      "np_mae": 0.012374622747302055,
+      "large_change_ratio": 0.06673177083333333
+    },
+    {
+      "id": "charts_maps_03",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.11674141883850098,
+      "crr": 1.0723825885837717,
+      "np_mae": 0.013722495175898075,
+      "large_change_ratio": 0.07792154947916667
+    },
+    {
+      "id": "charts_maps_03",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0865926593542099,
+      "crr": 1.1375980893168038,
+      "np_mae": 0.013722495175898075,
+      "large_change_ratio": 0.07792154947916667
+    },
+    {
+      "id": "charts_maps_04",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.021382058039307594,
+      "crr": 0.9999999332149919,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_04",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.019344445317983627,
+      "crr": 0.9999999337621758,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_05",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.2601751685142517,
+      "crr": 0.9999998076695001,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_05",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.12364742904901505,
+      "crr": 0.9999998079939081,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_06",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.754684329032898,
+      "crr": 1.0591677294965487,
+      "np_mae": 0.10002171248197556,
+      "large_change_ratio": 0.5381673177083334
+    },
+    {
+      "id": "charts_maps_06",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.5595391392707825,
+      "crr": 1.0919157108232183,
+      "np_mae": 0.10002171248197556,
+      "large_change_ratio": 0.5381673177083334
+    },
+    {
+      "id": "charts_maps_07",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5289372801780701,
+      "crr": 1.0526381218202037,
+      "np_mae": 0.012751088477671146,
+      "large_change_ratio": 0.09315447351421188
+    },
+    {
+      "id": "charts_maps_07",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.5526230931282043,
+      "crr": 1.0076520291983948,
+      "np_mae": 0.012751088477671146,
+      "large_change_ratio": 0.09315447351421188
+    },
+    {
+      "id": "charts_maps_08",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7060595750808716,
+      "crr": 1.0583157024335113,
+      "np_mae": 0.010575958527624607,
+      "large_change_ratio": 0.14921061197916666
+    },
+    {
+      "id": "charts_maps_08",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.2567489445209503,
+      "crr": 1.135916937087953,
+      "np_mae": 0.010575958527624607,
+      "large_change_ratio": 0.14921061197916666
+    },
+    {
+      "id": "charts_maps_09",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_09",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_10",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.9912333488464355,
+      "crr": 1.0744836714716417,
+      "np_mae": 0.16892440617084503,
+      "large_change_ratio": 0.9415991005777311
+    },
+    {
+      "id": "charts_maps_10",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.9490257501602173,
+      "crr": 1.4928131756541654,
+      "np_mae": 0.16892440617084503,
+      "large_change_ratio": 0.9415991005777311
+    },
+    {
+      "id": "charts_maps_11",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.1793629676103592,
+      "crr": 0.9999998722046323,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_11",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.10904548317193985,
+      "crr": 0.9999998958634834,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_12",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.18662498891353607,
+      "crr": 1.5498658092370354,
+      "np_mae": 0.07130225747823715,
+      "large_change_ratio": 0.3857367621527778
+    },
+    {
+      "id": "charts_maps_12",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.4668896496295929,
+      "crr": 1.1462892084094056,
+      "np_mae": 0.07130225747823715,
+      "large_change_ratio": 0.3857367621527778
+    },
+    {
+      "id": "charts_maps_13",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.15321539342403412,
+      "crr": 1.0090070682762364,
+      "np_mae": 0.001807232154533267,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_13",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0766412764787674,
+      "crr": 0.9975473621245043,
+      "np_mae": 0.001807232154533267,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_14",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7594128251075745,
+      "crr": 1.426725434260009,
+      "np_mae": 0.09902355819940567,
+      "large_change_ratio": 0.4847259521484375
+    },
+    {
+      "id": "charts_maps_14",
+      "category": "charts_maps",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.6443976163864136,
+      "crr": 1.0698883212070327,
+      "np_mae": 0.09902355819940567,
+      "large_change_ratio": 0.4847259521484375
+    },
+    {
+      "id": "charts_maps_15",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.3463316559791565,
+      "crr": 0.9999998187987068,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "charts_maps_15",
+      "category": "charts_maps",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.33668091893196106,
+      "crr": 0.9999998014853282,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "tools_workshop_01",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7128559947013855,
+      "crr": 1.0049665401599535,
+      "np_mae": 0.002038155682384968,
+      "large_change_ratio": 0.0039520263671875
+    },
+    {
+      "id": "tools_workshop_01",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.2987053096294403,
+      "crr": 1.0028550340192748,
+      "np_mae": 0.002038155682384968,
+      "large_change_ratio": 0.0039520263671875
+    },
+    {
+      "id": "tools_workshop_02",
+      "category": "tools_workshop",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.1504494547843933,
+      "crr": 1.1144321620727848,
+      "np_mae": 0.004602438770234585,
+      "large_change_ratio": 0.01350004582111437
+    },
+    {
+      "id": "tools_workshop_02",
+      "category": "tools_workshop",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.08945434540510178,
+      "crr": 1.0468145882949276,
+      "np_mae": 0.004602438770234585,
+      "large_change_ratio": 0.01350004582111437
+    },
+    {
+      "id": "tools_workshop_03",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.27167388796806335,
+      "crr": 0.9999995238382794,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "tools_workshop_03",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.3043818771839142,
+      "crr": 0.9999990283393764,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "tools_workshop_04",
+      "category": "tools_workshop",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.44739416241645813,
+      "crr": 1.0395316697653476,
+      "np_mae": 0.02303340844810009,
+      "large_change_ratio": 0.2080010308159722
+    },
+    {
+      "id": "tools_workshop_04",
+      "category": "tools_workshop",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.3626311719417572,
+      "crr": 1.0541801672448476,
+      "np_mae": 0.02303340844810009,
+      "large_change_ratio": 0.2080010308159722
+    },
+    {
+      "id": "tools_workshop_07",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.9658992290496826,
+      "crr": 1.1383824354265688,
+      "np_mae": 0.004909394774585962,
+      "large_change_ratio": 0.020310208944281524
+    },
+    {
+      "id": "tools_workshop_07",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.907097339630127,
+      "crr": 1.1522036469299934,
+      "np_mae": 0.004909394774585962,
+      "large_change_ratio": 0.020310208944281524
+    },
+    {
+      "id": "tools_workshop_08",
+      "category": "tools_workshop",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "tools_workshop_08",
+      "category": "tools_workshop",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "tools_workshop_09",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.30461087822914124,
+      "crr": 1.2993300476446836,
+      "np_mae": 0.015276987105607986,
+      "large_change_ratio": 0.0654296875
+    },
+    {
+      "id": "tools_workshop_09",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.29872238636016846,
+      "crr": 1.078962850299669,
+      "np_mae": 0.015276987105607986,
+      "large_change_ratio": 0.0654296875
+    },
+    {
+      "id": "tools_workshop_14",
+      "category": "tools_workshop",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.5685648322105408,
+      "crr": 1.2112866093304702,
+      "np_mae": 0.006232638377696276,
+      "large_change_ratio": 0.04002182904411765
+    },
+    {
+      "id": "tools_workshop_14",
+      "category": "tools_workshop",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.3568181097507477,
+      "crr": 1.047468298268869,
+      "np_mae": 0.006232638377696276,
+      "large_change_ratio": 0.04002182904411765
+    },
+    {
+      "id": "tools_workshop_15",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6422958374023438,
+      "crr": 0.9999996928234957,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "tools_workshop_15",
+      "category": "tools_workshop",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.371648371219635,
+      "crr": 0.9999995928638321,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "clothing_fashion_01",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7732632756233215,
+      "crr": 1.1182006919523917,
+      "np_mae": 0.014938164502382278,
+      "large_change_ratio": 0.12550189865537847
+    },
+    {
+      "id": "clothing_fashion_01",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.6065854430198669,
+      "crr": 1.1194007420534606,
+      "np_mae": 0.014938164502382278,
+      "large_change_ratio": 0.12550189865537847
+    },
+    {
+      "id": "clothing_fashion_02",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.17692658305168152,
+      "crr": 1.0042295547669875,
+      "np_mae": 0.0017632677918300033,
+      "large_change_ratio": 0.008772029433139535
+    },
+    {
+      "id": "clothing_fashion_02",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.09878737479448318,
+      "crr": 1.0043985601109906,
+      "np_mae": 0.0017632677918300033,
+      "large_change_ratio": 0.008772029433139535
+    },
+    {
+      "id": "clothing_fashion_03",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.48441484570503235,
+      "crr": 1.0500769777521297,
+      "np_mae": 0.024617096409201622,
+      "large_change_ratio": 0.18221537272135416
+    },
+    {
+      "id": "clothing_fashion_03",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.3287918269634247,
+      "crr": 1.1249881409528513,
+      "np_mae": 0.024617096409201622,
+      "large_change_ratio": 0.18221537272135416
+    },
+    {
+      "id": "clothing_fashion_04",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.30255118012428284,
+      "crr": 0.9999992586153621,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "clothing_fashion_04",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.051263924688100815,
+      "crr": 0.9999994500961968,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "clothing_fashion_07",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7203420996665955,
+      "crr": 1.0730693064396504,
+      "np_mae": 0.002433129120618105,
+      "large_change_ratio": 0.0004831949869791667
+    },
+    {
+      "id": "clothing_fashion_07",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.14499688148498535,
+      "crr": 1.0475862244509782,
+      "np_mae": 0.002433129120618105,
+      "large_change_ratio": 0.0004831949869791667
+    },
+    {
+      "id": "clothing_fashion_08",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7905687689781189,
+      "crr": 1.405150914706591,
+      "np_mae": 0.022629527375102043,
+      "large_change_ratio": 0.216766357421875
+    },
+    {
+      "id": "clothing_fashion_08",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.7698132395744324,
+      "crr": 1.2506791982588905,
+      "np_mae": 0.022629527375102043,
+      "large_change_ratio": 0.216766357421875
+    },
+    {
+      "id": "clothing_fashion_09",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.656610906124115,
+      "crr": 1.073777718282662,
+      "np_mae": 0.005358704831451178,
+      "large_change_ratio": 0.02326567082111437
+    },
+    {
+      "id": "clothing_fashion_09",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.25483542680740356,
+      "crr": 1.0190390876414919,
+      "np_mae": 0.005358704831451178,
+      "large_change_ratio": 0.02326567082111437
+    },
+    {
+      "id": "clothing_fashion_12",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.2690703272819519,
+      "crr": 1.007204920435137,
+      "np_mae": 0.012757888063788414,
+      "large_change_ratio": 0.07955423990885417
+    },
+    {
+      "id": "clothing_fashion_12",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.1549084335565567,
+      "crr": 1.053431872760665,
+      "np_mae": 0.012757888063788414,
+      "large_change_ratio": 0.07955423990885417
+    },
+    {
+      "id": "clothing_fashion_13",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7988492250442505,
+      "crr": 1.1331245427293897,
+      "np_mae": 0.0105591407045722,
+      "large_change_ratio": 0.07417025253950339
+    },
+    {
+      "id": "clothing_fashion_13",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.46226567029953003,
+      "crr": 1.0278308970605732,
+      "np_mae": 0.0105591407045722,
+      "large_change_ratio": 0.07417025253950339
+    },
+    {
+      "id": "clothing_fashion_14",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.8209263682365417,
+      "crr": 1.1327337001618583,
+      "np_mae": 0.014735004864633083,
+      "large_change_ratio": 0.101531982421875
+    },
+    {
+      "id": "clothing_fashion_14",
+      "category": "clothing_fashion",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.5653010010719299,
+      "crr": 1.046399975216679,
+      "np_mae": 0.014735004864633083,
+      "large_change_ratio": 0.101531982421875
+    },
+    {
+      "id": "clothing_fashion_15",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6632275581359863,
+      "crr": 1.0248991880126628,
+      "np_mae": 0.00464720418676734,
+      "large_change_ratio": 0.029337099542334096
+    },
+    {
+      "id": "clothing_fashion_15",
+      "category": "clothing_fashion",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.37664470076560974,
+      "crr": 1.0286338095346654,
+      "np_mae": 0.00464720418676734,
+      "large_change_ratio": 0.029337099542334096
+    },
+    {
+      "id": "people_social_01",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5406922698020935,
+      "crr": 1.1466064853656326,
+      "np_mae": 0.007500580046325922,
+      "large_change_ratio": 0.05491832386363636
+    },
+    {
+      "id": "people_social_01",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.44740286469459534,
+      "crr": 1.0637898090489948,
+      "np_mae": 0.007500580046325922,
+      "large_change_ratio": 0.05491832386363636
+    },
+    {
+      "id": "people_social_02",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.03979048505425453,
+      "crr": 1.0212364894262183,
+      "np_mae": 0.004257009830325842,
+      "large_change_ratio": 0.0005970982142857143
+    },
+    {
+      "id": "people_social_02",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.06442058831453323,
+      "crr": 1.0077166212572617,
+      "np_mae": 0.004257009830325842,
+      "large_change_ratio": 0.0005970982142857143
+    },
+    {
+      "id": "people_social_03",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.4546563923358917,
+      "crr": 1.0500367394650838,
+      "np_mae": 0.005203652661293745,
+      "large_change_ratio": 0.029591878255208332
+    },
+    {
+      "id": "people_social_03",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.18663834035396576,
+      "crr": 1.0452510759303566,
+      "np_mae": 0.005203652661293745,
+      "large_change_ratio": 0.029591878255208332
+    },
+    {
+      "id": "people_social_04",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.411886602640152,
+      "crr": 1.0350908081238437,
+      "np_mae": 0.012127160094678402,
+      "large_change_ratio": 0.0929412841796875
+    },
+    {
+      "id": "people_social_04",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.16206403076648712,
+      "crr": 1.005825731898121,
+      "np_mae": 0.012127160094678402,
+      "large_change_ratio": 0.0929412841796875
+    },
+    {
+      "id": "people_social_05",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.2856171727180481,
+      "crr": 1.00910741633038,
+      "np_mae": 0.0045111170038580894,
+      "large_change_ratio": 5.580357142857143e-06
+    },
+    {
+      "id": "people_social_05",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.004329950548708439,
+      "crr": 0.9979918910973751,
+      "np_mae": 0.0045111170038580894,
+      "large_change_ratio": 5.580357142857143e-06
+    },
+    {
+      "id": "people_social_06",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.703088104724884,
+      "crr": 1.2202739302378662,
+      "np_mae": 0.014205551706254482,
+      "large_change_ratio": 0.109039306640625
+    },
+    {
+      "id": "people_social_06",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.6229257583618164,
+      "crr": 1.0864835115323153,
+      "np_mae": 0.014205551706254482,
+      "large_change_ratio": 0.109039306640625
+    },
+    {
+      "id": "people_social_07",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.38205355405807495,
+      "crr": 1.0574206275087668,
+      "np_mae": 0.021178381517529488,
+      "large_change_ratio": 0.12208306135770235
+    },
+    {
+      "id": "people_social_07",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.26377788186073303,
+      "crr": 1.0094722146411295,
+      "np_mae": 0.021178381517529488,
+      "large_change_ratio": 0.12208306135770235
+    },
+    {
+      "id": "people_social_08",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7791031002998352,
+      "crr": 1.016229154704982,
+      "np_mae": 0.002070380374789238,
+      "large_change_ratio": 0.0031996783088235293
+    },
+    {
+      "id": "people_social_08",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.18510693311691284,
+      "crr": 1.0176459570566037,
+      "np_mae": 0.002070380374789238,
+      "large_change_ratio": 0.0031996783088235293
+    },
+    {
+      "id": "people_social_09",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7544226050376892,
+      "crr": 0.9999996798253485,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "people_social_09",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.2027568519115448,
+      "crr": 0.9999997667429911,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "people_social_10",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.9040409326553345,
+      "crr": 0.9999994572168954,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "people_social_10",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.29281437397003174,
+      "crr": 0.9999997747320981,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "people_social_11",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7105150818824768,
+      "crr": 1.0292465682992782,
+      "np_mae": 0.005174717400223017,
+      "large_change_ratio": 0.031015198087431695
+    },
+    {
+      "id": "people_social_11",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.3812539875507355,
+      "crr": 1.0126145097586832,
+      "np_mae": 0.005174717400223017,
+      "large_change_ratio": 0.031015198087431695
+    },
+    {
+      "id": "people_social_13",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "people_social_13",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "people_social_14",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5130608677864075,
+      "crr": 1.0319682704391193,
+      "np_mae": 0.005530956666916609,
+      "large_change_ratio": 0.024770412604456823
+    },
+    {
+      "id": "people_social_14",
+      "category": "people_social",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.10571243613958359,
+      "crr": 1.01632491154163,
+      "np_mae": 0.005530956666916609,
+      "large_change_ratio": 0.024770412604456823
+    },
+    {
+      "id": "people_social_15",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "people_social_15",
+      "category": "people_social",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "sports_play_01",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6899428963661194,
+      "crr": 1.0164241858012881,
+      "np_mae": 0.0020932150073349476,
+      "large_change_ratio": 0.0018236671469740633
+    },
+    {
+      "id": "sports_play_01",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0672360360622406,
+      "crr": 1.0115787484544545,
+      "np_mae": 0.0020932150073349476,
+      "large_change_ratio": 0.0018236671469740633
+    },
+    {
+      "id": "sports_play_02",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.5065232515335083,
+      "crr": 1.3327162555908003,
+      "np_mae": 0.02366950549185276,
+      "large_change_ratio": 0.1728945197947214
+    },
+    {
+      "id": "sports_play_02",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.3061434030532837,
+      "crr": 1.136062717038544,
+      "np_mae": 0.02366950549185276,
+      "large_change_ratio": 0.1728945197947214
+    },
+    {
+      "id": "sports_play_03",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "sports_play_03",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "sports_play_04",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.41675543785095215,
+      "crr": 0.9999997739807637,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "sports_play_04",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.12723927199840546,
+      "crr": 0.9999998035216289,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "sports_play_05",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.33248746395111084,
+      "crr": 1.0285261244476072,
+      "np_mae": 0.006274759769439697,
+      "large_change_ratio": 0.030558268229166668
+    },
+    {
+      "id": "sports_play_05",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.21395641565322876,
+      "crr": 1.0269143928830156,
+      "np_mae": 0.006274759769439697,
+      "large_change_ratio": 0.030558268229166668
+    },
+    {
+      "id": "sports_play_06",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.6298596858978271,
+      "crr": 1.0066702950917463,
+      "np_mae": 0.002875841688364744,
+      "large_change_ratio": 0.007609049479166667
+    },
+    {
+      "id": "sports_play_06",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.22021952271461487,
+      "crr": 1.007325207121269,
+      "np_mae": 0.002875841688364744,
+      "large_change_ratio": 0.007609049479166667
+    },
+    {
+      "id": "sports_play_07",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.3088008761405945,
+      "crr": 1.2241692814301457,
+      "np_mae": 0.01897944137454033,
+      "large_change_ratio": 0.17229715983072916
+    },
+    {
+      "id": "sports_play_07",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.3524920642375946,
+      "crr": 1.067745231482755,
+      "np_mae": 0.01897944137454033,
+      "large_change_ratio": 0.17229715983072916
+    },
+    {
+      "id": "sports_play_08",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.3380796015262604,
+      "crr": 1.0642338765576658,
+      "np_mae": 0.006954251788556576,
+      "large_change_ratio": 0.04058837890625
+    },
+    {
+      "id": "sports_play_08",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.19970297813415527,
+      "crr": 1.0609132036811757,
+      "np_mae": 0.006954251788556576,
+      "large_change_ratio": 0.04058837890625
+    },
+    {
+      "id": "sports_play_09",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7877058386802673,
+      "crr": 1.026951006275423,
+      "np_mae": 0.002353101037442684,
+      "large_change_ratio": 0.012589518229166667
+    },
+    {
+      "id": "sports_play_09",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.15882346034049988,
+      "crr": 1.0538344808849514,
+      "np_mae": 0.002353101037442684,
+      "large_change_ratio": 0.012589518229166667
+    },
+    {
+      "id": "sports_play_10",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.3188028931617737,
+      "crr": 1.0783000405753695,
+      "np_mae": 0.013953517191112041,
+      "large_change_ratio": 0.12286885579427083
+    },
+    {
+      "id": "sports_play_10",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.1725943684577942,
+      "crr": 1.1021830677416133,
+      "np_mae": 0.013953517191112041,
+      "large_change_ratio": 0.12286885579427083
+    },
+    {
+      "id": "sports_play_11",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.19931472837924957,
+      "crr": 1.0214544292585404,
+      "np_mae": 0.004664821550250053,
+      "large_change_ratio": 0.0002543131510416667
+    },
+    {
+      "id": "sports_play_11",
+      "category": "sports_play",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.2826003134250641,
+      "crr": 1.0282479465157894,
+      "np_mae": 0.004664821550250053,
+      "large_change_ratio": 0.0002543131510416667
+    },
+    {
+      "id": "sports_play_15",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.39679014682769775,
+      "crr": 0.9999997337976547,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "sports_play_15",
+      "category": "sports_play",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.49693673849105835,
+      "crr": 0.9999995584613551,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "garden_plants_03",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6013737320899963,
+      "crr": 1.0216718924784456,
+      "np_mae": 0.03495936468243599,
+      "large_change_ratio": 0.2234868893678161
+    },
+    {
+      "id": "garden_plants_03",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.552910327911377,
+      "crr": 1.00474232727597,
+      "np_mae": 0.03495936468243599,
+      "large_change_ratio": 0.2234868893678161
+    },
+    {
+      "id": "garden_plants_04",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.381145179271698,
+      "crr": 1.324490008355357,
+      "np_mae": 0.005516514647752047,
+      "large_change_ratio": 0.030495574034334765
+    },
+    {
+      "id": "garden_plants_04",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.2977924942970276,
+      "crr": 1.2091838725466442,
+      "np_mae": 0.005516514647752047,
+      "large_change_ratio": 0.030495574034334765
+    },
+    {
+      "id": "garden_plants_05",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7760962247848511,
+      "crr": 0.9999995762308531,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "garden_plants_05",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.7359881401062012,
+      "crr": 0.9999995625482,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "garden_plants_06",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.8716006875038147,
+      "crr": 1.0377186519611712,
+      "np_mae": 0.007395818829536438,
+      "large_change_ratio": 0.06182861328125
+    },
+    {
+      "id": "garden_plants_06",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.5306007266044617,
+      "crr": 1.0193884725763624,
+      "np_mae": 0.007395818829536438,
+      "large_change_ratio": 0.06182861328125
+    },
+    {
+      "id": "garden_plants_07",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "garden_plants_07",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "garden_plants_08",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7440357208251953,
+      "crr": 0.9999998404662147,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "garden_plants_08",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.8811478018760681,
+      "crr": 0.9999998302068892,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "garden_plants_09",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7261090874671936,
+      "crr": 1.0189000992935153,
+      "np_mae": 0.014897863380610943,
+      "large_change_ratio": 0.13154296875
+    },
+    {
+      "id": "garden_plants_09",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.6225904822349548,
+      "crr": 1.0326567668444449,
+      "np_mae": 0.014897863380610943,
+      "large_change_ratio": 0.13154296875
+    },
+    {
+      "id": "garden_plants_10",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.6854968667030334,
+      "crr": 1.0179168122832893,
+      "np_mae": 0.003510105889290571,
+      "large_change_ratio": 0.01495361328125
+    },
+    {
+      "id": "garden_plants_10",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.1993183046579361,
+      "crr": 1.014161365786582,
+      "np_mae": 0.003510105889290571,
+      "large_change_ratio": 0.01495361328125
+    },
+    {
+      "id": "garden_plants_11",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.3845604956150055,
+      "crr": 0.9999998300762909,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "garden_plants_11",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.3272044360637665,
+      "crr": 0.9999998506860897,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "garden_plants_13",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.768074095249176,
+      "crr": 1.4226631138375232,
+      "np_mae": 0.0205382052809,
+      "large_change_ratio": 0.18703715006510416
+    },
+    {
+      "id": "garden_plants_13",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.7036597728729248,
+      "crr": 1.1021136314039486,
+      "np_mae": 0.0205382052809,
+      "large_change_ratio": 0.18703715006510416
+    },
+    {
+      "id": "garden_plants_14",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.523634672164917,
+      "crr": 1.1396465643756917,
+      "np_mae": 0.012101412750780582,
+      "large_change_ratio": 0.06686463647959184
+    },
+    {
+      "id": "garden_plants_14",
+      "category": "garden_plants",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.30352696776390076,
+      "crr": 1.0693515673735556,
+      "np_mae": 0.012101412750780582,
+      "large_change_ratio": 0.06686463647959184
+    },
+    {
+      "id": "garden_plants_15",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.2892785668373108,
+      "crr": 1.1899328466173986,
+      "np_mae": 0.005531486123800278,
+      "large_change_ratio": 0.008839925130208334
+    },
+    {
+      "id": "garden_plants_15",
+      "category": "garden_plants",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.2730472981929779,
+      "crr": 1.049242099213855,
+      "np_mae": 0.005531486123800278,
+      "large_change_ratio": 0.008839925130208334
+    },
+    {
+      "id": "landscape_water_01",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6824409365653992,
+      "crr": 1.498477126040216,
+      "np_mae": 0.025070583447813988,
+      "large_change_ratio": 0.21746527777777777
+    },
+    {
+      "id": "landscape_water_01",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.37156322598457336,
+      "crr": 1.1750011312268767,
+      "np_mae": 0.025070583447813988,
+      "large_change_ratio": 0.21746527777777777
+    },
+    {
+      "id": "landscape_water_03",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.797812283039093,
+      "crr": 1.173221185966109,
+      "np_mae": 0.057309746742248535,
+      "large_change_ratio": 0.36545202529325516
+    },
+    {
+      "id": "landscape_water_03",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.65377277135849,
+      "crr": 1.0587478986450811,
+      "np_mae": 0.057309746742248535,
+      "large_change_ratio": 0.36545202529325516
+    },
+    {
+      "id": "landscape_water_04",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5855457782745361,
+      "crr": 1.1433769226748778,
+      "np_mae": 0.02495213970541954,
+      "large_change_ratio": 0.2516873150887574
+    },
+    {
+      "id": "landscape_water_04",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.4390241503715515,
+      "crr": 1.246945940165612,
+      "np_mae": 0.02495213970541954,
+      "large_change_ratio": 0.2516873150887574
+    },
+    {
+      "id": "landscape_water_05",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.2460622638463974,
+      "crr": 1.0841399596160017,
+      "np_mae": 0.010778470896184444,
+      "large_change_ratio": 0.10525045955882353
+    },
+    {
+      "id": "landscape_water_05",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.2566591799259186,
+      "crr": 1.053381265676404,
+      "np_mae": 0.010778470896184444,
+      "large_change_ratio": 0.10525045955882353
+    },
+    {
+      "id": "landscape_water_07",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5523519515991211,
+      "crr": 1.1596433540722242,
+      "np_mae": 0.0405048169195652,
+      "large_change_ratio": 0.3017494658119658
+    },
+    {
+      "id": "landscape_water_07",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.3887261152267456,
+      "crr": 1.001558598912209,
+      "np_mae": 0.0405048169195652,
+      "large_change_ratio": 0.3017494658119658
+    },
+    {
+      "id": "landscape_water_08",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.5617259740829468,
+      "crr": 1.086014169578957,
+      "np_mae": 0.014679791405797005,
+      "large_change_ratio": 0.1826171875
+    },
+    {
+      "id": "landscape_water_08",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.36530524492263794,
+      "crr": 1.0462910322611747,
+      "np_mae": 0.014679791405797005,
+      "large_change_ratio": 0.1826171875
+    },
+    {
+      "id": "landscape_water_09",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.41932258009910583,
+      "crr": 1.1125512331154641,
+      "np_mae": 0.013431957922875881,
+      "large_change_ratio": 0.10597630550986842
+    },
+    {
+      "id": "landscape_water_09",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.4717964828014374,
+      "crr": 1.0358161710223508,
+      "np_mae": 0.013431957922875881,
+      "large_change_ratio": 0.10597630550986842
+    },
+    {
+      "id": "landscape_water_10",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.20362310111522675,
+      "crr": 1.1972345841412069,
+      "np_mae": 0.0041725244373083115,
+      "large_change_ratio": 0.035069783528645836
+    },
+    {
+      "id": "landscape_water_10",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.13769768178462982,
+      "crr": 1.037983183097061,
+      "np_mae": 0.0041725244373083115,
+      "large_change_ratio": 0.035069783528645836
+    },
+    {
+      "id": "landscape_water_11",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.8672072291374207,
+      "crr": 1.0283974266465117,
+      "np_mae": 0.005147211253643036,
+      "large_change_ratio": 0.027862548828125
+    },
+    {
+      "id": "landscape_water_11",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.7043263912200928,
+      "crr": 1.0128143607217006,
+      "np_mae": 0.005147211253643036,
+      "large_change_ratio": 0.027862548828125
+    },
+    {
+      "id": "landscape_water_12",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7798122763633728,
+      "crr": 1.0215736571114642,
+      "np_mae": 0.004781344439834356,
+      "large_change_ratio": 0.02525888929618768
+    },
+    {
+      "id": "landscape_water_12",
+      "category": "landscape_water",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.6046044826507568,
+      "crr": 1.0235111954525995,
+      "np_mae": 0.004781344439834356,
+      "large_change_ratio": 0.02525888929618768
+    },
+    {
+      "id": "landscape_water_14",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.8096359372138977,
+      "crr": 1.322733167842312,
+      "np_mae": 0.08263976871967316,
+      "large_change_ratio": 0.6624298095703125
+    },
+    {
+      "id": "landscape_water_14",
+      "category": "landscape_water",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.6248682737350464,
+      "crr": 1.2324144434176418,
+      "np_mae": 0.08263976871967316,
+      "large_change_ratio": 0.6624298095703125
+    },
+    {
+      "id": "animals_pets_10",
+      "category": "animals_pets",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.16429810225963593,
+      "crr": 1.0257188705643567,
+      "np_mae": 0.0031900242902338505,
+      "large_change_ratio": 0.007319132486979167
+    },
+    {
+      "id": "animals_pets_10",
+      "category": "animals_pets",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.04397686943411827,
+      "crr": 1.0232120660619133,
+      "np_mae": 0.0031900242902338505,
+      "large_change_ratio": 0.007319132486979167
+    },
+    {
+      "id": "animals_pets_12",
+      "category": "animals_pets",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.8549427390098572,
+      "crr": 1.084138858417271,
+      "np_mae": 0.026771321892738342,
+      "large_change_ratio": 0.1052093505859375
+    },
+    {
+      "id": "animals_pets_12",
+      "category": "animals_pets",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.9626295566558838,
+      "crr": 1.0704275155578118,
+      "np_mae": 0.026771321892738342,
+      "large_change_ratio": 0.1052093505859375
+    },
+    {
+      "id": "animals_pets_13",
+      "category": "animals_pets",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.9720191955566406,
+      "crr": 1.1740866214218717,
+      "np_mae": 0.07072202861309052,
+      "large_change_ratio": 0.82873046875
+    },
+    {
+      "id": "animals_pets_13",
+      "category": "animals_pets",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.9119483232498169,
+      "crr": 1.023618656360958,
+      "np_mae": 0.07072202861309052,
+      "large_change_ratio": 0.82873046875
+    },
+    {
+      "id": "animals_pets_14",
+      "category": "animals_pets",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.15941762924194336,
+      "crr": 1.0876042742029703,
+      "np_mae": 0.002195922890678048,
+      "large_change_ratio": 0.0010021865889212828
+    },
+    {
+      "id": "animals_pets_14",
+      "category": "animals_pets",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.029694033786654472,
+      "crr": 1.0111298612797148,
+      "np_mae": 0.002195922890678048,
+      "large_change_ratio": 0.0010021865889212828
+    },
+    {
+      "id": "urban_architecture_01",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.34963545203208923,
+      "crr": 0.9999997917661977,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "urban_architecture_01",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.39338743686676025,
+      "crr": 0.9999998304175353,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "urban_architecture_02",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.42104676365852356,
+      "crr": 1.0581882077157916,
+      "np_mae": 0.007087280973792076,
+      "large_change_ratio": 0.04683866279069768
+    },
+    {
+      "id": "urban_architecture_02",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.14695614576339722,
+      "crr": 1.0879764689827838,
+      "np_mae": 0.007087280973792076,
+      "large_change_ratio": 0.04683866279069768
+    },
+    {
+      "id": "urban_architecture_03",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.10476257652044296,
+      "crr": 1.0858686066900984,
+      "np_mae": 0.0020283435005694628,
+      "large_change_ratio": 0.0007223095414201183
+    },
+    {
+      "id": "urban_architecture_03",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.03960120305418968,
+      "crr": 1.0166411636186676,
+      "np_mae": 0.0020283435005694628,
+      "large_change_ratio": 0.0007223095414201183
+    },
+    {
+      "id": "urban_architecture_04",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.16894356906414032,
+      "crr": 1.0562483142189785,
+      "np_mae": 0.008750121109187603,
+      "large_change_ratio": 0.041081746419270836
+    },
+    {
+      "id": "urban_architecture_04",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.08414328843355179,
+      "crr": 1.0724971597739086,
+      "np_mae": 0.008750121109187603,
+      "large_change_ratio": 0.041081746419270836
+    },
+    {
+      "id": "urban_architecture_05",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.4403909146785736,
+      "crr": 1.0064091613278228,
+      "np_mae": 0.003462255699560046,
+      "large_change_ratio": 0.006978352864583333
+    },
+    {
+      "id": "urban_architecture_05",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.06972309201955795,
+      "crr": 1.0205369799260697,
+      "np_mae": 0.003462255699560046,
+      "large_change_ratio": 0.006978352864583333
+    },
+    {
+      "id": "urban_architecture_06",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.4481353759765625,
+      "crr": 1.0674161176438464,
+      "np_mae": 0.008608637377619743,
+      "large_change_ratio": 0.052922566731770836
+    },
+    {
+      "id": "urban_architecture_06",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.0767437145113945,
+      "crr": 1.0997218225872607,
+      "np_mae": 0.008608637377619743,
+      "large_change_ratio": 0.052922566731770836
+    },
+    {
+      "id": "urban_architecture_07",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.35232511162757874,
+      "crr": 0.9999998264583698,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "urban_architecture_07",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.15057162940502167,
+      "crr": 0.9999998370510188,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "urban_architecture_08",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.28524869680404663,
+      "crr": 0.9999998587410946,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "urban_architecture_08",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.04476518929004669,
+      "crr": 0.9999998807791022,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "urban_architecture_09",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.833805501461029,
+      "crr": 1.2610126855097414,
+      "np_mae": 0.0071606021374464035,
+      "large_change_ratio": 0.06906960227272728
+    },
+    {
+      "id": "urban_architecture_09",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.4868158996105194,
+      "crr": 1.187561219629246,
+      "np_mae": 0.0071606021374464035,
+      "large_change_ratio": 0.06906960227272728
+    },
+    {
+      "id": "urban_architecture_10",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.24916642904281616,
+      "crr": 0.9999997076240394,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "urban_architecture_10",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.07432669401168823,
+      "crr": 0.9999997648358843,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "urban_architecture_11",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6215087175369263,
+      "crr": 1.3155174097411964,
+      "np_mae": 0.028086785227060318,
+      "large_change_ratio": 0.26999080882352944
+    },
+    {
+      "id": "urban_architecture_11",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.29236626625061035,
+      "crr": 1.0696957031933187,
+      "np_mae": 0.028086785227060318,
+      "large_change_ratio": 0.26999080882352944
+    },
+    {
+      "id": "urban_architecture_12",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.3679707944393158,
+      "crr": 1.0337667574726834,
+      "np_mae": 0.005217176862061024,
+      "large_change_ratio": 0.011388142903645834
+    },
+    {
+      "id": "urban_architecture_12",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.09053915739059448,
+      "crr": 1.0347632767591821,
+      "np_mae": 0.005217176862061024,
+      "large_change_ratio": 0.011388142903645834
+    },
+    {
+      "id": "urban_architecture_13",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5270745754241943,
+      "crr": 1.0860392201837592,
+      "np_mae": 0.047941651195287704,
+      "large_change_ratio": 0.3830464680989583
+    },
+    {
+      "id": "urban_architecture_13",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.42766180634498596,
+      "crr": 1.0161619601644947,
+      "np_mae": 0.047941651195287704,
+      "large_change_ratio": 0.3830464680989583
+    },
+    {
+      "id": "urban_architecture_14",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.34458303451538086,
+      "crr": 1.0186489506812475,
+      "np_mae": 0.004034590907394886,
+      "large_change_ratio": 0.006006876627604167
+    },
+    {
+      "id": "urban_architecture_14",
+      "category": "urban_architecture",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.10658083111047745,
+      "crr": 1.029571846245839,
+      "np_mae": 0.004034590907394886,
+      "large_change_ratio": 0.006006876627604167
+    },
+    {
+      "id": "urban_architecture_15",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.1455923616886139,
+      "crr": 1.0818867838021677,
+      "np_mae": 0.0027762430254369974,
+      "large_change_ratio": 0.0013288123167155424
+    },
+    {
+      "id": "urban_architecture_15",
+      "category": "urban_architecture",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.03259861469268799,
+      "crr": 1.0708732292364362,
+      "np_mae": 0.0027762430254369974,
+      "large_change_ratio": 0.0013288123167155424
+    },
+    {
+      "id": "night_lowlight_01",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5902187824249268,
+      "crr": 0.9999998112590498,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "night_lowlight_01",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.5925225615501404,
+      "crr": 0.9999998260835784,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "night_lowlight_02",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.11598770320415497,
+      "crr": 0.9999997962515287,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "night_lowlight_02",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.06312430649995804,
+      "crr": 0.9999998306294109,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "night_lowlight_03",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.3822515606880188,
+      "crr": 1.0699409372050654,
+      "np_mae": 0.02397790178656578,
+      "large_change_ratio": 0.31843634544334976
+    },
+    {
+      "id": "night_lowlight_03",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.601850152015686,
+      "crr": 1.0736441858930854,
+      "np_mae": 0.02397790178656578,
+      "large_change_ratio": 0.31843634544334976
+    },
+    {
+      "id": "night_lowlight_05",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.7221806645393372,
+      "crr": 1.2872651348155448,
+      "np_mae": 0.007231671828776598,
+      "large_change_ratio": 0.028720323226544622
+    },
+    {
+      "id": "night_lowlight_05",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.7613081932067871,
+      "crr": 1.1890770465678628,
+      "np_mae": 0.007231671828776598,
+      "large_change_ratio": 0.028720323226544622
+    },
+    {
+      "id": "night_lowlight_07",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.562321662902832,
+      "crr": 1.0742954946256842,
+      "np_mae": 0.00943389255553484,
+      "large_change_ratio": 0.050445556640625
+    },
+    {
+      "id": "night_lowlight_07",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.2163935750722885,
+      "crr": 1.1653034329633598,
+      "np_mae": 0.00943389255553484,
+      "large_change_ratio": 0.050445556640625
+    },
+    {
+      "id": "night_lowlight_08",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.6088061928749084,
+      "crr": 1.0217315893870274,
+      "np_mae": 0.005480412393808365,
+      "large_change_ratio": 0.008366902669270834
+    },
+    {
+      "id": "night_lowlight_08",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.5146801471710205,
+      "crr": 1.0137914460525344,
+      "np_mae": 0.005480412393808365,
+      "large_change_ratio": 0.008366902669270834
+    },
+    {
+      "id": "night_lowlight_10",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.6618013381958008,
+      "crr": 1.1082348972154419,
+      "np_mae": 0.009649806655943394,
+      "large_change_ratio": 0.0973663330078125
+    },
+    {
+      "id": "night_lowlight_10",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.38536202907562256,
+      "crr": 1.0958961967584373,
+      "np_mae": 0.009649806655943394,
+      "large_change_ratio": 0.0973663330078125
+    },
+    {
+      "id": "night_lowlight_11",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.3771493434906006,
+      "crr": 1.0595048628072607,
+      "np_mae": 0.002539859851822257,
+      "large_change_ratio": 0.004112445014662756
+    },
+    {
+      "id": "night_lowlight_11",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.10958699882030487,
+      "crr": 1.0095199241123374,
+      "np_mae": 0.002539859851822257,
+      "large_change_ratio": 0.004112445014662756
+    },
+    {
+      "id": "night_lowlight_12",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.4814237654209137,
+      "crr": 1.151680750316719,
+      "np_mae": 0.012377970851957798,
+      "large_change_ratio": 0.095611572265625
+    },
+    {
+      "id": "night_lowlight_12",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.2949469983577728,
+      "crr": 1.0668026910162636,
+      "np_mae": 0.012377970851957798,
+      "large_change_ratio": 0.095611572265625
+    },
+    {
+      "id": "night_lowlight_13",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.9405018091201782,
+      "crr": 1.0660011245296153,
+      "np_mae": 0.0016143667744472623,
+      "large_change_ratio": 0.0008786264326647564
+    },
+    {
+      "id": "night_lowlight_13",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.15535666048526764,
+      "crr": 1.025624653091303,
+      "np_mae": 0.0016143667744472623,
+      "large_change_ratio": 0.0008786264326647564
+    },
+    {
+      "id": "night_lowlight_14",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.44652584195137024,
+      "crr": 1.2026512071140223,
+      "np_mae": 0.009335977956652641,
+      "large_change_ratio": 0.08088175455729167
+    },
+    {
+      "id": "night_lowlight_14",
+      "category": "night_lowlight",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.46111583709716797,
+      "crr": 1.092275359252178,
+      "np_mae": 0.009335977956652641,
+      "large_change_ratio": 0.08088175455729167
+    },
+    {
+      "id": "night_lowlight_15",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.5093257427215576,
+      "crr": 1.1809309085430326,
+      "np_mae": 0.049221575260162354,
+      "large_change_ratio": 0.3110605875651042
+    },
+    {
+      "id": "night_lowlight_15",
+      "category": "night_lowlight",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.48977604508399963,
+      "crr": 1.176559368919523,
+      "np_mae": 0.049221575260162354,
+      "large_change_ratio": 0.3110605875651042
+    },
+    {
+      "id": "weather_seasons_01",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.22285360097885132,
+      "crr": 1.0861670682662585,
+      "np_mae": 0.004238719120621681,
+      "large_change_ratio": 0.0006306966145833334
+    },
+    {
+      "id": "weather_seasons_01",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.01608882285654545,
+      "crr": 1.0617039036851494,
+      "np_mae": 0.004238719120621681,
+      "large_change_ratio": 0.0006306966145833334
+    },
+    {
+      "id": "weather_seasons_02",
+      "category": "weather_seasons",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.07705213874578476,
+      "crr": 0.9999998379607302,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "weather_seasons_02",
+      "category": "weather_seasons",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.018695566803216934,
+      "crr": 0.9999998107120546,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "weather_seasons_04",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.3300674557685852,
+      "crr": 1.0035499062518805,
+      "np_mae": 0.0031859364826232195,
+      "large_change_ratio": 0.01052389705882353
+    },
+    {
+      "id": "weather_seasons_04",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.02849942445755005,
+      "crr": 1.035803632206046,
+      "np_mae": 0.0031859364826232195,
+      "large_change_ratio": 0.01052389705882353
+    },
+    {
+      "id": "weather_seasons_05",
+      "category": "weather_seasons",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.08332034200429916,
+      "crr": 1.0177089489830882,
+      "np_mae": 0.001919155940413475,
+      "large_change_ratio": 0.00244140625
+    },
+    {
+      "id": "weather_seasons_05",
+      "category": "weather_seasons",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.01580180414021015,
+      "crr": 1.019145854914511,
+      "np_mae": 0.001919155940413475,
+      "large_change_ratio": 0.00244140625
+    },
+    {
+      "id": "weather_seasons_06",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "weather_seasons_06",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.0,
+      "crr": 0.0,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "weather_seasons_07",
+      "category": "weather_seasons",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.4581812620162964,
+      "crr": 1.0686998829541619,
+      "np_mae": 0.019445188343524933,
+      "large_change_ratio": 0.15252757352941176
+    },
+    {
+      "id": "weather_seasons_07",
+      "category": "weather_seasons",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.3520835340023041,
+      "crr": 1.056507148423938,
+      "np_mae": 0.019445188343524933,
+      "large_change_ratio": 0.15252757352941176
+    },
+    {
+      "id": "weather_seasons_08",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.03052864782512188,
+      "crr": 0.9999992531231955,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "weather_seasons_08",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.01949246972799301,
+      "crr": 0.999999097187825,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "weather_seasons_09",
+      "category": "weather_seasons",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.43612140417099,
+      "crr": 1.1124407165930168,
+      "np_mae": 0.0095754349604249,
+      "large_change_ratio": 0.07097863203642384
+    },
+    {
+      "id": "weather_seasons_09",
+      "category": "weather_seasons",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.31070324778556824,
+      "crr": 1.0155012727838488,
+      "np_mae": 0.0095754349604249,
+      "large_change_ratio": 0.07097863203642384
+    },
+    {
+      "id": "weather_seasons_11",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.326705664396286,
+      "crr": 0.9999994418246569,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "weather_seasons_11",
+      "category": "weather_seasons",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.4789377450942993,
+      "crr": 0.9999991742417176,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "small_color_items_01",
+      "category": "small_color_items",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.22870902717113495,
+      "crr": 1.095284038937125,
+      "np_mae": 0.015248931013047695,
+      "large_change_ratio": 0.08556620279947917
+    },
+    {
+      "id": "small_color_items_01",
+      "category": "small_color_items",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.32975924015045166,
+      "crr": 1.06550911919081,
+      "np_mae": 0.015248931013047695,
+      "large_change_ratio": 0.08556620279947917
+    },
+    {
+      "id": "small_color_items_04",
+      "category": "small_color_items",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.8745375871658325,
+      "crr": 1.1020208808587657,
+      "np_mae": 0.007225864101201296,
+      "large_change_ratio": 0.04440165011682243
+    },
+    {
+      "id": "small_color_items_04",
+      "category": "small_color_items",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.6945666670799255,
+      "crr": 1.0603620517282448,
+      "np_mae": 0.007225864101201296,
+      "large_change_ratio": 0.04440165011682243
+    },
+    {
+      "id": "small_color_items_05",
+      "category": "small_color_items",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.5838871598243713,
+      "crr": 1.0870599287930929,
+      "np_mae": 0.009119524620473385,
+      "large_change_ratio": 0.0737032624633431
+    },
+    {
+      "id": "small_color_items_05",
+      "category": "small_color_items",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.49139437079429626,
+      "crr": 1.017144511015675,
+      "np_mae": 0.009119524620473385,
+      "large_change_ratio": 0.0737032624633431
+    },
+    {
+      "id": "small_color_items_06",
+      "category": "small_color_items",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.37393447756767273,
+      "crr": 0.999999578004963,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "small_color_items_06",
+      "category": "small_color_items",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.1773732304573059,
+      "crr": 0.9999997848156111,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "small_color_items_07",
+      "category": "small_color_items",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.41754579544067383,
+      "crr": 1.0778016116964362,
+      "np_mae": 0.024640081450343132,
+      "large_change_ratio": 0.24610786897590362
+    },
+    {
+      "id": "small_color_items_07",
+      "category": "small_color_items",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.4083610475063324,
+      "crr": 1.0543708536537808,
+      "np_mae": 0.024640081450343132,
+      "large_change_ratio": 0.24610786897590362
+    },
+    {
+      "id": "small_color_items_09",
+      "category": "small_color_items",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.6956855654716492,
+      "crr": 0.999999114460877,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "small_color_items_09",
+      "category": "small_color_items",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.1618967354297638,
+      "crr": 0.9999991954823408,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "small_color_items_11",
+      "category": "small_color_items",
+      "split": "dev",
+      "simulator": "brettel",
+      "w_mean": 0.7121692299842834,
+      "crr": 1.2319722612538577,
+      "np_mae": 0.049540452659130096,
+      "large_change_ratio": 0.327667236328125
+    },
+    {
+      "id": "small_color_items_11",
+      "category": "small_color_items",
+      "split": "dev",
+      "simulator": "machado",
+      "w_mean": 0.6662670969963074,
+      "crr": 1.142829330530791,
+      "np_mae": 0.049540452659130096,
+      "large_change_ratio": 0.327667236328125
+    },
+    {
+      "id": "small_color_items_12",
+      "category": "small_color_items",
+      "split": "test",
+      "simulator": "brettel",
+      "w_mean": 0.29511159658432007,
+      "crr": 0.9999994644961788,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    },
+    {
+      "id": "small_color_items_12",
+      "category": "small_color_items",
+      "split": "test",
+      "simulator": "machado",
+      "w_mean": 0.019492164254188538,
+      "crr": 0.9999995524373777,
+      "np_mae": 0.0,
+      "large_change_ratio": 0.0
+    }
+  ]
+}

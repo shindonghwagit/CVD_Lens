@@ -113,7 +113,7 @@ def _band(x: np.ndarray, lo: float, hi: float, w: float = 12.0) -> np.ndarray:
 _TRITAN_BASE_DEG = 30.0
 
 
-def _tritan_hue_shift(img_f32: np.ndarray, severity: float) -> np.ndarray:
+def _tritan_hue_shift_fixed_legacy(img_f32: np.ndarray, severity: float) -> np.ndarray:
     """Analytic, saturation-preserving hue rotation for tritan (blue↔yellow axis).
 
     Rotates blue (H~90–135) toward violet and yellow (H~18–40) toward yellow-green,
@@ -132,6 +132,102 @@ def _tritan_hue_shift(img_f32: np.ndarray, severity: float) -> np.ndarray:
     g_yellow = sat_g * _band(H, 18.0, 40.0)                   # yellow
     hsv[..., 0] = (H + (g_blue + g_yellow) * deg) % 180.0     # S,V untouched
     return cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2RGB).astype(np.float32) / 255.0
+
+
+_TRITAN_ANGLES = (-36.0, -30.0, -24.0, -18.0, -12.0, 0.0,
+                  12.0, 18.0, 24.0, 30.0, 36.0)
+_TRITAN_RGB2LMS = np.array([
+    [17.8824, 43.5161, 4.11935], [3.45565, 27.1554, 3.86714],
+    [.02996, .18431, 1.46720],
+], np.float32)
+_TRITAN_LMS2RGB = np.linalg.inv(_TRITAN_RGB2LMS).astype(np.float32)
+_TRITAN_SIM = _TRITAN_LMS2RGB @ np.array(
+    [[1, 0, 0], [0, 1, 0], [-.395913, .801109, 0]], np.float32
+) @ _TRITAN_RGB2LMS
+_TRITAN_MACHADO = np.array([
+    [1.255528, -.076749, -.178779],
+    [-.078411, .930809, .147602],
+    [.004733, .691367, .303900],
+], np.float32)
+_RGB2XYZ = np.array([
+    [.4124564, .3575761, .1804375], [.2126729, .7151522, .0721750],
+    [.0193339, .1191920, .9503041],
+], np.float32)
+_D65 = np.array([.95047, 1.0, 1.08883], np.float32)
+
+
+def _tritan_apply_angle(img_f32: np.ndarray, angle: float) -> np.ndarray:
+    """Saturation/value-preserving gated hue shift; zero is exact identity."""
+    if angle == 0.0:
+        return img_f32.copy()
+    hsv = cv2.cvtColor(_to_u8(img_f32), cv2.COLOR_RGB2HSV).astype(np.float32)
+    hue, saturation = hsv[..., 0], hsv[..., 1]
+    sat_gate = np.clip((saturation - 18.0) / 50.0, 0.0, 1.0)
+    gate = sat_gate * (_band(hue, 90.0, 135.0) + _band(hue, 18.0, 40.0))
+    hsv[..., 0] = (hue + gate * angle) % 180.0
+    return cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2RGB).astype(np.float32) / 255.0
+
+
+def _tritan_linear(x: np.ndarray) -> np.ndarray:
+    return np.where(x > .04045, ((np.maximum(x, 0) + .055) / 1.055) ** 2.4,
+                    x / 12.92).astype(np.float32)
+
+
+def _tritan_lab(x_linear: np.ndarray) -> np.ndarray:
+    xyz = np.einsum("ij,hwj->hwi", _RGB2XYZ, x_linear) / _D65
+    d = 6.0 / 29.0
+    f = np.where(xyz > d ** 3, np.cbrt(np.maximum(xyz, 0)),
+                 xyz / (3 * d * d) + 4.0 / 29.0)
+    return np.stack((116 * f[..., 1] - 16,
+                     500 * (f[..., 0] - f[..., 1]),
+                     200 * (f[..., 1] - f[..., 2])), axis=-1)
+
+
+def _tritan_simulate(x_linear: np.ndarray, matrix: np.ndarray = _TRITAN_SIM) -> np.ndarray:
+    return np.clip(np.einsum("ij,hwj->hwi", matrix, x_linear), 0, 1)
+
+
+def _tritan_probe_score(original: np.ndarray, candidate: np.ndarray,
+                        matrix: np.ndarray = _TRITAN_SIM) -> float:
+    orig_linear = _tritan_linear(original)
+    sim_orig = _tritan_simulate(orig_linear, matrix)
+    sim_out = _tritan_simulate(_tritan_linear(candidate), matrix)
+    delta_e = np.linalg.norm(_tritan_lab(orig_linear) - _tritan_lab(sim_orig), axis=2)
+    weight = np.clip((delta_e - 12.0) / 18.0, 0, 1).astype(np.float32)
+    weight = cv2.GaussianBlur(weight, (11, 11), 3, borderType=cv2.BORDER_REFLECT)
+    if float(weight.mean()) < 1e-6:
+        return 1.0
+    before = cv2.GaussianBlur(sim_orig, (5, 5), 1, borderType=cv2.BORDER_REFLECT)
+    after = cv2.GaussianBlur(sim_out, (5, 5), 1, borderType=cv2.BORDER_REFLECT)
+
+    def gradient(x: np.ndarray) -> np.ndarray:
+        dx = np.pad(np.abs(x[:, 1:] - x[:, :-1]).mean(2), ((0, 0), (0, 1)))
+        dy = np.pad(np.abs(x[1:] - x[:-1]).mean(2), ((0, 1), (0, 0)))
+        return dx + dy
+
+    denominator = float((weight * gradient(before)).sum() / (weight.sum() + 1e-8))
+    numerator = float((weight * gradient(after)).sum() / (weight.sum() + 1e-8))
+    return numerator / (denominator + 1e-8)
+
+
+def _tritan_hue_shift(img_f32: np.ndarray, severity: float) -> np.ndarray:
+    """Select a per-image hue angle that improves Brettel-view contrast."""
+    h, w = img_f32.shape[:2]
+    scale = min(1.0, 512.0 / max(h, w))
+    probe = (cv2.resize(img_f32, (round(w * scale), round(h * scale)),
+                        interpolation=cv2.INTER_AREA) if scale < 1.0 else img_f32)
+    strength = float(np.clip(severity, 0.0, 1.0))
+    scored = []
+    for base_angle in _TRITAN_ANGLES:
+        angle = base_angle * strength
+        candidate = _tritan_apply_angle(probe, angle)
+        brettel = _tritan_probe_score(probe, candidate, _TRITAN_SIM)
+        machado = _tritan_probe_score(probe, candidate, _TRITAN_MACHADO)
+        scored.append((min(brettel, machado), angle))
+    best_score, best_angle = max(scored, key=lambda item: item[0])
+    if best_score < 1.002:
+        best_angle = 0.0
+    return _tritan_apply_angle(img_f32, best_angle)
 
 
 def _correct_image(img_f32: np.ndarray, cvd_type: str, severity: float) -> np.ndarray:
@@ -160,7 +256,7 @@ def _correct_image(img_f32: np.ndarray, cvd_type: str, severity: float) -> np.nd
     # (region boundaries sharpen) and flatten it inside uniform-guide regions
     # (removes the low-frequency delta gradient), using the original as guide.
     # Model is untouched — this operates on the composited delta only.
-    if config.GUIDED_FILTER_ENABLED:
+    if config.GUIDED_FILTER_ENABLED and cvd_type != "t":
         radius = max(1, max(h, w) // config.GUIDED_RADIUS_DIVISOR)
         delta_full = guided_filter(img_f32, delta_full, radius, config.GUIDED_EPS,
                                    max_side=config.GUIDED_MAX_SIDE)
