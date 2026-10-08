@@ -4,7 +4,7 @@
  * 그래프 IO: srgb (1,3,256,256) f32 + severity (1,1) f32 → out_srgb (1,3,256,256) f32.
  */
 import * as ort from "onnxruntime-web";
-import type { CVDType } from "./cvdSim";
+import type { CVDType } from "./cvd";
 
 // WASM은 public/ort에서 자체 호스팅한다. 스레드 off = SharedArrayBuffer/교차출처격리 불필요.
 ort.env.wasm.wasmPaths = "/ort/";

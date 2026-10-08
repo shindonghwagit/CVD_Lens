@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useContext, ReactNode } from "react";
-import { useCVDModel, CVDType } from "../hooks/useCVDModel";
+import { useCVDModel } from "../hooks/useCVDModel";
+import type { CVDType } from "@/lib/cvd";
 
 interface ModelContextValue {
   ready: boolean;

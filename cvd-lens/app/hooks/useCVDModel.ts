@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import type { CVDType } from "@/lib/cvd";
 
-export type CVDType = "p" | "d" | "t";
+export type { CVDType } from "@/lib/cvd";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 

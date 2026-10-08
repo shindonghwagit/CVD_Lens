@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { simulate, CVDType } from "@/lib/cvdSim";
+import { simulate } from "@/lib/cvdSim";
+import type { CVDType } from "@/lib/cvd";
 
 type SimKey = "normal" | CVDType;
 

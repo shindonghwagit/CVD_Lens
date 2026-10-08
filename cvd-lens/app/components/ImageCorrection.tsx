@@ -2,44 +2,16 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useModel } from "../context/ModelContext";
-import { CVDType } from "../hooks/useCVDModel";
+import type { CVDType } from "@/lib/cvd";
+import { CVD_LABELS } from "@/lib/cvd";
+import {
+  HISTORY_THUMBNAIL_SIZE,
+  imageDataToURL,
+  MAX_UPLOAD_SIDE,
+  REQUEST_TIMEOUT_MS,
+  resizeDataURL,
+} from "@/lib/correctionClient";
 import { simulate } from "@/lib/cvdSim";
-
-const CVD_LABELS: Record<CVDType, string> = {
-  p: "적색맹 (Protanopia)",
-  d: "녹색맹 (Deuteranopia)",
-  t: "청색맹 (Tritanopia)",
-};
-
-// Cap on the square side uploaded to the server. Kept equal to the backend's
-// MAX_SIDE (cvd-lens/inference/main.py) — the server re-caps the long side to
-// this anyway, so sending more only wastes bandwidth. Sync manually if changed.
-const MAX_UPLOAD = 2048;
-const THUMB_SIZE = 256;
-
-function resizeDataURL(src: string, size: number): Promise<string> {
-  return new Promise((resolve) => {
-    const img = document.createElement("img");
-    img.onload = () => {
-      const c = document.createElement("canvas");
-      c.width = size; c.height = size;
-      c.getContext("2d")!.drawImage(img, 0, 0, size, size);
-      resolve(c.toDataURL("image/jpeg", 0.75));
-    };
-    img.src = src;
-  });
-}
-
-function imageDataToURL(id: ImageData): string {
-  const c = document.createElement("canvas");
-  c.width = id.width; c.height = id.height;
-  c.getContext("2d")!.putImageData(id, 0, 0);
-  return c.toDataURL("image/jpeg", 0.92);
-}
-
-// Reject if the inference request hasn't resolved within `ms`. Client-side
-// guard for a surfaced error state; the request contract itself is unchanged.
-const REQUEST_TIMEOUT = 30000;
 
 export default function ImageCorrection({ initialType }: { initialType?: CVDType } = {}) {
   const { ready, error, infer } = useModel();
@@ -80,7 +52,7 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
     const controller = new AbortController();
     const id = (requestRef.current?.id ?? 0) + 1;
     requestRef.current = { id, controller };
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     setReqError(false);
     setProcessing(true);
     try {
@@ -114,7 +86,7 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
     setSimOrig(null); setSimOut(null);
 
     const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_UPLOAD / Math.max(bitmap.width, bitmap.height));
+    const scale = Math.min(1, MAX_UPLOAD_SIDE / Math.max(bitmap.width, bitmap.height));
     const targetWidth = Math.max(1, Math.round(bitmap.width * scale));
     const targetHeight = Math.max(1, Math.round(bitmap.height * scale));
     const canvas = document.createElement("canvas");
@@ -134,8 +106,8 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
     if (!original || !corrected || saveState === "saving") return;
     setSaveState("saving");
     const [origThumb, corrThumb] = await Promise.all([
-      resizeDataURL(original, THUMB_SIZE),
-      resizeDataURL(corrected, THUMB_SIZE),
+      resizeDataURL(original, HISTORY_THUMBNAIL_SIZE),
+      resizeDataURL(corrected, HISTORY_THUMBNAIL_SIZE),
     ]);
     try {
       const res = await fetch("/api/corrections", {

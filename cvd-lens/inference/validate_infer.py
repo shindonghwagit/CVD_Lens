@@ -28,6 +28,7 @@ OUT = Path("C:/Users/SCH/graduation_project/outputs/v2_phase2/infer_fix")
 OUT.mkdir(parents=True, exist_ok=True)
 
 TYPES = ("p", "d", "t")
+MODEL_TYPES = ("p", "d")
 
 
 def hf_energy(rgb_u8: np.ndarray) -> float:
@@ -86,11 +87,14 @@ def check_text():
     worst = 1.0
     for t in TYPES:
         new_u8 = main._to_u8(main._correct_image(arr, t, 1.0))
-        old_u8 = main._to_u8(old_path(arr, t, 1.0))
         r_new = hf_energy(new_u8) / hf_o
-        r_old = hf_energy(old_u8) / hf_o
         worst = min(worst, r_new)
-        print(f"    {t}:  new/orig={r_new:.3f}   (legacy 256 path={r_old:.3f})")
+        if t in MODEL_TYPES:
+            old_u8 = main._to_u8(old_path(arr, t, 1.0))
+            r_old = hf_energy(old_u8) / hf_o
+            print(f"    {t}:  new/orig={r_new:.3f}   (legacy 256 path={r_old:.3f})")
+        else:
+            print(f"    {t}:  new/orig={r_new:.3f}   (rule-based path; no legacy model)")
         Image.fromarray(new_u8).save(OUT / f"text_new_{t}.png")
     ok = worst > 0.95
     print(f"    → worst new/orig = {worst:.3f}  [{'PASS' if ok else 'FAIL'}]")
@@ -106,7 +110,7 @@ def check_direction():
 
     worst = 1.0
     panels = [orig_u8]
-    for t in TYPES:
+    for t in MODEL_TYPES:
         new = main._correct_image(arr, t, 1.0)
         old = old_path(arr, t, 1.0)
         d_new = (new - arr).reshape(-1, 3).mean(0)

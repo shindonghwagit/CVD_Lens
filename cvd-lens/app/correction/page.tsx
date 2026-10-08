@@ -6,7 +6,7 @@ import { Suspense, useEffect } from "react";
 import CameraView from "../components/CameraView";
 import ImageCorrection from "../components/ImageCorrection";
 import VideoCorrection from "../components/VideoCorrection";
-import { CVDType } from "../hooks/useCVDModel";
+import type { CVDType } from "@/lib/cvd";
 
 type Tab = "camera" | "image" | "video";
 

@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import NavBar from "./components/NavBar";
 import { ModelProvider } from "./context/ModelContext";
 import SessionWrapper from "./components/SessionWrapper";
-
-// 본문 sans = Pretendard (globals.css CDN + --f-sans). 코드/수치는 JetBrains Mono 유지.
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--f-mono", display: "swap" });
 
 const SITE_URL = "https://cvd-lens.vercel.app";
 const OG_TITLE = "CVDLens | 색각이상 맞춤 보정";
@@ -44,7 +40,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" data-theme="light" className={`h-full antialiased ${jetbrainsMono.variable}`}>
+    <html lang="ko" data-theme="light" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <SessionWrapper>
           <ModelProvider>

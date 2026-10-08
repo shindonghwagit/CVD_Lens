@@ -1,42 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CVDType, useCVDModel } from "../hooks/useCVDModel";
+import { useCVDModel } from "../hooks/useCVDModel";
+import type { CVDType } from "@/lib/cvd";
+import { CVD_LABELS } from "@/lib/cvd";
+import {
+  HISTORY_THUMBNAIL_SIZE,
+  imageDataToURL,
+  MAX_UPLOAD_SIDE,
+  REQUEST_TIMEOUT_MS,
+  resizeDataURL,
+} from "@/lib/correctionClient";
 import { simulate } from "@/lib/cvdSim";
-
-function imageDataToURL(id: ImageData): string {
-  const c = document.createElement("canvas");
-  c.width = id.width; c.height = id.height;
-  c.getContext("2d")!.putImageData(id, 0, 0);
-  return c.toDataURL("image/jpeg", 0.92);
-}
-
-// Reject if the inference request hasn't resolved within `ms`. Client-side
-// guard for a surfaced error state; the request contract itself is unchanged.
-const REQUEST_TIMEOUT = 30000;
-
-// Cap on the captured square side. Kept equal to the backend's MAX_SIDE
-// (cvd-lens/inference/main.py). Sync manually if changed.
-const MAX_UPLOAD = 2048;
-
-const CVD_LABELS: Record<CVDType, string> = {
-  p: "적색맹 (Protanopia)",
-  d: "녹색맹 (Deuteranopia)",
-  t: "청색맹 (Tritanopia)",
-};
-
-function resizeDataURL(src: string, size: number): Promise<string> {
-  return new Promise((resolve) => {
-    const img = document.createElement("img");
-    img.onload = () => {
-      const c = document.createElement("canvas");
-      c.width = size; c.height = size;
-      c.getContext("2d")!.drawImage(img, 0, 0, size, size);
-      resolve(c.toDataURL("image/jpeg", 0.75));
-    };
-    img.src = src;
-  });
-}
 
 export default function CameraView() {
   const videoRef    = useRef<HTMLVideoElement>(null);
@@ -115,7 +90,7 @@ export default function CameraView() {
     setCorrected(null);
 
     const vw = video.videoWidth, vh = video.videoHeight;
-    const scale = Math.min(1, MAX_UPLOAD / Math.max(vw, vh));
+    const scale = Math.min(1, MAX_UPLOAD_SIDE / Math.max(vw, vh));
     const targetWidth = Math.max(1, Math.round(vw * scale));
     const targetHeight = Math.max(1, Math.round(vh * scale));
     const canvas = document.createElement("canvas");
@@ -131,7 +106,7 @@ export default function CameraView() {
     const controller = new AbortController();
     const id = (requestRef.current?.id ?? 0) + 1;
     requestRef.current = { id, controller };
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
       const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
       sourceIDRef.current = imageData;
@@ -162,7 +137,7 @@ export default function CameraView() {
     const controller = new AbortController();
     const id = (requestRef.current?.id ?? 0) + 1;
     requestRef.current = { id, controller };
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
       const result = await infer(sourceIDRef.current, type, controller.signal);
       if (requestRef.current?.id !== id) return;
@@ -200,8 +175,8 @@ export default function CameraView() {
     if (!original || !corrected || saveState === "saving") return;
     setSaveState("saving");
     const [origThumb, corrThumb] = await Promise.all([
-      resizeDataURL(original, 256),
-      resizeDataURL(corrected, 256),
+      resizeDataURL(original, HISTORY_THUMBNAIL_SIZE),
+      resizeDataURL(corrected, HISTORY_THUMBNAIL_SIZE),
     ]);
     try {
       const res = await fetch("/api/corrections", {

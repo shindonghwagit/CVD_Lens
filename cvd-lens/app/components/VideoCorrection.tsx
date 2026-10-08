@@ -1,14 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CVDType } from "../hooks/useCVDModel";
+import type { CVDType } from "@/lib/cvd";
+import { CVD_LABELS } from "@/lib/cvd";
 import { preloadSession, runOnnxCorrection, ONNX_SIZE } from "../../lib/cvdOnnx";
-
-const CVD_LABELS: Record<CVDType, string> = {
-  p: "적색맹 (Protanopia)",
-  d: "녹색맹 (Deuteranopia)",
-  t: "청색맹 (Tritanopia)",
-};
 
 const MAX_DIM = 512;          // 실시간 캔버스 최대 변
 const TRITAN_DEG = 30;        // 청색맹 hue 회전각 (배포 _tritan_hue_shift와 동일, severity 1.0)

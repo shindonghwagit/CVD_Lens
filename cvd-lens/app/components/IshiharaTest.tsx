@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useModel } from "../context/ModelContext";
-import { CVDType } from "../hooks/useCVDModel";
+import type { CVDType } from "@/lib/cvd";
 import {
   Plate,
   plateSrc,

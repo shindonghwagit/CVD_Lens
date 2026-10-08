@@ -7,7 +7,9 @@
  * Brettel 1997 matrices operate on LINEAR RGB; values match
  * cvdlens_v2/simulation.py::_BRETTEL_RGB.
  */
-export type CVDType = "p" | "d" | "t";
+import type { CVDType } from "./cvd";
+
+export type { CVDType } from "./cvd";
 
 // linear-RGB → linear-RGB Brettel matrices (row-major, LMS2RGB·MAT·RGB2LMS).
 const BRETTEL: Record<CVDType, number[]> = {
