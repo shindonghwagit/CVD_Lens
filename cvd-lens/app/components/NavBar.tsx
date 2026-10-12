@@ -10,8 +10,8 @@ import Logo from "./Logo";
 const NAV_ITEMS = [
   { href: "/",                    label: "Home" },
   { href: "/education",           label: "학습" },
-  { href: "/ishihara",            label: "진단" },
-  { href: "/history",             label: "진단 기록" },
+  { href: "/ishihara",            label: "간이 선별" },
+  { href: "/history",             label: "선별 기록" },
   { href: "/corrections",         label: "보정 기록" },
   { href: "/correction?tab=image",label: "이미지",  matchPath: "/correction", matchTab: "image" },
   { href: "/correction",          label: "카메라",  matchPath: "/correction", matchTab: "" },

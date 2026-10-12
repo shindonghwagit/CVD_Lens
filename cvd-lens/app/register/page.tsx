@@ -47,7 +47,7 @@ export default function RegisterPage() {
             당신의 눈에,<br />맞춤 보정.
           </h2>
           <p className="text-[15px] max-w-[340px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
-            첫 진단 후 결과에 맞춘 AI 보정 프로필이 자동 생성됩니다.
+            간이 선별 결과와 이미지·카메라·영상 보정 기록을 안전하게 저장하세요.
           </p>
         </div>
         <div className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-subtle)" }}>v0.3 · alpha</div>

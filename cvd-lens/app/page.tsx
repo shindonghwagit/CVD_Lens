@@ -27,9 +27,9 @@ function useFadeIn() {
 }
 
 const CVD_TYPES = [
-  { type: "PROTAN", kor: "적색맹" },
-  { type: "DEUTAN", kor: "녹색맹" },
-  { type: "TRITAN", kor: "청색맹" },
+  { type: "PROTAN", kor: "적색계" },
+  { type: "DEUTAN", kor: "녹색계" },
+  { type: "TRITAN", kor: "청황계" },
 ];
 
 // Real /correction screenshot for a feature card. Until the asset is dropped in
@@ -67,9 +67,9 @@ const FEATURES = [
   {
     num: "01 / ASSESSMENT",
     href: "/ishihara",
-    title: "이시하라 색각 진단",
+    title: "이시하라 간이 색각 선별",
     subtitle: "10장의 이시하라 도판으로 적록 계열 색각이상 여부를 스스로 확인합니다.",
-    detail: "적록 계열(적색맹·녹색맹) 스크리닝 · 청색 계열은 참고용 · 결과는 참고이며 정확한 진단은 안과 전문의와 상담하세요.",
+    detail: "적록 계열 화면 기반 간이 선별 · Tritan형은 검사 범위 밖 · 정확한 진단은 안과 전문의와 상담하세요.",
     tags: ["10 plates", "~2 min", "결과서 보정 미리보기"],
   },
   {
@@ -77,7 +77,7 @@ const FEATURES = [
     href: "/correction?tab=image",
     title: "이미지 파일 보정",
     subtitle: "사진을 업로드하면 AI가 색각이상 타입별로 보정된 결과를 생성합니다.",
-    detail: "원본과 보정본을 슬라이더로 비교 · 적색맹 / 녹색맹 / 청색맹 3종 지원 · 보정 기록 저장.",
+    detail: "원본과 보정본을 슬라이더로 비교 · Protan형 / Deutan형 / 실험적 Tritan형 지원 · 보정 기록 저장.",
     tags: ["jpg / png", "슬라이더 비교", "3종 타입"],
   },
   {
@@ -85,7 +85,7 @@ const FEATURES = [
     href: "/correction",
     title: "카메라 촬영 보정",
     subtitle: "카메라로 사진을 찍으면 AI가 색각이상 타입에 맞춰 색 대비를 보정합니다.",
-    detail: "슬라이더로 원본과 보정본 비교 · 보정 결과 저장 · 적색맹 / 녹색맹 / 청색맹 지원.",
+    detail: "슬라이더로 원본과 보정본 비교 · 보정 결과 저장 · P/D형과 실험적 T형 지원.",
     tags: ["Camera", "사진 촬영", "AI 보정"],
   },
 ];
@@ -108,11 +108,11 @@ export default function Home() {
           </h1>
           <p className="text-[17px] leading-relaxed mb-8 max-w-[480px]" style={{ color: "var(--fg-muted)" }}>
             색각이상(Color Vision Deficiency)을 가진 사용자를 위한 맞춤 보정 도구.
-            자가 진단부터 사진·카메라 촬영 보정까지, 한 곳에서 해결하세요.
+            간이 선별부터 사진·카메라 촬영 보정까지, 한 곳에서 경험하세요.
           </p>
           <div className="flex gap-3 mb-10">
             <Link href="/ishihara" className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-brand hover:bg-brand-ink text-white text-sm font-medium transition-colors">
-              자가 진단 시작
+              간이 선별 시작
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" />
                 <path d="m13 6 6 6-6 6" />
@@ -170,7 +170,7 @@ export default function Home() {
             </h2>
           </div>
           <p className="text-sm max-w-[320px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
-            적·녹색맹은 학습 모델, 청색맹은 채도 보존 규칙을 사용합니다. 사진과 카메라에서도 같은 보정 원칙을 적용합니다.
+            Protan형·Deutan형은 학습 모델을 사용합니다. Tritan형은 별도 진단 없이 제공하는 실험적 채도 보존 규칙 보정입니다.
           </p>
         </div>
 

@@ -19,7 +19,7 @@ export default function LoginPage() {
     setError(null);
     const res = await signIn("credentials", { username, password, redirect: false });
     setLoading(false);
-    if (res?.error) setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+    if (res?.error) setError("아이디 또는 비밀번호가 올바르지 않습니다.");
     else router.push("/");
   };
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
             색을 다시,<br />또렷하게.
           </h2>
           <p className="text-[15px] max-w-[340px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
-            진단 기록과 보정 프로필을 저장해 모든 기기에서 동일한 경험을 이어가세요.
+            간이 선별 결과와 보정 기록을 저장해 모든 기기에서 동일한 경험을 이어가세요.
           </p>
         </div>
         <div className="font-mono text-[11px] tracking-[0.08em]" style={{ color: "var(--fg-subtle)" }}>

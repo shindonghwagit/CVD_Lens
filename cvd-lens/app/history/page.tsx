@@ -14,16 +14,16 @@ interface Result {
 }
 
 const DIAGNOSIS_LABEL: Record<string, { label: string; color: string }> = {
-  normal:       { label: "정상",       color: "#22c55e" },
-  protan:       { label: "적색맹 의심", color: "#ef4444" },
-  deutan:       { label: "녹색맹 의심", color: "#f97316" },
-  rg:           { label: "적록색각이상 의심", color: "#d97706" },
-  p:            { label: "적색맹",     color: "#ef4444" },
-  d:            { label: "녹색맹",     color: "#f97316" },
-  t:            { label: "청색맹",     color: "#3b82f6" },
-  protanopia:   { label: "적색맹",     color: "#ef4444" },
-  deuteranopia: { label: "녹색맹",     color: "#f97316" },
-  tritanopia:   { label: "청색맹",     color: "#3b82f6" },
+  normal:       { label: "뚜렷한 신호 없음", color: "#22c55e" },
+  protan:       { label: "Protan형 반응 가능성", color: "#ef4444" },
+  deutan:       { label: "Deutan형 반응 가능성", color: "#16a34a" },
+  rg:           { label: "판정 유보·유형 미분류", color: "#d97706" },
+  p:            { label: "Protan형",   color: "#ef4444" },
+  d:            { label: "Deutan형",   color: "#f97316" },
+  t:            { label: "Tritan형",   color: "#3b82f6" },
+  protanopia:   { label: "Protan형",   color: "#ef4444" },
+  deuteranopia: { label: "Deutan형",   color: "#f97316" },
+  tritanopia:   { label: "Tritan형",   color: "#3b82f6" },
 };
 
 function diagnosisInfo(diagnosis: string) {
@@ -73,12 +73,12 @@ export default function HistoryPage() {
             DIAGNOSIS RECORDS
           </p>
           <h1 className="font-serif text-[36px] md:text-[60px] leading-[1.05] tracking-[-0.03em]">
-            진단
+            선별
             <br />기록
           </h1>
         </div>
         <p className="text-[15px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
-          이시하라 색각 진단 결과 기록입니다. 최근 10회까지 표시됩니다.
+          이시하라 간이 색각 선별 결과입니다. 최근 10회까지 표시됩니다.
         </p>
       </div>
 
@@ -93,7 +93,7 @@ export default function HistoryPage() {
           </div>
         ) : results.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <p className="text-[15px]" style={{ color: "var(--fg-muted)" }}>아직 진단 기록이 없습니다.</p>
+            <p className="text-[15px]" style={{ color: "var(--fg-muted)" }}>아직 선별 기록이 없습니다.</p>
             <Link
               href="/ishihara"
               className="px-5 py-2 rounded-full text-[13px] text-white bg-brand hover:bg-brand-ink transition-colors"
@@ -106,9 +106,9 @@ export default function HistoryPage() {
             <thead>
               <tr className="border-b font-mono text-[11px] tracking-[0.08em] uppercase" style={{ borderColor: "var(--border)", color: "var(--fg-subtle)" }}>
                 <th className="text-left px-6 md:px-8 py-4">일시</th>
-                <th className="text-left px-4 py-4">진단 결과</th>
-                <th className="text-left px-4 py-4">정답률</th>
-                <th className="text-left px-4 py-4 hidden md:table-cell">정답 / 전체</th>
+                <th className="text-left px-4 py-4">선별 결과</th>
+                <th className="text-left px-4 py-4">일반 반응률</th>
+                <th className="text-left px-4 py-4 hidden md:table-cell">일반 반응 / 선별판</th>
               </tr>
             </thead>
             <tbody>
@@ -169,7 +169,7 @@ export default function HistoryPage() {
           className="px-5 py-2 rounded-full text-[13px] border transition-colors hover:bg-[var(--bg-muted)]"
           style={{ borderColor: "var(--border-strong)", color: "var(--fg)" }}
         >
-          다시 진단하기 →
+          다시 선별하기 →
         </Link>
       </div>
     </div>

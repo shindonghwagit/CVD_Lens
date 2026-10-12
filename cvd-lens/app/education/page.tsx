@@ -9,15 +9,15 @@ type SimKey = "normal" | CVDType;
 
 const SIM_OPTIONS: { key: SimKey; label: string; hint: string }[] = [
   { key: "normal", label: "정상 색각", hint: "일반적인 3원추 색각" },
-  { key: "p", label: "적색맹 (P)", hint: "L-원추 결손 · 적록 혼동" },
-  { key: "d", label: "녹색맹 (D)", hint: "M-원추 결손 · 적록 혼동" },
-  { key: "t", label: "청색맹 (T)", hint: "S-원추 결손 · 청황 혼동" },
+  { key: "p", label: "Protan형 (P)", hint: "L-원추 기능 차이 · 적록 혼동" },
+  { key: "d", label: "Deutan형 (D)", hint: "M-원추 기능 차이 · 적록 혼동" },
+  { key: "t", label: "Tritan형 (T)", hint: "S-원추 기능 차이 · 청황 혼동" },
 ];
 
 const TYPE_CARDS = [
-  { code: "P", name: "적색맹 (Protanopia)", cone: "L-원추 (장파장·빨강)", axis: "적록", desc: "빨강 계열의 밝기·채도가 떨어져 빨강과 초록, 갈색과 녹색을 혼동합니다." },
-  { code: "D", name: "녹색맹 (Deuteranopia)", cone: "M-원추 (중파장·초록)", axis: "적록", desc: "가장 흔한 유형으로, 적록 혼동 양상이 적색맹과 매우 비슷합니다." },
-  { code: "T", name: "청색맹 (Tritanopia)", cone: "S-원추 (단파장·파랑)", axis: "청황", desc: "매우 드문 유형으로, 파랑과 초록·노랑과 분홍을 혼동합니다. 적록과는 완전히 다른 축입니다." },
+  { code: "P", name: "Protan형 (적색약·적색맹)", cone: "L-원추 기능 차이", axis: "적록", desc: "빨강 계열의 밝기·채도가 떨어져 빨강과 초록, 갈색과 녹색을 혼동할 수 있습니다." },
+  { code: "D", name: "Deutan형 (녹색약·녹색맹)", cone: "M-원추 기능 차이", axis: "적록", desc: "가장 흔한 유형으로, 적록 혼동 양상이 Protan형과 매우 비슷합니다." },
+  { code: "T", name: "Tritan형 (청황 색각이상)", cone: "S-원추 기능 차이", axis: "청황", desc: "선천성은 매우 드물며 파랑–초록, 노랑–분홍을 혼동할 수 있습니다. 후천적 청황 색각 저하는 눈 질환이나 노화와도 관련될 수 있어 전문 검사가 필요합니다." },
 ];
 
 // 유형 선택 → 동일 샘플 이미지의 CVD 시뮬레이션 (클라이언트 cvdSim, API 호출 없음).
@@ -159,11 +159,11 @@ export default function EducationPage() {
 
           {/* 적록 두 유형이 유사한 이유 (pd_similarity 일반인용) */}
           <div className="rounded-xl p-5 border-l-4" style={{ background: "var(--bg-muted)", borderColor: "#f97316" }}>
-            <p className="text-[14px] font-medium mb-1" style={{ color: "var(--fg)" }}>적색맹(P)과 녹색맹(D)이 비슷해 보이는 이유</p>
+            <p className="text-[14px] font-medium mb-1" style={{ color: "var(--fg)" }}>Protan형(P)과 Deutan형(D)이 비슷해 보이는 이유</p>
             <p className="text-[13px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
               둘 다 <strong style={{ color: "var(--fg)" }}>적록(빨강–초록) 계열</strong> 결손이라 &lsquo;혼동하는 색의 방향&rsquo;이 거의 같습니다.
               그래서 보이는 세계도, 우리의 보정 방향도 P와 D가 서로 닮습니다 — 버그가 아니라 색채학적으로 자연스러운 결과입니다.
-              반면 청색맹(T)은 혼동축이 완전히 달라 확연히 구분됩니다.
+              반면 Tritan형(T)은 청황 혼동축이라 양상이 다릅니다.
             </p>
           </div>
 
@@ -224,10 +224,10 @@ export default function EducationPage() {
         <div className="rounded-[20px] border p-7 md:p-9 flex flex-col sm:flex-row sm:items-center gap-5 justify-between" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
           <div>
             <p className="font-serif text-[24px] tracking-[-0.02em] mb-1">직접 확인해 보세요</p>
-            <p className="text-[14px]" style={{ color: "var(--fg-muted)" }}>자가 진단으로 유형을 가늠하고, AI 보정으로 대비를 되살려 보세요.</p>
+            <p className="text-[14px]" style={{ color: "var(--fg-muted)" }}>간이 선별로 적록 반응을 확인하고, 보정 기능으로 색 대비 변화를 체험해 보세요.</p>
           </div>
           <div className="flex flex-wrap gap-3 shrink-0">
-            <Link href="/ishihara" className="px-6 py-2.5 rounded-full text-sm font-medium text-white" style={{ background: "var(--color-brand)" }}>색각 진단하기</Link>
+            <Link href="/ishihara" className="px-6 py-2.5 rounded-full text-sm font-medium text-white" style={{ background: "var(--color-brand)" }}>간이 선별하기</Link>
             <Link href="/correction?tab=image" className="px-6 py-2.5 rounded-full text-sm font-medium" style={{ background: "var(--bg-muted)", color: "var(--fg)", border: "1px solid var(--border-strong)" }}>이미지 보정 체험</Link>
           </div>
         </div>
