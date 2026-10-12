@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "잘못된 검사 결과입니다." }, { status: 400 });
   }
 
-  const preferred = diagnosis === "protan" ? "p" : diagnosis === "normal" ? null : "d";
+  const preferred = diagnosis === "protan" ? "p" : diagnosis === "deutan" ? "d" : null;
   const client = await pool.connect();
   let rows;
   try {
