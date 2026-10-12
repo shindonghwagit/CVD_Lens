@@ -7,9 +7,10 @@
  *   - screening     : 적록 선별. transformation(정상·적록이 다른 숫자) + vanishing(정상만 읽음).
  *   - classification: P/D 감별판(판 22~25). 정상·protan·deutan이 서로 다른 숫자를 읽는다.
  *
- * 진단 범위: 정상 / 적색맹(protan) / 녹색맹(deutan).
- *   - 적록 선별로 이상 여부를 감지하고, 분류판 응답으로 protan vs deutan을 가른다.
- *   - 청색맹(tritan)은 표준 이시하라 38판에 판이 없어 진단 불가 → 범위 밖(별도 판 필요).
+ * 결과 범위: 뚜렷한 신호 없음 / 적록 반응 신호 / protan형 / deutan형.
+ *   - 이 검사는 임상 진단이 아닌 화면 기반 간이 선별이다.
+ *   - 적록 선별 신호가 먼저 확인된 경우에만 분류판으로 반응 경향을 제시한다.
+ *   - Tritan형(청황 계열)은 표준 이시하라 38판으로 선별할 수 없어 범위 밖이다.
  */
 export type PlateKind = "demo" | "screening" | "classification";
 
@@ -19,9 +20,9 @@ export interface Plate {
   answer: string;
   /** 적록 색각이상이 읽는 값. transformation=다른 숫자, vanishing/hidden=null(못 읽음). */
   rgAnswer: string | null;
-  /** classification 전용: protan(적색맹)이 읽는 값. */
+  /** classification 전용: protan형 반응에서 읽는 값. */
   protan?: string;
-  /** classification 전용: deutan(녹색맹)이 읽는 값. */
+  /** classification 전용: deutan형 반응에서 읽는 값. */
   deutan?: string;
   kind: PlateKind;
   label: string;
@@ -50,10 +51,10 @@ export const PLATES: Plate[] = [
   { id: "16", answer: "16", rgAnswer: null, kind: "screening", label: "적록 선별" },
   { id: "17", answer: "73", rgAnswer: null, kind: "screening", label: "적록 선별" },
   // classification — protan vs deutan 감별
-  { id: "22", answer: "26", rgAnswer: null, protan: "6", deutan: "2", kind: "classification", label: "유형 감별 (정상 26)" },
-  { id: "23", answer: "42", rgAnswer: null, protan: "2", deutan: "4", kind: "classification", label: "유형 감별 (정상 42)" },
-  { id: "24", answer: "35", rgAnswer: null, protan: "5", deutan: "3", kind: "classification", label: "유형 감별 (정상 35)" },
-  { id: "25", answer: "96", rgAnswer: null, protan: "6", deutan: "9", kind: "classification", label: "유형 감별 (정상 96)" },
+  { id: "22", answer: "26", rgAnswer: null, protan: "6", deutan: "2", kind: "classification", label: "적록 유형 감별" },
+  { id: "23", answer: "42", rgAnswer: null, protan: "2", deutan: "4", kind: "classification", label: "적록 유형 감별" },
+  { id: "24", answer: "35", rgAnswer: null, protan: "5", deutan: "3", kind: "classification", label: "적록 유형 감별" },
+  { id: "25", answer: "96", rgAnswer: null, protan: "6", deutan: "9", kind: "classification", label: "적록 유형 감별" },
 ];
 
 export const plateSrc = (p: Plate) => `/ishihara/Ishihara_${p.id}.${p.ext ?? "jpg"}`;
@@ -68,14 +69,23 @@ export function pickPlates(): Plate[] {
   const demo = PLATES.filter((p) => p.kind === "demo");
   const screening = PLATES.filter((p) => p.kind === "screening");
   const classification = PLATES.filter((p) => p.kind === "classification");
-  const shuffled = [...screening].sort(() => Math.random() - 0.5).slice(0, SCREENING_PER_TEST);
-  return [...demo, ...shuffled, ...classification];
+  const shuffle = <T,>(items: T[]): T[] => {
+    const result = [...items];
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  };
+  const selectedScreening = shuffle(screening).slice(0, SCREENING_PER_TEST);
+  return [...demo, ...shuffle([...selectedScreening, ...classification])];
 }
 
 export type Diagnosis = "normal" | "protan" | "deutan" | "rg";
 
 export interface DiagnosisResult {
   type: Diagnosis;
+  demoPassed: boolean;
   screeningErrors: number;
   screeningTotal: number;
   /** 분류판을 각 유형으로 읽은 수(진단 근거·막대그래프용). */
@@ -88,10 +98,12 @@ export interface DiagnosisResult {
 const norm = (s: string | null) => (s ?? "").trim();
 
 /**
- * 진단: 적록 선별 오답률 + 분류판 응답으로 정상/적색맹/녹색맹 판정.
+ * 적록 간이 선별: 선별판 오답 수 + 분류판 응답으로 반응 경향을 계산한다.
  * tritan은 범위 밖(판정하지 않음).
  */
 export function diagnose(plates: Plate[], answers: (string | null)[]): DiagnosisResult {
+  const demo = plates.map((p, i) => ({ p, i })).find(({ p }) => p.kind === "demo");
+  const demoPassed = demo ? norm(answers[demo.i]) === demo.p.answer : false;
   const screening = plates.map((p, i) => ({ p, i })).filter(({ p }) => p.kind === "screening");
   const screeningErrors = screening.filter(({ p, i }) => norm(answers[i]) !== p.answer).length;
   const screeningTotal = screening.length;
@@ -108,24 +120,29 @@ export function diagnose(plates: Plate[], answers: (string | null)[]): Diagnosis
   }
   const classTotal = classification.length;
 
-  const screenThreshold = Math.max(2, Math.round(screeningTotal / 2));
-  const deficient = screeningErrors >= screenThreshold || protanVotes + deutanVotes >= 2;
-
   let type: Diagnosis;
-  if (!deficient) type = "normal";
-  else if (protanVotes > deutanVotes) type = "protan";
-  else if (deutanVotes > protanVotes) type = "deutan";
-  else type = "rg"; // 적록 이상은 있으나 P/D 미분류
+  // 표준 38판의 단축법은 모든 판을 정상적으로 읽은 경우에만 정상 근거로 삼고,
+  // 불일치가 있으면 전체 검사를 권한다. 이 5판 간이 선별에서는 1~2개 불일치를
+  // 판정 유보, 3개 이상을 뚜렷한 선별 신호로 보수적으로 취급한다.
+  const screeningSignal = demoPassed && screeningErrors >= 3;
+  const strongProtanPattern = protanVotes >= 3 && protanVotes - deutanVotes >= 2;
+  const strongDeutanPattern = deutanVotes >= 3 && deutanVotes - protanVotes >= 2;
 
-  return { type, screeningErrors, screeningTotal, normalReads, protanVotes, deutanVotes, classTotal };
+  if (demoPassed && screeningErrors === 0 && !strongProtanPattern && !strongDeutanPattern) type = "normal";
+  else if (!screeningSignal) type = "rg"; // 대조판 실패 또는 소수 불일치: 판정 유보
+  else if (strongProtanPattern) type = "protan";
+  else if (strongDeutanPattern) type = "deutan";
+  else type = "rg"; // 적록 신호는 있으나 P/D 반응이 일관되지 않음
+
+  return { type, demoPassed, screeningErrors, screeningTotal, normalReads, protanVotes, deutanVotes, classTotal };
 }
 
-/** 진단 유형 → 화면 라벨/색. */
+/** 간이 선별 결과 → 화면 라벨/색. */
 export const DIAGNOSIS_META: Record<Diagnosis, { label: string; color: string; correctionType: "p" | "d" | null }> = {
-  normal: { label: "정상 (색각이상 징후 없음)", color: "#22c55e", correctionType: null },
-  protan: { label: "적색맹(protan) 가능성", color: "#ef4444", correctionType: "p" },
-  deutan: { label: "녹색맹(deutan) 가능성", color: "#22c55e", correctionType: "d" },
-  rg: { label: "적록 색각이상 가능성 (유형 미분류)", color: "#f97316", correctionType: "d" },
+  normal: { label: "뚜렷한 적록 색각이상 신호 없음", color: "#22c55e", correctionType: null },
+  protan: { label: "Protan형(적색계) 반응 가능성", color: "#ef4444", correctionType: "p" },
+  deutan: { label: "Deutan형(녹색계) 반응 가능성", color: "#16a34a", correctionType: "d" },
+  rg: { label: "판정 유보 · 유형 확인 필요", color: "#f97316", correctionType: null },
 };
 
 export interface Bar {
@@ -138,14 +155,13 @@ export interface Bar {
 }
 
 /**
- * 막대그래프 데이터: 분류판(정상·적색맹·녹색맹이 다른 숫자를 읽는 판) 응답 분포.
- * 정상 응답 막대를 포함해 누구나 값이 채워진다. 적색맹=빨강, 녹색맹=초록.
- * (청색맹은 표준 이시하라에 판이 없어 이 그래프에서 제외)
+ * 막대그래프 데이터: 분류판에서 일반·Protan형·Deutan형 응답이 나온 횟수.
+ * Tritan형은 표준 이시하라로 선별할 수 없어 이 그래프에서 제외한다.
  */
 export function diagnosisBars(r: DiagnosisResult): Bar[] {
   return [
-    { key: "normal", label: "정상 응답", color: "#64748b", value: r.normalReads, max: r.classTotal },
-    { key: "protan", label: "적색맹", color: "#ef4444", value: r.protanVotes, max: r.classTotal },
-    { key: "deutan", label: "녹색맹", color: "#22c55e", value: r.deutanVotes, max: r.classTotal },
+    { key: "normal", label: "일반 반응", color: "#64748b", value: r.normalReads, max: r.classTotal },
+    { key: "protan", label: "Protan형", color: "#ef4444", value: r.protanVotes, max: r.classTotal },
+    { key: "deutan", label: "Deutan형", color: "#16a34a", value: r.deutanVotes, max: r.classTotal },
   ];
 }

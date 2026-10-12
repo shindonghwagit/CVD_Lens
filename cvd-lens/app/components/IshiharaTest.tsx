@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useModel } from "../context/ModelContext";
@@ -85,7 +85,7 @@ function PlateCorrectionCard({ plate, correctionType }: { plate: Plate; correcti
         )}
       </div>
       <p className="font-mono text-[11px]" style={{ color: "var(--fg-subtle)" }}>
-        정답 <span style={{ color: "var(--fg)" }}>{plate.answer}</span>
+        일반적 판독 <span style={{ color: "var(--fg)" }}>{plate.answer}</span>
       </p>
       <button
         onClick={toggleCorrection}
@@ -126,8 +126,8 @@ function DiagnosisBars({ bars }: { bars: Bar[] }) {
         })}
       </div>
       <p className="text-[11px] font-mono mt-1" style={{ color: "var(--fg-subtle)" }}>
-        ※ 분류판(정상·적색맹·녹색맹이 다른 숫자를 읽는 판)에서 각 유형의 답을 읽은 수입니다.
-        정상 응답이 높으면 정상, 적색맹(빨강)·녹색맹(초록) 막대가 높을수록 해당 유형 가능성을 시사합니다.
+        ※ 22~25번 감별판에서 어느 숫자가 더 선명했는지를 집계한 참고 지표입니다.
+        같은 유형 반응이 4판 중 3판 이상 일관될 때만 해당 경향을 표시합니다.
       </p>
     </div>
   );
@@ -136,14 +136,25 @@ function DiagnosisBars({ bars }: { bars: Bar[] }) {
 export default function IshiharaTest() {
   const { data: session } = useSession();
 
-  const [plates, setPlates] = useState(pickPlates);
+  // Math.random() must run after hydration; otherwise the server and browser can
+  // render different first plates and React may retain the server-side sequence.
+  const [plates, setPlates] = useState<Plate[]>([]);
   const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<(string | null)[]>(() => Array(plates.length).fill(null));
+  const [answers, setAnswers] = useState<(string | null)[]>([]);
   const [input, setInput] = useState("");
   const [done, setDone] = useState(false);
 
   const submittingRef = useRef(false);
   const plate = plates[current];
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const initialPlates = pickPlates();
+      setPlates(initialPlates);
+      setAnswers(Array(initialPlates.length).fill(null));
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const submit = async (answer?: string) => {
     if (submittingRef.current) return;
@@ -154,13 +165,16 @@ export default function IshiharaTest() {
 
     if (current + 1 >= plates.length) {
       const result = diagnose(plates, newAnswers);
-      const correct = newAnswers.filter((ans, i) => ans === plates[i].answer).length;
 
       if (session?.user) {
         await fetch("/api/results", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ correct, total: plates.length, diagnosis: result.type }),
+          body: JSON.stringify({
+            correct: result.screeningTotal - result.screeningErrors,
+            total: result.screeningTotal,
+            diagnosis: result.type,
+          }),
         }).catch(() => {});
       }
       setDone(true);
@@ -184,9 +198,13 @@ export default function IshiharaTest() {
     const result = diagnose(plates, answers);
     const meta = DIAGNOSIS_META[result.type];
     const bars = diagnosisBars(result);
-    const correct = answers.filter((a, i) => a === plates[i].answer).length;
-    const isDeficient = result.type !== "normal";
-    const correctionType = (meta.correctionType ?? "d") as CVDType;
+    const screeningNormalReads = result.screeningTotal - result.screeningErrors;
+    const hasScreeningSignal = result.demoPassed && result.screeningErrors >= 3;
+    const hasTypedPattern = result.type === "protan" || result.type === "deutan";
+    const resultLabel = result.type === "rg" && hasScreeningSignal
+      ? "적록 색각이상 신호 · 유형 미분류"
+      : meta.label;
+    const correctionType = meta.correctionType as CVDType | null;
     const wrongPlates = plates.filter((p, i) => p.kind !== "demo" && answers[i] !== p.answer);
 
     return (
@@ -197,11 +215,10 @@ export default function IshiharaTest() {
             className="text-[15px] font-medium px-4 py-1.5 rounded-full inline-block"
             style={{ background: meta.color + "18", color: meta.color }}
           >
-            {meta.label}
+            {resultLabel}
           </p>
           <p className="text-xs mt-3 font-mono" style={{ color: "var(--fg-subtle)" }}>
-            ※ 적록 계열 선별·감별 결과입니다. 청색 계열(청색맹)은 감별 범위 밖이며,
-            정확한 진단은 안과 전문의에게 받으세요.
+            ※ 화면 기반 간이 선별 결과이며 의학적 진단이 아닙니다. 청황색 계열은 검사하지 않습니다.
           </p>
         </div>
 
@@ -214,12 +231,14 @@ export default function IshiharaTest() {
             style={{ background: "var(--bg-muted)", color: "var(--fg-subtle)", borderColor: "var(--border)" }}
           >
             <span>#</span>
-            <span>정답</span>
+            <span>일반</span>
             <span>내 답</span>
-            <span>결과</span>
+            <span>반응 해석</span>
           </div>
           {plates.map((p, i) => {
-            const isCorrect = answers[i] === p.answer;
+            const isGeneralResponse = answers[i] === p.answer;
+            const isProtanResponse = p.kind === "classification" && answers[i] === p.protan;
+            const isDeutanResponse = p.kind === "classification" && answers[i] === p.deutan;
             return (
               <div
                 key={p.id}
@@ -231,23 +250,31 @@ export default function IshiharaTest() {
                   <span className="font-mono font-medium">{p.answer}</span>
                   {p.kind === "classification" && (
                     <span className="font-mono text-[10px]" style={{ color: "var(--fg-subtle)" }}>
-                      적{p.protan}·녹{p.deutan}
+                      P{p.protan}·D{p.deutan}
                     </span>
                   )}
                 </div>
-                <span className="font-mono font-medium" style={{ color: isCorrect ? "#22c55e" : "#ef4444" }}>
+                <span className="font-mono font-medium" style={{ color: isGeneralResponse ? "#22c55e" : "#f97316" }}>
                   {answers[i] ?? "-"}
                 </span>
                 <div>
-                  {isCorrect ? (
+                  {isGeneralResponse ? (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#22c55e18", color: "#22c55e" }}>
-                      ✓ 정상
+                      ✓ 일반 반응
                     </span>
                   ) : p.kind === "demo" ? (
-                    <span className="text-xs font-mono" style={{ color: "var(--fg-subtle)" }}>-</span>
+                    <span className="text-xs font-mono" style={{ color: "#f97316" }}>환경 확인 필요</span>
+                  ) : isProtanResponse ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#ef444418", color: "#ef4444" }}>
+                      Protan형 신호
+                    </span>
+                  ) : isDeutanResponse ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#16a34a18", color: "#16a34a" }}>
+                      Deutan형 신호
+                    </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#f9731618", color: "#f97316" }}>
-                      ✗ 오답
+                      다른 반응
                     </span>
                   )}
                 </div>
@@ -258,24 +285,36 @@ export default function IshiharaTest() {
 
         <div className="w-full rounded-xl p-4" style={{ background: "var(--bg-muted)" }}>
           <p className="text-sm font-mono mb-1" style={{ color: "var(--fg-subtle)" }}>
-            정답 {correct} / {plates.length} · 적록 선별 오답 {result.screeningErrors}/{result.screeningTotal}
-            {result.classTotal > 0 && ` · 분류판 적${result.protanVotes}·녹${result.deutanVotes}`}
+            선별판 일반 반응 {screeningNormalReads}/{result.screeningTotal} · 다른 반응 {result.screeningErrors}/{result.screeningTotal}
+            {result.classTotal > 0 && ` · 감별판 P형 ${result.protanVotes} · D형 ${result.deutanVotes}`}
           </p>
-          {isDeficient && (
+          {!result.demoPassed ? (
             <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
-              적록 선별·분류에서 색각이상 신호가 나타납니다. 안과 정밀 검사를 권장합니다.
+              누구나 읽을 수 있는 대조판과 응답이 달라 검사 환경이나 입력을 확인한 뒤 다시 검사해 주세요.
+            </p>
+          ) : result.type === "normal" ? (
+            <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
+              이번 간이 검사에서는 뚜렷한 적록 색각이상 신호가 나타나지 않았습니다.
+            </p>
+          ) : !hasScreeningSignal ? (
+            <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
+              일부 응답이 달라 이 짧은 검사만으로 판단하기 어렵습니다. 환경을 확인해 재검하거나 안과 검사를 권장합니다.
+            </p>
+          ) : (
+            <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
+              적록 색각이상 선별 신호가 나타났습니다. 유형과 정도는 안과 정밀 검사로 확인해 주세요.
             </p>
           )}
         </div>
 
         {/* AI 보정으로 다시 보기 — 틀린 도판을 보정 상태로 재표시(진단 판정과 무관) */}
-        {wrongPlates.length > 0 && (
+        {wrongPlates.length > 0 && correctionType && (
           <div className="w-full rounded-xl border p-5 flex flex-col gap-4" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
             <div>
               <p className="text-sm font-medium mb-1" style={{ color: "var(--fg)" }}>AI 보정으로 다시 보기</p>
               <p className="text-[13px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
                 읽기 어려웠던 도판을 AI 보정 상태로 확인해보세요. 보정이 색 대비를 어떻게
-                되살리는지 볼 수 있습니다. (이 미리보기는 진단 결과에 반영되지 않습니다.)
+                되살리는지 볼 수 있습니다. (이 미리보기는 선별 결과에 반영되지 않습니다.)
               </p>
             </div>
             <div className="flex flex-wrap gap-6 justify-center">
@@ -287,7 +326,7 @@ export default function IshiharaTest() {
         )}
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {isDeficient && (
+          {hasTypedPattern && correctionType && (
             <Link
               href={`/correction?tab=image&type=${correctionType}`}
               className="px-6 py-2.5 rounded-full text-sm font-medium text-white inline-flex items-center gap-2"
@@ -310,7 +349,7 @@ export default function IshiharaTest() {
           <button
             onClick={restart}
             className="px-6 py-2.5 rounded-full text-sm font-medium transition-colors"
-            style={isDeficient
+            style={hasScreeningSignal
               ? { background: "var(--bg-muted)", color: "var(--fg)", border: "1px solid var(--border-strong)" }
               : { background: "var(--color-brand)", color: "#fff" }
             }
@@ -318,6 +357,14 @@ export default function IshiharaTest() {
             다시 검사 (새 문제)
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (!plate) {
+    return (
+      <div className="flex justify-center py-24" aria-label="검사 도판 준비 중">
+        <div className="w-6 h-6 rounded-full border-2 border-brand border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -351,7 +398,11 @@ export default function IshiharaTest() {
 
       {/* 답 입력 */}
       <div className="flex flex-col items-center gap-3 w-full max-w-xs">
-        <p className="text-sm" style={{ color: "var(--fg-muted)" }}>보이는 숫자를 입력하세요</p>
+        <p className="text-sm text-center" style={{ color: "var(--fg-muted)" }}>
+          {plate.kind === "classification"
+            ? "두 숫자 중 더 선명한 숫자 하나를 입력하세요. 비슷하면 두 숫자를 모두 입력하세요."
+            : "보이는 숫자를 입력하세요"}
+        </p>
         <div className="flex gap-2 w-full">
           <input
             type="text"
@@ -359,7 +410,7 @@ export default function IshiharaTest() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") void submit(); }}
-            placeholder="숫자 입력"
+            placeholder={plate.kind === "classification" ? `예: ${plate.protan} / 비슷하면 ${plate.answer}` : "숫자 입력"}
             className="flex-1 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 border"
             style={{ background: "var(--bg-muted)", borderColor: "var(--border-strong)", color: "var(--fg)" }}
           />

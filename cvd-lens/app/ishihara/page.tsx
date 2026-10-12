@@ -21,14 +21,22 @@ export default function IshiharaPage() {
           </p>
           <h1 className="font-serif text-[36px] md:text-[60px] leading-[1.05] tracking-[-0.03em]">
             이시하라
-            <br />색각 진단
+            <br />간이 색각 선별
           </h1>
         </div>
         <p className="text-[15px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
-          아래 플레이트에 숨어있는 숫자를 입력해주세요. 진단은 보정 없이 진행되며,
-          결과 화면에서 틀린 도판을 AI 보정으로 다시 볼 수 있습니다. 적색맹·녹색맹
-          감별 검사이며 총 10장 · 약 3분이 소요됩니다.
+          아래 플레이트의 숫자를 입력해 적록 색각 반응을 간단히 확인합니다.
+          결과는 Protan형·Deutan형 반응 경향까지 보수적으로 안내하며,
+          총 10장 · 약 3분이 소요됩니다.
         </p>
+      </div>
+
+      <div
+        className="mb-5 rounded-xl border px-5 py-4 text-[13px] leading-relaxed"
+        style={{ background: "var(--bg-muted)", borderColor: "var(--border)", color: "var(--fg-muted)" }}
+      >
+        <p className="font-medium mb-1" style={{ color: "var(--fg)" }}>검사 환경을 먼저 확인해 주세요</p>
+        <p>야간 모드·색상 필터·색약 보정 기능을 끄고, 화면 밝기를 적당히 높인 뒤 밝고 눈부심 없는 곳에서 진행하세요.</p>
       </div>
 
       {/* Test panel */}
@@ -41,9 +49,18 @@ export default function IshiharaPage() {
 
       {/* Disclaimer */}
       <p className="mt-6 text-xs font-mono tracking-[0.04em]" style={{ color: "var(--fg-subtle)" }}>
-        ※ 본 검사는 적록 계열(적색맹·녹색맹) 스크리닝이며 청색 계열(청색맹) 감별은 포함하지 않습니다.
-        참고용 자가 진단으로 의학적 진단을 대체하지 않으니, 정밀 검사는 안과 전문의에게 문의하세요.
+        ※ 본 검사는 적록 계열의 화면 기반 간이 선별검사이며 청황색 계열은 포함하지 않습니다.
+        모니터와 주변 조명의 영향을 받으므로 의학적 진단을 대체하지 않습니다.
       </p>
+
+      <div className="mt-3 text-[11px] leading-relaxed" style={{ color: "var(--fg-subtle)" }}>
+        판독 기준 참고: {" "}
+        <a className="underline underline-offset-2" href="https://www.hse.gov.uk/pubns/ms7.pdf" target="_blank" rel="noreferrer">영국 HSE 색각검사 지침</a>
+        {" · "}
+        <a className="underline underline-offset-2" href="https://pubmed.ncbi.nlm.nih.gov/9390366/" target="_blank" rel="noreferrer">Ishihara 선별 효율 연구</a>
+        {" · "}
+        <a className="underline underline-offset-2" href="https://www.nei.nih.gov/eye-health-information/eye-conditions-and-diseases/color-blindness/testing-color-vision-deficiency" target="_blank" rel="noreferrer">미국 NEI 안내</a>
+      </div>
     </div>
   );
 }
