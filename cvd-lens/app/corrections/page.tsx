@@ -15,9 +15,9 @@ interface CorrectionRecord {
 }
 
 const CVD_LABEL: Record<string, { label: string; color: string }> = {
-  p: { label: "적색맹", color: "#ef4444" },
-  d: { label: "녹색맹", color: "#f97316" },
-  t: { label: "청색맹", color: "#3b82f6" },
+  p: { label: "Protan형", color: "#ef4444" },
+  d: { label: "Deutan형", color: "#f97316" },
+  t: { label: "Tritan형·실험적", color: "#3b82f6" },
 };
 
 function cvdInfo(type: string) {
@@ -36,8 +36,10 @@ function formatDate(iso: string) {
     + " " + d.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 }
 
-function CorrectionCard({ record }: { record: CorrectionRecord }) {
+function CorrectionCard({ record, onDelete }: { record: CorrectionRecord; onDelete: (id: string) => Promise<void> }) {
   const [showCorrected, setShowCorrected] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const info = cvdInfo(record.cvd_type);
   const hasImages = record.original_image && record.corrected_image;
 
@@ -92,10 +94,46 @@ function CorrectionCard({ record }: { record: CorrectionRecord }) {
             </span>
           )}
         </div>
-        <span className="text-[11px] font-mono shrink-0" style={{ color: "var(--fg-subtle)" }}>
-          {formatDate(record.created_at)}
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-[11px] font-mono" style={{ color: "var(--fg-subtle)" }}>
+            {formatDate(record.created_at)}
+          </span>
+          <button
+            type="button"
+            onClick={() => setConfirmingDelete(true)}
+            className="p-1 rounded-md transition-colors hover:bg-red-500/10"
+            style={{ color: "var(--fg-subtle)" }}
+            aria-label={`${formatDate(record.created_at)} 보정 기록 삭제`}
+            title="기록 삭제"
+          >
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="m19 6-1 14H6L5 6" /><path d="M10 11v5M14 11v5" />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {confirmingDelete && (
+        <div className="px-3 py-3 border-t flex items-center justify-between gap-3" style={{ borderColor: "var(--border)", background: "var(--bg-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--fg-muted)" }}>이 기록을 삭제할까요?</p>
+          <div className="flex gap-2">
+            <button type="button" disabled={deleting} onClick={() => setConfirmingDelete(false)} className="px-2.5 py-1 rounded-md text-xs" style={{ color: "var(--fg-muted)" }}>취소</button>
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={async () => {
+                setDeleting(true);
+                try { await onDelete(record.id); }
+                catch { /* The page-level alert explains the API failure. */ }
+                finally { setDeleting(false); }
+              }}
+              className="px-2.5 py-1 rounded-md text-xs text-white bg-red-600 disabled:opacity-50"
+            >
+              {deleting ? "삭제 중..." : "삭제"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -105,6 +143,7 @@ export default function CorrectionsPage() {
   const router = useRouter();
   const [records, setRecords] = useState<CorrectionRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (status === "unauthenticated") { router.replace("/login"); return; }
@@ -115,6 +154,17 @@ export default function CorrectionsPage() {
       .then((data) => setRecords(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
   }, [status, router]);
+
+  const deleteRecord = async (id: string) => {
+    setError("");
+    const response = await fetch(`/api/corrections?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+    if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      setError(body?.error ?? "기록을 삭제하지 못했습니다.");
+      throw new Error(body?.error ?? "Failed to delete correction record");
+    }
+    setRecords((current) => current.filter((record) => record.id !== id));
+  };
 
   return (
     <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-10 md:py-14 pb-32">
@@ -138,6 +188,12 @@ export default function CorrectionsPage() {
         </p>
       </div>
 
+      {error && (
+        <p role="alert" className="mb-4 rounded-lg px-4 py-3 text-sm" style={{ background: "#ef444418", color: "#dc2626" }}>
+          {error}
+        </p>
+      )}
+
       {loading ? (
         <div className="flex justify-center py-24">
           <div className="w-6 h-6 rounded-full border-2 border-brand border-t-transparent animate-spin" />
@@ -158,7 +214,7 @@ export default function CorrectionsPage() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {records.map((r) => (
-            <CorrectionCard key={r.id} record={r} />
+            <CorrectionCard key={r.id} record={r} onDelete={deleteRecord} />
           ))}
         </div>
       )}

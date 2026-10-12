@@ -43,3 +43,25 @@ export async function GET() {
 
   return NextResponse.json(rows);
 }
+
+export async function DELETE(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  }
+
+  const id = req.nextUrl.searchParams.get("id");
+  if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+    return NextResponse.json({ error: "잘못된 기록 ID입니다." }, { status: 400 });
+  }
+
+  const { rowCount } = await pool.query(
+    "DELETE FROM correction_results WHERE id = $1 AND user_id = $2",
+    [id, session.user.id]
+  );
+
+  if (!rowCount) {
+    return NextResponse.json({ error: "기록을 찾을 수 없습니다." }, { status: 404 });
+  }
+  return NextResponse.json({ ok: true });
+}
