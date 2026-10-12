@@ -6,9 +6,10 @@ import { CVD_LABELS } from "@/lib/cvd";
 import { preloadSession, runOnnxCorrection, ONNX_SIZE } from "../../lib/cvdOnnx";
 
 const MAX_DIM = 512;          // 실시간 캔버스 최대 변
-const TRITAN_DEG = 30;        // 청색맹 hue 회전각 (배포 _tritan_hue_shift와 동일, severity 1.0)
+const MAX_VIDEO_BYTES = 250 * 1024 * 1024;
+const TRITAN_DEG = 30;        // 실시간용 고정 hue 회전각(서버의 적응형 청황 보정과는 다름)
 
-/** 청색맹(t) 채도보존 hue 회전 — 순수 canvas 픽셀 연산(모델 불필요). */
+/** Tritan형(t) 실험적 채도보존 hue 회전 — 순수 canvas 픽셀 연산(모델 불필요). */
 function correctTritan(data: Uint8ClampedArray) {
   const deg = TRITAN_DEG;
   for (let i = 0; i < data.length; i += 4) {
@@ -71,6 +72,7 @@ export default function VideoCorrection() {
 
   const onFile = (file: File) => {
     if (!file.type.startsWith("video/")) { setErrorMsg("영상 파일(mp4, mov, webm)을 선택해주세요."); return; }
+    if (file.size > MAX_VIDEO_BYTES) { setErrorMsg("브라우저 안정성을 위해 250MB 이하 영상을 선택해주세요."); return; }
     if (videoUrl) URL.revokeObjectURL(videoUrl);
     setErrorMsg("");
     setSaveState("idle");
@@ -101,9 +103,10 @@ export default function VideoCorrection() {
     let cancelled = false;
     let busy = false;
 
+    const modelType = cvdType === "t" ? null : cvdType;
     modelReadyRef.current = false;
-    if (cvdType !== "t") {
-      preloadSession(cvdType)
+    if (modelType) {
+      preloadSession(modelType)
         .then(() => { if (!cancelled) { modelReadyRef.current = true; setModelStatus("ready"); } })
         .catch(() => { if (!cancelled) setModelStatus("error"); });
     }
@@ -118,10 +121,26 @@ export default function VideoCorrection() {
     };
 
     const runPd = (w: number, h: number) => {
+      if (!modelType) return;
       busy = true;
-      in256ctx.drawImage(video, 0, 0, ONNX_SIZE, ONNX_SIZE);
+      const scale = ONNX_SIZE / Math.max(w, h);
+      const nw = Math.max(1, Math.round(w * scale));
+      const nh = Math.max(1, Math.round(h * scale));
+      const x0 = Math.floor((ONNX_SIZE - nw) / 2);
+      const y0 = Math.floor((ONNX_SIZE - nh) / 2);
+      in256ctx.clearRect(0, 0, ONNX_SIZE, ONNX_SIZE);
+      in256ctx.drawImage(video, x0, y0, nw, nh);
+      // 서버 전처리처럼 가장자리 색을 패딩해 화면비를 보존한다.
+      if (y0 > 0) {
+        in256ctx.drawImage(in256, x0, y0, nw, 1, x0, 0, nw, y0);
+        in256ctx.drawImage(in256, x0, y0 + nh - 1, nw, 1, x0, y0 + nh, nw, ONNX_SIZE - y0 - nh);
+      }
+      if (x0 > 0) {
+        in256ctx.drawImage(in256, x0, 0, 1, ONNX_SIZE, 0, 0, x0, ONNX_SIZE);
+        in256ctx.drawImage(in256, x0 + nw - 1, 0, 1, ONNX_SIZE, x0 + nw, 0, ONNX_SIZE - x0 - nw, ONNX_SIZE);
+      }
       const src = in256ctx.getImageData(0, 0, ONNX_SIZE, ONNX_SIZE);
-      runOnnxCorrection(cvdType, src, 1.0).then((out) => {
+      runOnnxCorrection(modelType, src, 1.0).then((out) => {
         if (cancelled) { busy = false; return; }
         const N = ONNX_SIZE * ONNX_SIZE;
         const de = dEncCtx.createImageData(ONNX_SIZE, ONNX_SIZE);
@@ -134,7 +153,7 @@ export default function VideoCorrection() {
         }
         dEncCtx.putImageData(de, 0, 0);
         dUp.width = w; dUp.height = h; dUpCtx.imageSmoothingEnabled = true;
-        dUpCtx.drawImage(dEnc, 0, 0, w, h);                 // delta 원해상도 업샘플(bilinear)
+        dUpCtx.drawImage(dEnc, x0, y0, nw, nh, 0, 0, w, h); // content-box delta만 원해상도로 업샘플
         const dUpImg = dUpCtx.getImageData(0, 0, w, h);
         ctx.drawImage(video, 0, 0, w, h);                   // 현재 원본 프레임
         const frame = ctx.getImageData(0, 0, w, h);
@@ -262,7 +281,7 @@ export default function VideoCorrection() {
               d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
           </svg>
           <p className="text-sm" style={{ color: "var(--fg-muted)" }}>영상을 드래그하거나 클릭해서 업로드</p>
-          <p className="text-xs" style={{ color: "var(--fg-subtle)" }}>브라우저에서 실시간 보정 · 업로드 없음</p>
+          <p className="text-xs" style={{ color: "var(--fg-subtle)" }}>브라우저에서 실시간 보정 · 업로드 없음 · 최대 250MB</p>
           <input ref={fileInputRef} type="file" accept="video/*" className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }} />
         </div>
@@ -273,7 +292,7 @@ export default function VideoCorrection() {
       {videoUrl && (
         <div className="w-full flex flex-col items-center gap-5">
           <p className="text-xs font-mono" style={{ color: "var(--fg-subtle)" }}>
-            브라우저 실시간 보정 · 서버 처리 없음{cvdType !== "t" ? " · 학습 모델(ONNX Web)" : ""}
+            브라우저 실시간 보정 · 서버 처리 없음{cvdType !== "t" ? " · 학습 모델(ONNX Web)" : " · 실험적 고정 규칙"}
           </p>
           <div className="w-full grid grid-cols-2 gap-3 max-w-2xl">
             <div className="flex flex-col gap-1.5">

@@ -6,15 +6,17 @@
 import * as ort from "onnxruntime-web";
 import type { CVDType } from "./cvd";
 
+type ModelCVDType = Exclude<CVDType, "t">;
+
 // WASM은 public/ort에서 자체 호스팅한다. 스레드 off = SharedArrayBuffer/교차출처격리 불필요.
 ort.env.wasm.wasmPaths = "/ort/";
 ort.env.wasm.numThreads = 1;
 
 export const ONNX_SIZE = 256;
 
-const sessions: Partial<Record<CVDType, Promise<ort.InferenceSession>>> = {};
+const sessions: Partial<Record<ModelCVDType, Promise<ort.InferenceSession>>> = {};
 
-function getSession(type: CVDType): Promise<ort.InferenceSession> {
+function getSession(type: ModelCVDType): Promise<ort.InferenceSession> {
   const pending = sessions[type] ?? ort.InferenceSession.create(`/models/cvdlens_${type}.onnx`, {
     executionProviders: ["wasm"],
     graphOptimizationLevel: "all",
@@ -25,7 +27,7 @@ function getSession(type: CVDType): Promise<ort.InferenceSession> {
 }
 
 /** 세션 미리 로드(첫 프레임 지연 감소). */
-export function preloadSession(type: CVDType): Promise<unknown> {
+export function preloadSession(type: ModelCVDType): Promise<unknown> {
   return getSession(type);
 }
 
@@ -34,7 +36,7 @@ export function preloadSession(type: CVDType): Promise<unknown> {
  * (호출측에서 delta = out - in 계산 후 원해상도로 업샘플·합성)
  */
 export async function runOnnxCorrection(
-  type: CVDType,
+  type: ModelCVDType,
   src256: ImageData,
   severity: number,
 ): Promise<Float32Array> {

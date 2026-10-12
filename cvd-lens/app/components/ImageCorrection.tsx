@@ -15,7 +15,7 @@ import { simulate } from "@/lib/cvdSim";
 
 export default function ImageCorrection({ initialType }: { initialType?: CVDType } = {}) {
   const { ready, error, infer } = useModel();
-  // 진단 결과에서 넘어온 타입(?type=)을 기본 선택으로. 없으면 녹색맹(d).
+  // 간이 선별 결과에서 넘어온 타입(?type=)을 기본 선택으로. 없으면 Deutan형(d).
   const [cvdType, setCvdType] = useState<CVDType>(initialType ?? "d");
   const [original, setOriginal] = useState<string | null>(null);
   const [corrected, setCorrected] = useState<string | null>(null);
@@ -82,24 +82,32 @@ export default function ImageCorrection({ initialType }: { initialType?: CVDType
   const processImage = useCallback(async (file: File, type: CVDType) => {
     if (!ready) return;
     setProcessing(true);
+    setReqError(false);
     setCorrected(null);
     setSimOrig(null); setSimOut(null);
 
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_UPLOAD_SIDE / Math.max(bitmap.width, bitmap.height));
-    const targetWidth = Math.max(1, Math.round(bitmap.width * scale));
-    const targetHeight = Math.max(1, Math.round(bitmap.height * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
-    bitmap.close();
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, MAX_UPLOAD_SIDE / Math.max(bitmap.width, bitmap.height));
+      const targetWidth = Math.max(1, Math.round(bitmap.width * scale));
+      const targetHeight = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+      bitmap.close();
 
-    setOriginal(canvas.toDataURL("image/jpeg", 0.95));   // JPEG (not PNG): a 2048² PNG dataURL is multi-MB
-    setImageAspect(targetWidth / targetHeight);
-    sourceIDRef.current = ctx.getImageData(0, 0, targetWidth, targetHeight);
-    await runInference(type);
+      setOriginal(canvas.toDataURL("image/jpeg", 0.95));   // JPEG (not PNG): a 2048² PNG dataURL is multi-MB
+      setImageAspect(targetWidth / targetHeight);
+      sourceIDRef.current = ctx.getImageData(0, 0, targetWidth, targetHeight);
+      await runInference(type);
+    } catch (e) {
+      console.error("이미지 처리 실패:", e);
+      sourceIDRef.current = null;
+      setReqError(true);
+      setProcessing(false);
+    }
   }, [ready, runInference]);
 
   const saveCorrection = useCallback(async () => {
