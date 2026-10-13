@@ -76,8 +76,8 @@ function CorrectionCard({ record, onDelete }: { record: CorrectionRecord; onDele
         </div>
       )}
 
-      <div className="px-3 py-2.5 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
+      <div className="px-3 py-2.5 flex flex-col gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
           <span
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono shrink-0"
             style={{ background: info.color + "18", color: info.color }}
@@ -94,14 +94,14 @@ function CorrectionCard({ record, onDelete }: { record: CorrectionRecord; onDele
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[11px] font-mono" style={{ color: "var(--fg-subtle)" }}>
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <span className="text-[11px] leading-none font-mono truncate" style={{ color: "var(--fg-subtle)" }}>
             {formatDate(record.created_at)}
           </span>
           <button
             type="button"
             onClick={() => setConfirmingDelete(true)}
-            className="p-1 rounded-md transition-colors hover:bg-red-500/10"
+            className="p-1 rounded-md transition-colors hover:bg-red-500/10 shrink-0"
             style={{ color: "var(--fg-subtle)" }}
             aria-label={`${formatDate(record.created_at)} 보정 기록 삭제`}
             title="기록 삭제"
