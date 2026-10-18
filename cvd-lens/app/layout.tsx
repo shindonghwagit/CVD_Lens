@@ -12,7 +12,7 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--f-mono",
 const SITE_URL = "https://cvd-lens.vercel.app";
 const OG_TITLE = "CVDLens | 색각이상 맞춤 보정";
 const OG_DESC =
-  "Protan형·Deutan형·Tritan형 색각이상 사용자를 위한 학습·규칙 기반 색 보정 도구. 이시하라 간이 선별부터 사진·카메라 보정까지 한 곳에서.";
+  "적색맹·녹색맹·청색맹 사용자를 위한 학습·규칙 기반 색 보정 도구. 이시하라 간이 선별부터 사진·카메라 보정까지 한 곳에서.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
         url: "/landing/og_cover.jpg",
         width: 1200,
         height: 630,
-        alt: "CVDLens — 붉은 버스의 원본과 Deutan형 보정본 비교",
+        alt: "CVDLens — 붉은 버스의 원본과 녹색맹(Deuteranopia) 보정본 비교",
       },
     ],
   },

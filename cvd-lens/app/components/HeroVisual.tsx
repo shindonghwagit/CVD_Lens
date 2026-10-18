@@ -57,7 +57,7 @@ export default function HeroVisual() {
       {/* Corrected (right side, full frame) — real model output (Deuteranopia, sev 1.0) */}
       <Image
         src="/landing/hero_corrected.jpg"
-        alt="Deutan형 보정본 — 붉은 버스가 노랑으로 이동해 배경과 구분됩니다"
+        alt="녹색맹(Deuteranopia) 보정본 — 붉은 버스가 노랑으로 이동해 배경과 구분됩니다"
         fill
         sizes="(max-width: 768px) 100vw, 45vw"
         priority

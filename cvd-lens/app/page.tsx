@@ -27,9 +27,9 @@ function useFadeIn() {
 }
 
 const CVD_TYPES = [
-  { type: "PROTAN", kor: "적색계" },
-  { type: "DEUTAN", kor: "녹색계" },
-  { type: "TRITAN", kor: "청황계" },
+  { type: "PROTANOPIA", kor: "적색맹" },
+  { type: "DEUTERANOPIA", kor: "녹색맹" },
+  { type: "TRITANOPIA", kor: "청색맹" },
 ];
 
 // Real /correction screenshot for a feature card. Until the asset is dropped in
@@ -69,7 +69,7 @@ const FEATURES = [
     href: "/ishihara",
     title: "이시하라 간이 색각 선별",
     subtitle: "10장의 이시하라 도판으로 적록 계열 색각이상 여부를 스스로 확인합니다.",
-    detail: "적록 계열 화면 기반 간이 선별 · Tritan형은 검사 범위 밖 · 정확한 진단은 안과 전문의와 상담하세요.",
+    detail: "적록 계열 화면 기반 간이 선별 · 청색맹은 검사 범위 밖 · 정확한 진단은 안과 전문의와 상담하세요.",
     tags: ["10 plates", "~2 min", "결과서 보정 미리보기"],
   },
   {
@@ -77,7 +77,7 @@ const FEATURES = [
     href: "/correction?tab=image",
     title: "이미지 파일 보정",
     subtitle: "사진을 업로드하면 AI가 색각이상 타입별로 보정된 결과를 생성합니다.",
-    detail: "원본과 보정본을 슬라이더로 비교 · Protan형 / Deutan형 / 실험적 Tritan형 지원 · 보정 기록 저장.",
+    detail: "원본과 보정본을 슬라이더로 비교 · 적색맹 / 녹색맹 / 실험적 청색맹 보정 지원 · 보정 기록 저장.",
     tags: ["jpg / png", "슬라이더 비교", "3종 타입"],
   },
   {
@@ -85,7 +85,7 @@ const FEATURES = [
     href: "/correction",
     title: "카메라 촬영 보정",
     subtitle: "카메라로 사진을 찍으면 AI가 색각이상 타입에 맞춰 색 대비를 보정합니다.",
-    detail: "슬라이더로 원본과 보정본 비교 · 보정 결과 저장 · P/D형과 실험적 T형 지원.",
+    detail: "슬라이더로 원본과 보정본 비교 · 보정 결과 저장 · 적색맹·녹색맹과 실험적 청색맹 보정 지원.",
     tags: ["Camera", "사진 촬영", "AI 보정"],
   },
 ];
@@ -141,7 +141,7 @@ export default function Home() {
           <div className="grid grid-cols-3 gap-2.5 max-w-[420px]">
             {CVD_TYPES.map((c) => (
               <div key={c.type} className="p-3 rounded-xl border bg-elevated" style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}>
-                <div className="font-mono text-xs" style={{ color: "var(--fg-muted)" }}>{c.type}</div>
+                <div className="font-mono text-[10px] sm:text-xs break-words" style={{ color: "var(--fg-muted)" }}>{c.type}</div>
                 <div className="mt-2 h-3 rounded" style={{ background: "linear-gradient(90deg, #d5383a, #d89a2b, #4b8d3b, #2d69b8, #6a49a8)" }} />
                 <div className="font-mono text-[10px] mt-1.5" style={{ color: "var(--fg-subtle)" }}>{c.kor}</div>
               </div>
@@ -170,7 +170,7 @@ export default function Home() {
             </h2>
           </div>
           <p className="text-sm max-w-[320px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
-            Protan형·Deutan형은 학습 모델을 사용합니다. Tritan형은 별도 진단 없이 제공하는 실험적 채도 보존 규칙 보정입니다.
+            적색맹·녹색맹 보정은 학습 모델을 사용합니다. 청색맹 보정은 별도 진단 없이 제공하는 실험적 채도 보존 규칙 보정입니다.
           </p>
         </div>
 

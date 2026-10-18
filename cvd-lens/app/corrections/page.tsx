@@ -15,9 +15,9 @@ interface CorrectionRecord {
 }
 
 const CVD_LABEL: Record<string, { label: string; color: string }> = {
-  p: { label: "Protan형", color: "#ef4444" },
-  d: { label: "Deutan형", color: "#f97316" },
-  t: { label: "Tritan형·실험적", color: "#3b82f6" },
+  p: { label: "적색맹 (Protanopia)", color: "#ef4444" },
+  d: { label: "녹색맹 (Deuteranopia)", color: "#f97316" },
+  t: { label: "청색맹 (Tritanopia)·실험적", color: "#3b82f6" },
 };
 
 function cvdInfo(type: string) {

@@ -26,7 +26,7 @@ export default function IshiharaPage() {
         </div>
         <p className="text-[15px] leading-relaxed" style={{ color: "var(--fg-muted)" }}>
           아래 플레이트의 숫자를 입력해 적록 색각 반응을 간단히 확인합니다.
-          결과는 Protan형·Deutan형 반응 경향까지 보수적으로 안내하며,
+          결과는 적색맹·녹색맹 관련 반응 경향까지 보수적으로 안내하며,
           총 10장 · 약 3분이 소요됩니다.
         </p>
       </div>

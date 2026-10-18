@@ -15,15 +15,15 @@ interface Result {
 
 const DIAGNOSIS_LABEL: Record<string, { label: string; color: string }> = {
   normal:       { label: "뚜렷한 신호 없음", color: "#22c55e" },
-  protan:       { label: "Protan형 반응 가능성", color: "#ef4444" },
-  deutan:       { label: "Deutan형 반응 가능성", color: "#16a34a" },
+  protan:       { label: "적색맹 (Protanopia) 관련 반응 가능성", color: "#ef4444" },
+  deutan:       { label: "녹색맹 (Deuteranopia) 관련 반응 가능성", color: "#16a34a" },
   rg:           { label: "판정 유보·유형 미분류", color: "#d97706" },
-  p:            { label: "Protan형",   color: "#ef4444" },
-  d:            { label: "Deutan형",   color: "#f97316" },
-  t:            { label: "Tritan형",   color: "#3b82f6" },
-  protanopia:   { label: "Protan형",   color: "#ef4444" },
-  deuteranopia: { label: "Deutan형",   color: "#f97316" },
-  tritanopia:   { label: "Tritan형",   color: "#3b82f6" },
+  p:            { label: "적색맹 (Protanopia)",   color: "#ef4444" },
+  d:            { label: "녹색맹 (Deuteranopia)",   color: "#f97316" },
+  t:            { label: "청색맹 (Tritanopia)",   color: "#3b82f6" },
+  protanopia:   { label: "적색맹 (Protanopia)",   color: "#ef4444" },
+  deuteranopia: { label: "녹색맹 (Deuteranopia)",   color: "#f97316" },
+  tritanopia:   { label: "청색맹 (Tritanopia)",   color: "#3b82f6" },
 };
 
 function diagnosisInfo(diagnosis: string) {

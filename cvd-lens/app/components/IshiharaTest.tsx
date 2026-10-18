@@ -266,11 +266,11 @@ export default function IshiharaTest() {
                     <span className="text-xs font-mono" style={{ color: "#f97316" }}>환경 확인 필요</span>
                   ) : isProtanResponse ? (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#ef444418", color: "#ef4444" }}>
-                      Protan형 신호
+                      적색맹 관련 신호
                     </span>
                   ) : isDeutanResponse ? (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#16a34a18", color: "#16a34a" }}>
-                      Deutan형 신호
+                      녹색맹 관련 신호
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono" style={{ background: "#f9731618", color: "#f97316" }}>
@@ -286,7 +286,7 @@ export default function IshiharaTest() {
         <div className="w-full rounded-xl p-4" style={{ background: "var(--bg-muted)" }}>
           <p className="text-sm font-mono mb-1" style={{ color: "var(--fg-subtle)" }}>
             선별판 일반 반응 {screeningNormalReads}/{result.screeningTotal} · 다른 반응 {result.screeningErrors}/{result.screeningTotal}
-            {result.classTotal > 0 && ` · 감별판 P형 ${result.protanVotes} · D형 ${result.deutanVotes}`}
+            {result.classTotal > 0 && ` · 감별판 적색맹 관련 ${result.protanVotes} · 녹색맹 관련 ${result.deutanVotes}`}
           </p>
           {!result.demoPassed ? (
             <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
