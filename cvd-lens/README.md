@@ -23,6 +23,11 @@ npm install
 npm run dev
 ```
 
+영상의 적색맹·녹색맹 보정은 브라우저의 `onnxruntime-web/wasm`을 사용합니다.
+`npm run dev`와 `npm run build` 전에 설치된 라이브러리와 같은 빌드의 실행 파일을
+`public/ort`에 자동 동기화합니다. `npm run check:onnx`로 두 모델의 브라우저용 WASM
+로딩·실제 추론 및 영상 입력 변환을 확인할 수 있습니다(Node에서 실행, 브라우저 UI 검사는 별도).
+
 FastAPI 추론 서버:
 
 ```bash

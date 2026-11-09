@@ -108,7 +108,12 @@ export default function VideoCorrection() {
     if (modelType) {
       preloadSession(modelType)
         .then(() => { if (!cancelled) { modelReadyRef.current = true; setModelStatus("ready"); } })
-        .catch(() => { if (!cancelled) setModelStatus("error"); });
+        .catch((error: unknown) => {
+          if (!cancelled) {
+            console.error(`영상 보정 모델 로딩 실패 (${modelType})`, error);
+            setModelStatus("error");
+          }
+        });
     }
 
     const sizeTo = () => {
@@ -165,7 +170,14 @@ export default function VideoCorrection() {
         }
         ctx.putImageData(frame, 0, 0);
         busy = false;
-      }).catch(() => { if (!cancelled) setModelStatus("error"); busy = false; });
+      }).catch((error: unknown) => {
+        if (!cancelled) {
+          modelReadyRef.current = false;
+          console.error(`영상 보정 추론 실패 (${modelType})`, error);
+          setModelStatus("error");
+        }
+        busy = false;
+      });
     };
 
     const loop = () => {

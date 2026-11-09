@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/sync-ort-assets.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/sync-ort-assets.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:onnx": "node scripts/check-onnx-wasm.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
