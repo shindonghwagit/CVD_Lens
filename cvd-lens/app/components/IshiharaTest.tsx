@@ -303,6 +303,7 @@ export default function IshiharaTest() {
           ) : (
             <p className="text-sm" style={{ color: "var(--fg-muted)" }}>
               적록 색각이상 선별 신호가 나타났습니다. 유형과 정도는 안과 정밀 검사로 확인해 주세요.
+              {!hasTypedPattern && " 감별판에서 더 선명한 숫자 하나를 구분하지 못했거나 응답이 섞여 유형을 분류하지 못했습니다."}
             </p>
           )}
         </div>
@@ -400,9 +401,42 @@ export default function IshiharaTest() {
       <div className="flex flex-col items-center gap-3 w-full max-w-xs">
         <p className="text-sm text-center" style={{ color: "var(--fg-muted)" }}>
           {plate.kind === "classification"
-            ? "두 숫자 중 더 선명한 숫자 하나를 입력하세요. 비슷하면 두 숫자를 모두 입력하세요."
+            ? "두 숫자 중 더 선명한 숫자 하나를 선택하거나 입력하세요. 둘 다 비슷하게 선명하면 ‘둘 다 비슷해요’를 선택하세요."
             : "보이는 숫자를 입력하세요"}
         </p>
+        {plate.kind === "classification" && (
+          <div className="grid grid-cols-2 gap-2 w-full" role="group" aria-label="더 선명하게 보이는 숫자">
+            {plate.answer.split("").map((digit) => (
+              <button
+                key={digit}
+                type="button"
+                onClick={() => setInput(digit)}
+                aria-pressed={input === digit}
+                className="rounded-lg border px-3 py-3 text-sm transition-colors"
+                style={{
+                  background: input === digit ? "var(--color-brand)" : "var(--bg-muted)",
+                  borderColor: input === digit ? "var(--color-brand)" : "var(--border-strong)",
+                  color: input === digit ? "#fff" : "var(--fg)",
+                }}
+              >
+                <span className="font-mono font-medium">{digit}</span>이 더 선명해요
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setInput(plate.answer)}
+              aria-pressed={input === plate.answer}
+              className="col-span-2 rounded-lg border px-3 py-2.5 text-sm transition-colors"
+              style={{
+                background: input === plate.answer ? "var(--color-brand)" : "var(--bg-muted)",
+                borderColor: input === plate.answer ? "var(--color-brand)" : "var(--border-strong)",
+                color: input === plate.answer ? "#fff" : "var(--fg)",
+              }}
+            >
+              둘 다 비슷해요
+            </button>
+          </div>
+        )}
         <div className="flex gap-2 w-full">
           <input
             type="text"
@@ -410,7 +444,8 @@ export default function IshiharaTest() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") void submit(); }}
-            placeholder={plate.kind === "classification" ? `예: ${plate.protan} / 비슷하면 ${plate.answer}` : "숫자 입력"}
+            aria-label={plate.kind === "classification" ? "더 선명한 숫자 또는 비슷하게 보이는 두 숫자" : "보이는 숫자"}
+            placeholder={plate.kind === "classification" ? "숫자 선택 또는 직접 입력" : "숫자 입력"}
             className="flex-1 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 border"
             style={{ background: "var(--bg-muted)", borderColor: "var(--border-strong)", color: "var(--fg)" }}
           />

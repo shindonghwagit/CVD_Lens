@@ -140,8 +140,8 @@ export function diagnose(plates: Plate[], answers: (string | null)[]): Diagnosis
 /** 간이 선별 결과 → 화면 라벨/색. */
 export const DIAGNOSIS_META: Record<Diagnosis, { label: string; color: string; correctionType: "p" | "d" | null }> = {
   normal: { label: "뚜렷한 적록 색각이상 신호 없음", color: "#22c55e", correctionType: null },
-  protan: { label: "적색맹 (Protanopia) 관련 반응 가능성", color: "#ef4444", correctionType: "p" },
-  deutan: { label: "녹색맹 (Deuteranopia) 관련 반응 가능성", color: "#16a34a", correctionType: "d" },
+  protan: { label: "적색맹 의심", color: "#ef4444", correctionType: "p" },
+  deutan: { label: "녹색맹 의심", color: "#16a34a", correctionType: "d" },
   rg: { label: "판정 유보 · 유형 확인 필요", color: "#f97316", correctionType: null },
 };
 

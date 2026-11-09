@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { DIAGNOSIS_META } from "@/lib/ishiharaPlates";
 
 interface Result {
   id: string;
@@ -14,9 +15,9 @@ interface Result {
 }
 
 const DIAGNOSIS_LABEL: Record<string, { label: string; color: string }> = {
-  normal:       { label: "뚜렷한 신호 없음", color: "#22c55e" },
-  protan:       { label: "적색맹 (Protanopia) 관련 반응 가능성", color: "#ef4444" },
-  deutan:       { label: "녹색맹 (Deuteranopia) 관련 반응 가능성", color: "#16a34a" },
+  normal:       DIAGNOSIS_META.normal,
+  protan:       DIAGNOSIS_META.protan,
+  deutan:       DIAGNOSIS_META.deutan,
   rg:           { label: "판정 유보·유형 미분류", color: "#d97706" },
   p:            { label: "적색맹 (Protanopia)",   color: "#ef4444" },
   d:            { label: "녹색맹 (Deuteranopia)",   color: "#f97316" },
